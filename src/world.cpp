@@ -174,14 +174,14 @@ bool World::update(float elapsed_ms)
 		if (m_salmon.is_alive() && m_salmon.collides_with(*fish_it))
 		{
 			fish_it = m_fish.erase(fish_it);
-			m_salmon.light_up();
+            m_salmon.light_up();
 			Mix_PlayChannel(-1, m_salmon_eat_sound, 0);
 			++m_points;
 		}
 		else
 			++fish_it;
 	}
-	
+
 	// Updating all entities, making the turtle and fish
 	// faster based on current
 	m_salmon.update(elapsed_ms);
@@ -392,8 +392,39 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_current_speed -= 0.1f;
 	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
 		m_current_speed += 0.1f;
+
+    //add toggle
+    if (action == GLFW_RELEASE && key == GLFW_KEY_A) {
+        m_salmon.advanced = true;
+    }
+    if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
+        m_salmon.advanced = false;
+    }
 	
 	m_current_speed = fmax(0.f, m_current_speed);
+
+	//add key control for direction
+	vec2 cur_direction = m_salmon.get_direction();
+	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
+		m_salmon.set_direction({1.0f,cur_direction.y});
+	}
+	else if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
+		m_salmon.set_direction({-1.0f,cur_direction.y});
+	}
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_LEFT || key ==GLFW_KEY_RIGHT )) {
+		m_salmon.set_direction({0.0f,cur_direction.y});
+	}
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+		m_salmon.set_direction({cur_direction.x,-1.0f});
+	}
+	else if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+		m_salmon.set_direction({cur_direction.x,1.0f});
+	}
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_UP || key ==GLFW_KEY_DOWN )) {
+		m_salmon.set_direction({cur_direction.x,0.0f});
+	}
+
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -403,6 +434,11 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 	// xpos and ypos are relative to the top-left of the window, the salmon's 
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	float angle = 0.f;
+	vec2 salmon_position = m_salmon.get_position();
+	if (xpos - salmon_position.x != 0)
+		angle = atan2((ypos-salmon_position.y),(xpos-salmon_position.x));
 
+	m_salmon.set_rotation(angle);
 
 }

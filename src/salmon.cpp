@@ -12,8 +12,8 @@
 
 bool Salmon::init()
 {
-	std::vector<Vertex> vertices;
-	std::vector<uint16_t> indices;
+	//std::vector<Vertex> vertices;
+	//std::vector<uint16_t> indices;
 
 	// Reads the salmon mesh from a file, which contains a list of vertices and indices
 	FILE* mesh_file = fopen(mesh_path("salmon.mesh"), "r");
@@ -81,6 +81,13 @@ bool Salmon::init()
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
 
+
+	//Initialize my variable
+	set_color({1.0f,1.0f,1.0f});
+	m_direction = {0.f,0.f};
+	m_light_up = 0;
+	advanced = false;
+
 	return true;
 }
 
@@ -94,6 +101,8 @@ void Salmon::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+
 }
 
 // Called on each frame by World::update()
@@ -106,9 +115,8 @@ void Salmon::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// UPDATE SALMON POSITION HERE BASED ON KEY PRESSED (World::on_key())
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-		
+		vec2 displacement = {m_direction.x * step, m_direction.y * step};
+		move(displacement);
 	}
 	else
 	{
@@ -117,8 +125,14 @@ void Salmon::update(float ms)
 		move({ 0.f, step });
 	}
 
-	if (m_light_up_countdown_ms > 0.f)
+	if (m_light_up_countdown_ms > 0.f) {
 		m_light_up_countdown_ms -= ms;
+		m_light_up = 1;
+	}
+	else
+		m_light_up = 0;
+
+
 }
 
 void Salmon::draw(const mat3& projection)
@@ -130,16 +144,15 @@ void Salmon::draw(const mat3& projection)
 
 	// see Transformations and Rendering in the specification pdf
 	// the following functions are available:
-	// transform_translate()
-	// transform_rotate()
-	// transform_scale()
+	 transform_translate(m_position);
+	 transform_rotate(m_rotation);
+	 transform_scale(m_scale);
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// REMOVE THE FOLLOWING LINES BEFORE ADDING ANY TRANSFORMATION CODE
-	transform_translate({ 100.f, 100.f });
-	transform_scale(m_scale);
+	//transform_translate({ 400.f, 400.f });
+	//transform_scale(m_scale);
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 	transform_end();
 
@@ -173,15 +186,15 @@ void Salmon::draw(const mat3& projection)
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 
 	// !!! Salmon Color
-	float color[] = { 1.f, 1.f, 1.f };
-	glUniform3fv(color_uloc, 1, color);
+	//float color[] = { 1.f, 1.f, 1.f };
+	glUniform3fv(color_uloc, 1, m_color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// HERE TO SET THE CORRECTLY LIGHT UP THE SALMON IF HE HAS EATEN RECENTLY
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int light_up = 0;
-	glUniform1iv(light_up_uloc, 1, &light_up);
+	//int light_up = 0;
+	glUniform1iv(light_up_uloc, 1, &m_light_up);
 
 
 	// Drawing!
@@ -197,9 +210,40 @@ bool Salmon::collides_with(const Turtle& turtle)
 	float other_r = std::max(turtle.get_bounding_box().x, turtle.get_bounding_box().y);
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
-	r *= 0.6f;
-	if (d_sq < r * r)
-		return true;
+
+    if (!advanced) { //This is old code
+        r *= 0.6f;
+        if (d_sq < r * r)
+            return true;
+    }
+    else {	// mesh level collision detection
+        r *= 1.0f;
+        float top,bottom,left,right;
+		// 0.8 is 2*0.4, 0.4 is the scale of turtle, 2 is because I need to devide by 2 to the distance to the center
+		// I need 0.4 because turtle.transform would contain do the scale so I need to scale back before transform
+		float scale_back = 0.8f;
+        top =  -1.f * turtle.get_bounding_box().y / scale_back;
+        bottom =  turtle.get_bounding_box().y / scale_back;
+        left = -1.f * turtle.get_bounding_box().x / scale_back;
+        right = turtle.get_bounding_box().x / scale_back;
+		//points before transform
+        vec3 p_top,p_left,p_right,p_bottom;
+
+		//could add a list of points to test for our game
+        p_top = mul_vec(turtle.transform,{0,top,1});
+        p_bottom = mul_vec(turtle.transform,{0,bottom,1});
+        p_left = mul_vec(turtle.transform,{left,0,1});
+        p_right = mul_vec(turtle.transform,{right,0,1});
+
+        std::vector<vec3> cur_vertices;
+        transform_current_vertex(cur_vertices);
+        if (d_sq < r * r) {
+            return mesh_collision(p_top,cur_vertices) || mesh_collision(p_bottom,cur_vertices)
+                   || mesh_collision(p_left,cur_vertices) || mesh_collision(p_right,cur_vertices);
+        }
+
+    }
+
 	return false;
 }
 
@@ -211,9 +255,37 @@ bool Salmon::collides_with(const Fish& fish)
 	float other_r = std::max(fish.get_bounding_box().x, fish.get_bounding_box().y);
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
-	r *= 0.6f;
-	if (d_sq < r * r)
-		return true;
+
+	if (!advanced) {
+		r *= 0.6f;
+		if (d_sq < r * r)
+			return true;
+	}
+	else {
+		r *= 1.0f;
+		float top,bottom,left,right;
+		float scale_back = 0.8f;
+		top =  -1.f * fish.get_bounding_box().y / scale_back;
+		bottom =  fish.get_bounding_box().y / scale_back;
+		left = -1.f * fish.get_bounding_box().x / scale_back;
+		right = fish.get_bounding_box().x / scale_back;
+		//points before transform
+		vec3 p_top,p_left,p_right,p_bottom;
+
+		//could add a list of points to test for our game
+		p_top = mul_vec(fish.transform,{0,top,1});
+		p_bottom = mul_vec(fish.transform,{0,bottom,1});
+		p_left = mul_vec(fish.transform,{left,0,1});
+		p_right = mul_vec(fish.transform,{right,0,1});
+
+		std::vector<vec3> cur_vertices;
+		transform_current_vertex(cur_vertices);
+		if (d_sq < r * r) {
+			return mesh_collision(p_top,cur_vertices) || mesh_collision(p_bottom,cur_vertices)
+				   || mesh_collision(p_left,cur_vertices) || mesh_collision(p_right,cur_vertices);
+		}
+	}
+
 	return false;
 }
 
@@ -241,6 +313,8 @@ bool Salmon::is_alive()const
 void Salmon::kill()
 {
 	m_is_alive = false;
+	vec3 color = {1.0f,0.f,0.f};
+	set_color(color);
 }
 
 // Called when the salmon collides with a fish
@@ -248,3 +322,71 @@ void Salmon::light_up()
 {
 	m_light_up_countdown_ms = 1500.f;
 }
+
+void Salmon::set_direction(vec2 direction)
+{
+	m_direction = direction;
+}
+
+vec2 Salmon::get_direction()
+{
+	return m_direction;
+}
+
+void Salmon::transform_current_vertex(std::vector<vec3> &cur_vertices)
+{
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        vec3 old_position = {vertices.at(i).position.x, vertices.at(i).position.y,1};
+        vec3 cur_position = mul_vec(transform, old_position);
+        cur_vertices.push_back(cur_position);
+    }
+}
+
+bool Salmon::mesh_collision(vec3 ptest,std::vector<vec3> &cur_vertices)
+{
+    //mat3 A = mul(m_projection,transform);
+//    for (size_t i = 0; i < vertices.size(); ++i) {
+//        vec3 cur_position= mul_vec(transform, vertices.at(i).position);
+//        cur_vertices.push_back(cur_position);
+//    }
+
+    for (size_t i = 0; i < indices.size(); i+=3) {
+
+        //three vertices of a triangle
+        vec3 point1 = cur_vertices.at(indices[i]);
+        vec3 point2 = cur_vertices.at(indices[i+1]);
+        vec3 point3 = cur_vertices.at(indices[i+2]);
+
+        vec2 p1 = {point1.x, point1.y};
+        vec2 p1_p2 = {point2.x-point1.x,point2.y-point1.y};
+        vec2 p1_p3 = {point3.x-point1.x,point3.y-point1.y};
+        vec2 ptest2d = {ptest.x,ptest.y};
+
+        float a,b = 0.f;
+        float detv12 = det(p1_p2,p1_p3); //This should not be 0;
+        if (detv12 ==0)
+            return false;
+        float detvv2 = det(ptest2d,p1_p2);
+        float detvv3 = det(ptest2d,p1_p3);
+        float detv1v2 = det(p1,p1_p2);
+        float detv1v3 = det(p1,p1_p3);
+        a = (detvv2 - detv1v2) / detv12;
+        b = -1.f* (detvv3 - detv1v3) / detv12;
+
+        if (a>0 && b>0 && a+b <1.f) {
+            return true;
+        }
+
+    }
+
+    return false;
+}
+
+void Salmon::set_color(vec3 in_color)
+{
+	float color[3] = {in_color.x,in_color.y,in_color.z};
+	memcpy(m_color,color, sizeof(color));
+}
+
+
+

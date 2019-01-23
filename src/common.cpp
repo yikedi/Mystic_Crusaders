@@ -4,7 +4,6 @@
 #include "../ext/stb_image/stb_image.h"
 
 // stlib
-#include <vector>
 #include <iostream>
 #include <sstream>
 
@@ -79,10 +78,25 @@ mat3 mul(const mat3 & l, const mat3 & r)
 	return ret;
 }
 
+vec3 mul_vec(const mat3 & l, vec3 x)
+{
+	mat3 A = { { l.c0.x, l.c1.x, l.c2.x},
+				 { l.c0.y, l.c1.y, l.c2.y } ,
+				 { l.c0.z, l.c1.z, l.c2.z } };
+
+	return {dot(A.c0, x), dot(A.c1, x), dot(A.c2, x)};
+
+}
+
 vec2 normalize(vec2 v)
 {
 	float m = sqrtf(dot(v, v));
 	return { v.x / m, v.y / m };
+}
+
+float det(vec2 u, vec2 v)
+{
+	return u.x * v.y - u.y * v.x;
 }
 
 Texture::Texture()

@@ -9,6 +9,8 @@ class Salmon : public Renderable
 {
 public:
 	// Creates all the associated render resources and default transform
+	float m_color[3];
+	bool advanced;
 	bool init();
 
 	// Releases all associated resources
@@ -43,6 +45,14 @@ public:
 	// Called when the salmon collides with a fish, starts lighting up the salmon
 	void light_up();
 
+	void set_direction(vec2 velocity);
+
+	vec2 get_direction();
+
+    bool mesh_collision(vec3 point, std::vector<vec3> &cur_vertices);
+    void transform_current_vertex(std::vector<vec3> &cur_vertices);
+	void set_color(vec3 color);
+
 private:
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
@@ -50,4 +60,9 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
+
+	//add salmon speed
+	vec2 m_direction;
+	int m_light_up;
+
 };

@@ -2,6 +2,8 @@
 
 // stlib
 #include <fstream> // stdout, stderr..
+#include <vector>
+
 
 // glfw
 #define NOMINMAX
@@ -30,7 +32,11 @@ struct mat3 { vec3 c0, c1, c2; };
 float dot(vec2 l, vec2 r);
 float dot(vec3 l, vec3 r);
 mat3  mul(const mat3& l, const mat3& r);
+vec3  mul_vec(const mat3 & l, vec3 x);
 vec2  normalize(vec2 v);
+
+//creative part
+float det(vec2 u, vec2 v);
 
 // OpenGL utilities
 // cleans error buffer
@@ -98,6 +104,10 @@ struct Renderable
 	Mesh mesh;
 	Effect effect;
 	mat3 transform;
+
+    //advanced feature
+    std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
 
 	// projection contains the orthographic projection matrix. As every Renderable::draw()
 	// renders itself it needs it to correctly bind it to its shader.
