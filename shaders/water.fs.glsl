@@ -15,7 +15,7 @@ vec2 distort(vec2 uv) {
 	float distort_factor = 0.01;
     coord.x = coord.x * (1-distort_factor) + sin(20* (coord.x + time/100)) * distort_factor;
     coord.y = coord.y * (1-distort_factor) + sin(20* (coord.y + time/100)) * distort_factor;
-    return coord;
+    return uv;
 }
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

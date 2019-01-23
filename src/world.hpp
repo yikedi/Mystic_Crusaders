@@ -6,6 +6,7 @@
 #include "turtle.hpp"
 #include "fish.hpp"
 #include "water.hpp"
+#include "hero.hpp"
 
 // stlib
 #include <vector>
@@ -15,7 +16,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-// Container for all our entities and game logic. Individual rendering / update is 
+// Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class World
 {
@@ -65,14 +66,14 @@ private:
 	unsigned int m_points;
 
 	// Game entities
-	Salmon m_salmon;
+	Hero m_hero;
 	std::vector<Turtle> m_turtles;
 	std::vector<Fish> m_fish;
 
 	float m_current_speed;
 	float m_next_turtle_spawn;
 	float m_next_fish_spawn;
-	
+
 	Mix_Music* m_background_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
