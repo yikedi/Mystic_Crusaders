@@ -39,6 +39,7 @@ set(SOURCE_FILES
 	src/water.cpp
 	src/world.cpp
     src/hero.cpp
+    src/enemy.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -47,7 +48,8 @@ set(SOURCE_FILES
 	src/turtle.hpp
 	src/water.hpp
 	src/world.hpp
-    src/hero.cpp
+    src/hero.hpp
+    src/enemy.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

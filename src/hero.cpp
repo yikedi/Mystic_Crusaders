@@ -2,7 +2,7 @@
 #include "Hero.hpp"
 
 // internal
-#include "turtle.hpp"
+#include "enemy.hpp"
 #include "fish.hpp"
 
 // stlib
@@ -22,7 +22,7 @@ bool Hero::init()
 	{
 		if (!hero_texture.load_from_file(textures_path("hero.png")))
 		{
-			fprintf(stderr, "Failed to load turtle texture!");
+			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
 		}
 	}
@@ -67,7 +67,7 @@ bool Hero::init()
 		return false;
 
 	// Setting initial values
-	m_scale.x = -1.f;
+	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	m_is_alive = true;
 	m_position = { 50.f, 100.f };
@@ -178,12 +178,12 @@ void Hero::draw(const mat3& projection)
 }
 
 // Simple bounding box collision check,
-bool Hero::collides_with(const Turtle& turtle)
+bool Hero::collides_with(const Enemy& enemy)
 {
-	float dx = m_position.x - turtle.get_position().x;
-	float dy = m_position.y - turtle.get_position().y;
+	float dx = m_position.x - enemy.get_position().x;
+	float dy = m_position.y - enemy.get_position().y;
 	float d_sq = dx * dx + dy * dy;
-	float other_r = std::max(turtle.get_bounding_box().x, turtle.get_bounding_box().y);
+	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
@@ -195,21 +195,21 @@ bool Hero::collides_with(const Turtle& turtle)
     else {	// mesh level collision detection
         r *= 1.0f;
         float top,bottom,left,right;
-		// 0.8 is 2*0.4, 0.4 is the scale of turtle, 2 is because I need to devide by 2 to the distance to the center
-		// I need 0.4 because turtle.transform would contain do the scale so I need to scale back before transform
+		// 0.8 is 2*0.4, 0.4 is the scale of enemy, 2 is because I need to devide by 2 to the distance to the center
+		// I need 0.4 because enemy.transform would contain do the scale so I need to scale back before transform
 		float scale_back = 0.8f;
-        top =  -1.f * turtle.get_bounding_box().y / scale_back;
-        bottom =  turtle.get_bounding_box().y / scale_back;
-        left = -1.f * turtle.get_bounding_box().x / scale_back;
-        right = turtle.get_bounding_box().x / scale_back;
+        top =  -1.f * enemy.get_bounding_box().y / scale_back;
+        bottom =  enemy.get_bounding_box().y / scale_back;
+        left = -1.f * enemy.get_bounding_box().x / scale_back;
+        right = enemy.get_bounding_box().x / scale_back;
 		//points before transform
         vec3 p_top,p_left,p_right,p_bottom;
 
 		//could add a list of points to test for our game
-        p_top = mul_vec(turtle.transform,{0,top,1});
-        p_bottom = mul_vec(turtle.transform,{0,bottom,1});
-        p_left = mul_vec(turtle.transform,{left,0,1});
-        p_right = mul_vec(turtle.transform,{right,0,1});
+        p_top = mul_vec(enemy.transform,{0,top,1});
+        p_bottom = mul_vec(enemy.transform,{0,bottom,1});
+        p_left = mul_vec(enemy.transform,{left,0,1});
+        p_right = mul_vec(enemy.transform,{right,0,1});
 
         std::vector<vec3> cur_vertices;
         transform_current_vertex(cur_vertices);
@@ -285,7 +285,7 @@ bool Hero::is_alive()const
 	return m_is_alive;
 }
 
-// Called when the salmon collides with a turtle
+// Called when the salmon collides with a enemy
 void Hero::kill()
 {
 	m_is_alive = false;

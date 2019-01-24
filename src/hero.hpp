@@ -2,7 +2,7 @@
 
 #include "common.hpp"
 
-class Turtle;
+class Enemy;
 class Fish;
 
 class Hero : public Renderable
@@ -26,8 +26,8 @@ public:
 	// Renders the salmon
 	void draw(const mat3& projection)override;
 
-	// Collision routines for turtles and fish
-	bool collides_with(const Turtle& turtle);
+	// Collision routines for enemys and fish
+	bool collides_with(const Enemy& enemy);
 	bool collides_with(const Fish& fish);
 
 	// Returns the current salmon position
