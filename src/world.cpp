@@ -23,9 +23,9 @@ namespace
 	}
 }
 
-World::World() : 
+World::World() :
 	m_points(0),
-	m_next_turtle_spawn(0.f),
+	m_next_enemy_spawn(0.f),
 	m_next_fish_spawn(0.f)
 {
 	// Seeding rng with random device
@@ -114,12 +114,12 @@ bool World::init(vec2 screen)
 
 	// Playing background music undefinitely
 	Mix_PlayMusic(m_background_music, -1);
-	
+
 	fprintf(stderr, "Loaded music\n");
 
 	m_current_speed = 1.f;
 
-	return m_salmon.init() && m_water.init();
+	return m_hero.init() && m_water.init();
 }
 
 // Releases all the associated resources
@@ -136,12 +136,12 @@ void World::destroy()
 
 	Mix_CloseAudio();
 
-	m_salmon.destroy();
-	for (auto& turtle : m_turtles)
-		turtle.destroy();
+	m_hero.destroy();
+	for (auto& enemy : m_enemys)
+		enemy.destroy();
 	for (auto& fish : m_fish)
 		fish.destroy();
-	m_turtles.clear();
+	m_enemys.clear();
 	m_fish.clear();
 	glfwDestroyWindow(m_window);
 }
@@ -153,16 +153,16 @@ bool World::update(float elapsed_ms)
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 
-	// Checking Salmon - Turtle collisions
-	for (const auto& turtle : m_turtles)
+	// Checking Salmon - Enemy collisions
+	for (const auto& enemy : m_enemys)
 	{
-		if (m_salmon.collides_with(turtle))
+		if (m_hero.collides_with(enemy))
 		{
-			if (m_salmon.is_alive()) {
+			if (m_hero.is_alive()) {
 				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 				m_water.set_salmon_dead();
 			}
-			m_salmon.kill();
+			m_hero.kill();
 			break;
 		}
 	}
@@ -171,10 +171,10 @@ bool World::update(float elapsed_ms)
 	auto fish_it = m_fish.begin();
 	while (fish_it != m_fish.end())
 	{
-		if (m_salmon.is_alive() && m_salmon.collides_with(*fish_it))
+		if (m_hero.is_alive() && m_hero.collides_with(*fish_it))
 		{
 			fish_it = m_fish.erase(fish_it);
-            m_salmon.light_up();
+            m_hero.light_up();
 			Mix_PlayChannel(-1, m_salmon_eat_sound, 0);
 			++m_points;
 		}
@@ -182,26 +182,26 @@ bool World::update(float elapsed_ms)
 			++fish_it;
 	}
 
-	// Updating all entities, making the turtle and fish
+	// Updating all entities, making the enemy and fish
 	// faster based on current
-	m_salmon.update(elapsed_ms);
-	for (auto& turtle : m_turtles)
-		turtle.update(elapsed_ms * m_current_speed);
+	m_hero.update(elapsed_ms);
+	for (auto& enemy : m_enemys)
+		enemy.update(elapsed_ms * m_current_speed);
 	for (auto& fish : m_fish)
 		fish.update(elapsed_ms * m_current_speed);
 
-	// Removing out of screen turtles
-	auto turtle_it = m_turtles.begin();
-	while (turtle_it != m_turtles.end())
+	// Removing out of screen enemys
+	auto enemy_it = m_enemys.begin();
+	while (enemy_it != m_enemys.end())
 	{
-		float w = turtle_it->get_bounding_box().x / 2;
-		if (turtle_it->get_position().x + w < 0.f)
+		float w = enemy_it->get_bounding_box().x / 2;
+		if (enemy_it->get_position().x + w < 0.f)
 		{
-			turtle_it = m_turtles.erase(turtle_it);
+			enemy_it = m_enemys.erase(enemy_it);
 			continue;
 		}
 
-		++turtle_it;
+		++enemy_it;
 	}
 
 	// Removing out of screen fish
@@ -218,20 +218,20 @@ bool World::update(float elapsed_ms)
 		++fish_it;
 	}
 
-	// Spawning new turtles
-	m_next_turtle_spawn -= elapsed_ms * m_current_speed;
-	if (m_turtles.size() <= MAX_TURTLES && m_next_turtle_spawn < 0.f)
+	// Spawning new enemys
+	m_next_enemy_spawn -= elapsed_ms * m_current_speed;
+	if (m_enemys.size() <= MAX_TURTLES && m_next_enemy_spawn < 0.f)
 	{
-		if (!spawn_turtle())
+		if (!spawn_enemy())
 			return false;
 
-		Turtle& new_turtle = m_turtles.back();
-	
+		Enemy& new_enemy = m_enemys.back();
+
 		// Setting random initial position
-		new_turtle.set_position({ screen.x + 150, 50 + m_dist(m_rng) * (screen.y - 100) });
+		new_enemy.set_position({ screen.x + 150, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
-		m_next_turtle_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
+		m_next_enemy_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
 	}
 
 	// Spawning new fish
@@ -248,13 +248,13 @@ bool World::update(float elapsed_ms)
 	}
 
 	// If salmon is dead, restart the game after the fading animation
-	if (!m_salmon.is_alive() &&
+	if (!m_hero.is_alive() &&
 		m_water.get_salmon_dead_time() > 5) {
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-		m_salmon.destroy();
-		m_salmon.init();
-		m_turtles.clear();
+		m_hero.destroy();
+		m_hero.init();
+		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -305,11 +305,11 @@ void World::draw()
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
 	// Drawing entities
-	for (auto& turtle : m_turtles)
-		turtle.draw(projection_2D);
+	for (auto& enemy : m_enemys)
+		enemy.draw(projection_2D);
 	for (auto& fish : m_fish)
 		fish.draw(projection_2D);
-	m_salmon.draw(projection_2D);
+	m_hero.draw(projection_2D);
 
 	/////////////////////
 	// Truely render to the screen
@@ -339,16 +339,16 @@ bool World::is_over()const
 	return glfwWindowShouldClose(m_window);
 }
 
-// Creates a new turtle and if successfull adds it to the list of turtles
-bool World::spawn_turtle()
+// Creates a new enemy and if successfull adds it to the list of enemys
+bool World::spawn_enemy()
 {
-	Turtle turtle;
-	if (turtle.init())
+	Enemy enemy;
+	if (enemy.init())
 	{
-		m_turtles.emplace_back(turtle);
+		m_enemys.emplace_back(enemy);
 		return true;
 	}
-	fprintf(stderr, "Failed to spawn turtle");
+	fprintf(stderr, "Failed to spawn enemy");
 	return false;
 }
 
@@ -379,9 +379,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-		m_salmon.destroy(); 
-		m_salmon.init();
-		m_turtles.clear();
+		m_hero.destroy();
+		m_hero.init();
+		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -395,34 +395,34 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
     //add toggle
     if (action == GLFW_RELEASE && key == GLFW_KEY_A) {
-        m_salmon.advanced = true;
+        m_hero.advanced = true;
     }
     if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
-        m_salmon.advanced = false;
+        m_hero.advanced = false;
     }
-	
+
 	m_current_speed = fmax(0.f, m_current_speed);
 
 	//add key control for direction
-	vec2 cur_direction = m_salmon.get_direction();
+	vec2 cur_direction = m_hero.get_direction();
 	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
-		m_salmon.set_direction({1.0f,cur_direction.y});
+		m_hero.set_direction({1.0f,cur_direction.y});
 	}
 	else if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
-		m_salmon.set_direction({-1.0f,cur_direction.y});
+		m_hero.set_direction({-1.0f,cur_direction.y});
 	}
 	else if (action == GLFW_RELEASE && (key == GLFW_KEY_LEFT || key ==GLFW_KEY_RIGHT )) {
-		m_salmon.set_direction({0.0f,cur_direction.y});
+		m_hero.set_direction({0.0f,cur_direction.y});
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-		m_salmon.set_direction({cur_direction.x,-1.0f});
+		m_hero.set_direction({cur_direction.x,-1.0f});
 	}
 	else if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-		m_salmon.set_direction({cur_direction.x,1.0f});
+		m_hero.set_direction({cur_direction.x,1.0f});
 	}
 	else if (action == GLFW_RELEASE && (key == GLFW_KEY_UP || key ==GLFW_KEY_DOWN )) {
-		m_salmon.set_direction({cur_direction.x,0.0f});
+		m_hero.set_direction({cur_direction.x,0.0f});
 	}
 
 }
@@ -431,14 +431,14 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's 
+	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	float angle = 0.f;
-	vec2 salmon_position = m_salmon.get_position();
+	vec2 salmon_position = m_hero.get_position();
 	if (xpos - salmon_position.x != 0)
 		angle = atan2((ypos-salmon_position.y),(xpos-salmon_position.x));
 
-	m_salmon.set_rotation(angle);
+	m_hero.set_rotation(angle);
 
 }

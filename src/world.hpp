@@ -4,8 +4,10 @@
 #include "common.hpp"
 #include "salmon.hpp"
 #include "turtle.hpp"
+#include "enemy.hpp"
 #include "fish.hpp"
 #include "water.hpp"
+#include "hero.hpp"
 
 // stlib
 #include <vector>
@@ -15,7 +17,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-// Container for all our entities and game logic. Individual rendering / update is 
+// Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class World
 {
@@ -39,8 +41,8 @@ public:
 	bool is_over()const;
 
 private:
-	// Generates a new turtle
-	bool spawn_turtle();
+	// Generates a new enemy
+	bool spawn_enemy();
 
 	// Generates a new fish
 	bool spawn_fish();
@@ -65,14 +67,14 @@ private:
 	unsigned int m_points;
 
 	// Game entities
-	Salmon m_salmon;
-	std::vector<Turtle> m_turtles;
+	Hero m_hero;
+	std::vector<Enemy> m_enemys;
 	std::vector<Fish> m_fish;
 
 	float m_current_speed;
-	float m_next_turtle_spawn;
+	float m_next_enemy_spawn;
 	float m_next_fish_spawn;
-	
+
 	Mix_Music* m_background_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;

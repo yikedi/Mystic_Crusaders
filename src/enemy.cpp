@@ -1,25 +1,25 @@
 // Header
-#include "turtle.hpp"
+#include "enemy.hpp"
 
 #include <cmath>
 
-Texture Turtle::turtle_texture;
+Texture Enemy::enemy_texture;
 
-bool Turtle::init()
+bool Enemy::init()
 {
 	// Load shared texture
-	if (!turtle_texture.is_valid())
+	if (!enemy_texture.is_valid())
 	{
-		if (!turtle_texture.load_from_file(textures_path("turtle.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_01.png")))
 		{
-			fprintf(stderr, "Failed to load turtle texture!");
+			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
 		}
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = turtle_texture.width * 0.5f;
-	float hr = turtle_texture.height * 0.5f;
+	float wr = enemy_texture.width * 0.5f;
+	float hr = enemy_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -58,8 +58,8 @@ bool Turtle::init()
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = -0.4f;
-	m_scale.y = 0.4f;
+	m_scale.x = 1.0f;
+	m_scale.y = 1.0f;
 	m_rotation = 0.f;
 
 	return true;
@@ -67,7 +67,7 @@ bool Turtle::init()
 
 // Call if init() was successful
 // Releases all graphics resources
-void Turtle::destroy()
+void Enemy::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -78,7 +78,7 @@ void Turtle::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Turtle::update(float ms)
+void Enemy::update(float ms)
 {
 	// Move fish along -X based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
@@ -87,7 +87,7 @@ void Turtle::update(float ms)
 	m_position.x += step;
 }
 
-void Turtle::draw(const mat3& projection)
+void Enemy::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -124,7 +124,7 @@ void Turtle::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, turtle_texture.id);
+	glBindTexture(GL_TEXTURE_2D, enemy_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -136,19 +136,19 @@ void Turtle::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-vec2 Turtle::get_position()const
+vec2 Enemy::get_position()const
 {
 	return m_position;
 }
 
-void Turtle::set_position(vec2 position)
+void Enemy::set_position(vec2 position)
 {
 	m_position = position;
 }
 
-// Returns the local bounding coordinates scaled by the current size of the turtle
-vec2 Turtle::get_bounding_box()const
+// Returns the local bounding coordinates scaled by the current size of the enemy
+vec2 Enemy::get_bounding_box()const
 {
 	// fabs is to avoid negative scale due to the facing direction
-	return { std::fabs(m_scale.x) * turtle_texture.width, std::fabs(m_scale.y) * turtle_texture.height };
+	return { std::fabs(m_scale.x) * enemy_texture.width, std::fabs(m_scale.y) * enemy_texture.height };
 }
