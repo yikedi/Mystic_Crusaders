@@ -7,7 +7,6 @@ src/project_path.hpp
 
 ## Ignore libraries
 *.dll
-*.lib
 *.a
 
 ## Ignore Visual Studio temporary files, build results, and
