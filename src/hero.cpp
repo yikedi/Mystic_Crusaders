@@ -197,7 +197,7 @@ bool Hero::collides_with(const Enemy& enemy)
         float top,bottom,left,right;
 		// 0.8 is 2*0.4, 0.4 is the scale of enemy, 2 is because I need to devide by 2 to the distance to the center
 		// I need 0.4 because enemy.transform would contain do the scale so I need to scale back before transform
-		float scale_back = 0.8f;
+		float scale_back = 2.0f;
         top =  -1.f * enemy.get_bounding_box().y / scale_back;
         bottom =  enemy.get_bounding_box().y / scale_back;
         left = -1.f * enemy.get_bounding_box().x / scale_back;
