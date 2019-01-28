@@ -119,7 +119,7 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 
-	return m_hero.init() && m_water.init();
+	return m_hero.init(screen) && m_water.init();
 }
 
 // Releases all the associated resources
@@ -186,7 +186,7 @@ bool World::update(float elapsed_ms)
 	// faster based on current
 	m_hero.update(elapsed_ms);
 	for (auto& enemy : m_enemys)
-		enemy.update(elapsed_ms * m_current_speed);
+		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 	for (auto& fish : m_fish)
 		fish.update(elapsed_ms * m_current_speed);
 
@@ -227,8 +227,16 @@ bool World::update(float elapsed_ms)
 
 		Enemy& new_enemy = m_enemys.back();
 
+		int left_or_right_spawn = rand() % 2;
+
+		float screen_x = 0;
+
+		if(left_or_right_spawn == 0){
+			screen_x = screen.x + 150.f;
+		}
+
 		// Setting random initial position
-		new_enemy.set_position({ screen.x + 150, 50 + m_dist(m_rng) * (screen.y - 100) });
+		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
 		m_next_enemy_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
@@ -253,7 +261,7 @@ bool World::update(float elapsed_ms)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
@@ -375,12 +383,15 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
+	int w, h;
+        glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
