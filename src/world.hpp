@@ -8,7 +8,6 @@
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
-#include "camera.hpp"
 
 // stlib
 #include <vector>
@@ -69,7 +68,6 @@ private:
 
 	//zoom
 	float zoom_factor;
-	Camera* m_camera;
 
 	// Game entities
 	Hero m_hero;

@@ -1,6 +1,5 @@
 // Header
 #include "world.hpp"
-#include "camera.hpp"
 
 // stlib
 #include <string.h>
@@ -377,9 +376,6 @@ void World::draw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
-	//mat3 zoom{ { z, 0.f, 0.f },{ 0.f, z, 0.f },{ 0.f, 0.f, 1.f } };
-	//mat3  
-	//m_water.draw(mul(projection_2D, zoom));
 	m_water.draw(projection_2D);
 
 	//////////////////
@@ -428,17 +424,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	int w, h;
-	glfwGetWindowSize(m_window, &w, &h);
-	vec2 salmon_position = m_hero.get_position();
-	float our_x = salmon_position.x;
-	float our_y = salmon_position.y;
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
-		//int w, h;
-		//glfwGetWindowSize(m_window, &w, &h);
+		int w, h;
+		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
 		m_hero.init();
 		m_enemys.clear();
