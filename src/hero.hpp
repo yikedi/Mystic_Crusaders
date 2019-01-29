@@ -14,7 +14,8 @@ public:
 	// Creates all the associated render resources and default transform
 	float m_color[3];
 	bool advanced;
-	bool init();
+	vec2 m_screen;
+	bool init(vec2 screen);
 
 	// Releases all associated resources
 	void destroy();
@@ -67,5 +68,4 @@ private:
 	//add salmon speed
 	vec2 m_direction;
 	int m_light_up;
-
 };

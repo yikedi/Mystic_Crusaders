@@ -12,7 +12,7 @@
 
 Texture Hero::hero_texture;
 
-bool Hero::init()
+bool Hero::init(vec2 screen)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
@@ -70,7 +70,7 @@ bool Hero::init()
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	m_is_alive = true;
-	m_position = { 50.f, 100.f };
+	m_position = { screen.x/2, screen.y/2 };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
 
