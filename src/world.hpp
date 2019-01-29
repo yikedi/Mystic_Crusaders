@@ -66,6 +66,9 @@ private:
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
 
+	//zoom
+	float zoom_factor;
+
 	// Game entities
 	Hero m_hero;
 	std::vector<Enemy> m_enemys;
