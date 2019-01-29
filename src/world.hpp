@@ -8,6 +8,7 @@
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
+#include "camera.hpp"
 
 // stlib
 #include <vector>
@@ -65,6 +66,10 @@ private:
 
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
+
+	//zoom
+	float zoom_factor;
+	Camera* m_camera;
 
 	// Game entities
 	Hero m_hero;

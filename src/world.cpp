@@ -133,7 +133,7 @@ bool World::init(vec2 screen)
 	fprintf(stderr, "Loaded music\n");
 
 	m_current_speed = 1.f;
-	z = 1.f;
+	zoom_factor = 1.f;
 	return m_hero.init() && m_water.init();
 }
 
@@ -313,16 +313,16 @@ void World::draw()
 	//float right = (float)w;// *0.5;
 	//float bottom = (float)h;// *0.5;
 
-	float sx = z * 2.f / (right - left);
-	float sy = z * 2.f / (top - bottom);
+	float sx = zoom_factor * 2.f / (right - left);
+	float sy = zoom_factor * 2.f / (top - bottom);
 	
 
 	//right = left + (float)w;
 	vec2 salmon_position = m_hero.get_position();
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
-	double w_scaled = (double)w / z;
-	double h_scaled = (double)h / z;
+	double w_scaled = (double)w / zoom_factor;
+	double h_scaled = (double)h / zoom_factor;
 	double w_double = (double)w;
 	double h_double = (double)h;
 	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
@@ -347,8 +347,8 @@ void World::draw()
 	//bottom = bottom_holder;
 
 	
-	double tx = -z * (right + left) / (right - left);
-	double ty = -z * (top + bottom) / (top - bottom);
+	double tx = -zoom_factor * (right + left) / (right - left);
+	double ty = -zoom_factor * (top + bottom) / (top - bottom);
 
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
@@ -449,7 +449,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		top = 0.f;// (float)h * -0.5;
 		right = (float)w;// *0.5;
 		bottom = (float)h;// *0.5;
-		z = 1.f;
+		zoom_factor = 1.f;
 
 	}
 
@@ -493,10 +493,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_hero.set_direction({cur_direction.x,0.0f});
 	}
 	else if (key == GLFW_KEY_P) {
-		z += 0.1f;
+		zoom_factor += 0.1f;
 	}
 	else if (key == GLFW_KEY_O) {
-		z -= 0.1f;
+		zoom_factor -= 0.1f;
 	}
 }
 
