@@ -6,6 +6,8 @@
 #include <cassert>
 #include <sstream>
 
+#include <gl3w.h>
+
 // Same as static in c, local to compilation unit
 namespace
 {
@@ -13,6 +15,16 @@ namespace
 	const size_t MAX_FISH = 5;
 	const size_t TURTLE_DELAY_MS = 2000;
 	const size_t FISH_DELAY_MS = 5000;
+	double left = 0.f;
+	double right = 100.f;
+	double top = 0.f;
+	double bottom = 100.f;
+	double left_holder = 0.f;
+	double right_holder = 100.f;
+	double top_holder = 0.f;
+	double bottom_holder = 100.f;
+	double our_x = 0.f;
+	double our_y = 0.f;
 
 	namespace
 	{
@@ -74,8 +86,10 @@ bool World::init(vec2 screen)
 	glfwSetWindowUserPointer(m_window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
+	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	glfwSetKeyCallback(m_window, key_redirect);
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
+	//glutReshapeFunc(reshape);
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
@@ -118,8 +132,8 @@ bool World::init(vec2 screen)
 	fprintf(stderr, "Loaded music\n");
 
 	m_current_speed = 1.f;
-
-	return m_hero.init() && m_water.init();
+	zoom_factor = 1.f;
+	return m_hero.init(screen) && m_water.init();
 }
 
 // Releases all the associated resources
@@ -186,7 +200,7 @@ bool World::update(float elapsed_ms)
 	// faster based on current
 	m_hero.update(elapsed_ms);
 	for (auto& enemy : m_enemys)
-		enemy.update(elapsed_ms * m_current_speed);
+		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 	for (auto& fish : m_fish)
 		fish.update(elapsed_ms * m_current_speed);
 
@@ -227,8 +241,16 @@ bool World::update(float elapsed_ms)
 
 		Enemy& new_enemy = m_enemys.back();
 
+		int left_or_right_spawn = rand() % 2;
+
+		float screen_x = 0;
+
+		if(left_or_right_spawn == 0){
+			screen_x = screen.x + 150.f;
+		}
+
 		// Setting random initial position
-		new_enemy.set_position({ screen.x + 150, 50 + m_dist(m_rng) * (screen.y - 100) });
+		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
 		m_next_enemy_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
@@ -253,7 +275,7 @@ bool World::update(float elapsed_ms)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
@@ -293,22 +315,58 @@ void World::draw()
 
 	// Fake projection matrix, scales with respect to window coordinates
 	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	float left = 0.f;// *-0.5;
-	float top = 0.f;// (float)h * -0.5;
-	float right = (float)w;// *0.5;
-	float bottom = (float)h;// *0.5;
+	//float left = 0.f;// *-0.5;
+	//float top = 0.f;// (float)h * -0.5;
+	//float right = (float)w;// *0.5;
+	//float bottom = (float)h;// *0.5;
 
-	float sx = 2.f / (right - left);
-	float sy = 2.f / (top - bottom);
-	float tx = -(right + left) / (right - left);
-	float ty = -(top + bottom) / (top - bottom);
+	float sx = zoom_factor * 2.f / (right - left);
+	float sy = zoom_factor * 2.f / (top - bottom);
+	
+
+	//right = left + (float)w;
+	vec2 salmon_position = m_hero.get_position();
+	our_x = salmon_position.x;
+	our_y = salmon_position.y;
+	double w_scaled = (double)w / zoom_factor;
+	double h_scaled = (double)h / zoom_factor;
+	double w_double = (double)w;
+	double h_double = (double)h;
+	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
+	if (left < 0.f) {
+		left = 0.f;
+	}
+	else if (left + w_scaled > w_double) {
+		left = w_double - w_scaled;
+	}
+	top = our_y - (h_scaled / 2); // divided by 2? // and this would be y - 300
+	if (top < 0.f) {
+		top = 0.f;
+	}
+	else if (top + h_scaled > h_double) {
+		top = h_double - h_scaled;
+	}
+	right = left + w_scaled;
+	bottom = top + h_scaled;
+	//left = left_holder;
+	//top = top_holder;
+	//right = right_holder;
+	//bottom = bottom_holder;
+
+	
+	double tx = -zoom_factor * (right + left) / (right - left);
+	double ty = -zoom_factor * (top + bottom) / (top - bottom);
+
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
+
 
 	// Drawing entities
 	for (auto& enemy : m_enemys)
 		enemy.draw(projection_2D);
 	for (auto& fish : m_fish)
 		fish.draw(projection_2D);
+
+
 	m_hero.draw(projection_2D);
 
 	/////////////////////
@@ -375,16 +433,25 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
+	int w, h;
+        glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
 		m_fish.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
+		left = 0.f;// *-0.5;
+		top = 0.f;// (float)h * -0.5;
+		right = (float)w;// *0.5;
+		bottom = (float)h;// *0.5;
+		zoom_factor = 1.f;
+
 	}
 
 	// Control the current speed with `<` `>`
@@ -405,9 +472,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 	//add key control for direction
 	vec2 cur_direction = m_hero.get_direction();
+
 	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
 		m_hero.set_direction({1.0f,cur_direction.y});
 	}
+
 	else if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
 		m_hero.set_direction({-1.0f,cur_direction.y});
 	}
@@ -424,7 +493,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (action == GLFW_RELEASE && (key == GLFW_KEY_UP || key ==GLFW_KEY_DOWN )) {
 		m_hero.set_direction({cur_direction.x,0.0f});
 	}
-
+	else if (key == GLFW_KEY_P) {
+		zoom_factor += 0.1f;
+	}
+	else if (key == GLFW_KEY_O) {
+		zoom_factor -= 0.1f;
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -442,3 +516,4 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 	m_hero.set_rotation(angle);
 
 }
+
