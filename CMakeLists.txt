@@ -40,7 +40,6 @@ set(SOURCE_FILES
 	src/world.cpp
     src/hero.cpp
     src/enemy.cpp
-    src/enemies.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -51,8 +50,7 @@ set(SOURCE_FILES
 	src/world.hpp
     src/hero.hpp
     src/enemy.hpp
-    src/enemies.hpp
-	)
+        src/skill.cpp src/skill.hpp src/projectile.cpp src/projectile.h src/fireball.cpp src/fireball.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)

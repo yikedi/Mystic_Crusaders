@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common.hpp"
+#include "projectile.h"
+#include "fireball.h"
 
 class Enemy;
 class Fish;
@@ -11,11 +13,18 @@ class Hero : public Renderable
 	static Texture hero_texture;
 
 public:
+	//hero attributes
+    float max_hp;
+    float max_mp;
+	float hp;
+	float mp;
+	//std::vector<skill> skill_list;
+
+
 	// Creates all the associated render resources and default transform
 	float m_color[3];
 	bool advanced;
-	vec2 m_screen;
-	bool init(vec2 screen);
+	bool init();
 
 	// Releases all associated resources
 	void destroy();
@@ -57,6 +66,15 @@ public:
     void transform_current_vertex(std::vector<vec3> &cur_vertices);
 	void set_color(vec3 color);
 
+    //hero functions
+    void take_damage(float damage);
+    void change_hp(float d_hp);
+    void change_mp(float d_mp);
+    void apply_momentum(vec2 f);
+    void set_speed(vec2 speed);
+    bool shoot_projectiles(std::vector<Fireball> & hero_projectiles);
+
+
 private:
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
@@ -68,4 +86,6 @@ private:
 	//add salmon speed
 	vec2 m_direction;
 	int m_light_up;
+
+
 };

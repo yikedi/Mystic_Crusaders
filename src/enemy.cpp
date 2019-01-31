@@ -60,6 +60,7 @@ bool Enemy::init()
 	// 1.0 would be as big as the original texture
 	m_scale.x = 1.0f;
 	m_scale.y = 1.0f;
+	m_rotation = 0.f;
 
 	return true;
 }
@@ -77,6 +78,14 @@ void Enemy::destroy()
 	glDeleteShader(effect.program);
 }
 
+void Enemy::update(float ms)
+{
+	// Move fish along -X based on how much time has passed, this is to (partially) avoid
+	// having entities move at different speed based on the machine.
+	const float TURTLE_SPEED = 200.f;
+	float step = -TURTLE_SPEED * (ms / 1000);
+	m_position.x += step;
+}
 
 void Enemy::draw(const mat3& projection)
 {
@@ -84,13 +93,7 @@ void Enemy::draw(const mat3& projection)
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(m_position);
-
-	if(m_face_left_or_right == 1){
-		m_scale.x = -1.0f;
-	} else {
-		m_scale.x = 1.0f;
-	}
-
+	transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();
 
@@ -133,26 +136,34 @@ void Enemy::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Enemy::update(float ms, vec2 target_pos)
+vec2 Enemy::get_position()const
 {
-	// Move fish along -X based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	const float TURTLE_SPEED = 100.f;
-	double del_x =  m_position.x - target_pos.x;
-	double del_y =  m_position.y - target_pos.y;
-	double enemy_angle = atan2(del_y, del_x);
-	int facing = 1;
-	if (del_x > 0.0) {
-		facing = 0;
-	}
-	set_facing(facing);
-
-	float step = -TURTLE_SPEED * (ms / 1000);
-	m_position.x += cos(enemy_angle)*step;
-	m_position.y += sin(enemy_angle)*step;
+	return m_position;
 }
 
+void Enemy::set_position(vec2 position)
+{
+	m_position = position;
+}
 
-void Enemy::attack(){
+bool Enemy::collide_with(Projectile &projectile)
+{
+	float dx = m_position.x - projectile.get_position().x;
+	float dy = m_position.y - projectile.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 0.6f;
+	if (d_sq < r * r)
+			return true;
+	return false;
 
+}
+
+// Returns the local bounding coordinates scaled by the current size of the enemy
+vec2 Enemy::get_bounding_box()const
+{
+	// fabs is to avoid negative scale due to the facing direction
+	return { std::fabs(m_scale.x) * enemy_texture.width, std::fabs(m_scale.y) * enemy_texture.height };
 }
