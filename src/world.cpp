@@ -170,23 +170,40 @@ bool World::update(float elapsed_ms)
 	}
 
 //    !!temporarily comment out for merge
-//    auto h_proj = hero_projectiles.begin();
-//    auto enemy = m_enemys.begin();
-//    while (enemy != m_enemys.end())
+    auto h_proj = hero_projectiles.begin();
+    auto enemy = m_enemys.begin();
+
+    while (enemy != m_enemys.end())
+    {
+            while (h_proj != hero_projectiles.end())
+            {
+                if (enemy->collide_with(*h_proj))
+                {
+                    //enemy->destroy();
+                    enemy = m_enemys.erase(enemy);
+                    //h_proj->destroy();
+                    h_proj = hero_projectiles.erase(h_proj);
+                    break;
+                }
+                ++h_proj;
+            }
+    ++enemy;
+    }
+
+
+//    for (auto & enemy: m_enemys)
 //    {
-//            while (h_proj != hero_projectiles.end())
+//        for (auto & projectile: hero_projectiles)
+//        {
+//            if (enemy.collide_with(projectile))
 //            {
-//                if (enemy->collide_with(*h_proj))
-//                {
-//                    enemy = m_enemys.erase(enemy);
-//                    enemy->destroy();
-//                    h_proj = hero_projectiles.erase(h_proj);
-//                    h_proj->destroy();
-//                    break;
-//                }
-//                ++h_proj;
+//                enemy.destroy();
+//                projectile.destroy();
+//                hero_projectiles.erase()
+//                break;
 //            }
-//    ++enemy;
+//        }
+//
 //    }
 
 
@@ -228,7 +245,7 @@ bool World::update(float elapsed_ms)
 	}
 
 	// Removing out of screen fish
-    auto h_proj = hero_projectiles.begin();
+    h_proj = hero_projectiles.begin();
 	while (h_proj != hero_projectiles.end())
 	{
 		float w = h_proj->get_bounding_box().x / 2;
