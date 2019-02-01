@@ -41,6 +41,8 @@ set(SOURCE_FILES
     src/hero.cpp
     src/enemy.cpp
     src/enemies.cpp
+    src/fireball.cpp
+    src/projectile.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -52,6 +54,9 @@ set(SOURCE_FILES
     src/hero.hpp
     src/enemy.hpp
     src/enemies.hpp
+    src/fireball.h
+    src/projectile.h
+
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
