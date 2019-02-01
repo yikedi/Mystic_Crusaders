@@ -5,6 +5,7 @@
 #include "enemy.hpp"
 #include "fish.hpp"
 
+
 // stlib
 #include <vector>
 #include <string>
@@ -80,7 +81,10 @@ bool Hero::init(vec2 screen)
 	m_direction = {0.f,0.f};
 	m_light_up = 0;
 	advanced = false;
-
+	max_hp = 100.f;
+	max_mp = 100.f;
+	hp = max_hp;
+	mp = max_mp;
 	return true;
 }
 
@@ -189,8 +193,10 @@ bool Hero::collides_with(const Enemy& enemy)
 
     if (!advanced) { //This is old code
         r *= 0.6f;
-        if (d_sq < r * r)
-            return true;
+		if (d_sq < r * r) {
+			take_damage(2.f);
+			return true;
+		}
     }
     else {	// mesh level collision detection
         r *= 1.0f;
@@ -364,5 +370,40 @@ void Hero::set_color(vec3 in_color)
 	memcpy(m_color,color, sizeof(color));
 }
 
+void Hero::take_damage(float damage)
+{
+	change_hp(-1.f * damage);
+	if (hp <= 0.5f) {
+		m_is_alive = false;
+	}
+}
 
+void Hero::change_hp(float d_hp)
+{
+	hp += d_hp;
+	hp = std::min(hp,max_hp);
+	hp = std::max(0.5f,hp);
+}
+
+void Hero::change_mp(float d_mp)
+{
+	mp += d_mp;
+	mp = std::min(mp, max_mp);
+	mp = std::max(0.5f, mp);
+}
+
+bool Hero::shoot_projectiles(std::vector<Fireball> & hero_projectiles)
+{
+	//Fish fish;
+	Fireball fireball;
+	if (fireball.init(m_rotation))
+	{
+		fireball.set_position(m_position);
+		hero_projectiles.emplace_back(fireball);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn fish");
+	return false;
+
+}
 

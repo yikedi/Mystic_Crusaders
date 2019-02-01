@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "enemies.hpp"
+#include "projectile.h"
 
 // Salmon enemy
 class Enemy : public Renderable, public Enemies
@@ -24,6 +25,9 @@ public:
 	// Renders the salmon
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
+
+
+	bool collide_with(Projectile &projectile);
 
 	void attack() override;
 };

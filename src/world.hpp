@@ -8,6 +8,8 @@
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
+#include "projectile.h"
+#include "fireball.h"
 
 // stlib
 #include <vector>
@@ -50,6 +52,8 @@ private:
 	// !!! INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow*, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
+	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
+
 
 private:
 	// Window handle
@@ -72,7 +76,7 @@ private:
 	// Game entities
 	Hero m_hero;
 	std::vector<Enemy> m_enemys;
-	std::vector<Fish> m_fish;
+	std::vector<Fireball> hero_projectiles;
 
 	float m_current_speed;
 	float m_next_enemy_spawn;
