@@ -2,6 +2,7 @@
 #include "enemy.hpp"
 
 #include <cmath>
+#include <algorithm>
 
 Texture Enemy::enemy_texture;
 
