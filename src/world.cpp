@@ -223,11 +223,11 @@ bool World::update(float elapsed_ms)
 		++h_proj;
 	}
 
-    h_proj = hero_projectiles.begin();
     auto enemy = m_enemys.begin();
 
     while (enemy != m_enemys.end())
     {
+		h_proj = hero_projectiles.begin();
         while (h_proj != hero_projectiles.end())
         {
             if (enemy->collide_with(*h_proj))
@@ -319,7 +319,7 @@ void World::draw()
 
 	float sx = zoom_factor * 2.f / (right - left);
 	float sy = zoom_factor * 2.f / (top - bottom);
-	
+
 
 	//right = left + (float)w;
 	vec2 salmon_position = m_hero.get_position();
