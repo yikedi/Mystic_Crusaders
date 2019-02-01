@@ -6,6 +6,8 @@
 #include <cassert>
 #include <sstream>
 
+#include <gl3w.h>
+
 // Same as static in c, local to compilation unit
 namespace
 {
@@ -13,6 +15,16 @@ namespace
 	const size_t MAX_FISH = 5;
 	const size_t TURTLE_DELAY_MS = 2000;
 	const size_t FISH_DELAY_MS = 5000;
+	double left = 0.f;
+	double right = 100.f;
+	double top = 0.f;
+	double bottom = 100.f;
+	double left_holder = 0.f;
+	double right_holder = 100.f;
+	double top_holder = 0.f;
+	double bottom_holder = 100.f;
+	double our_x = 0.f;
+	double our_y = 0.f;
 
 	namespace
 	{
@@ -74,10 +86,10 @@ bool World::init(vec2 screen)
 	glfwSetWindowUserPointer(m_window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
-    auto mouse_button_callback =[](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2);};
+	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	glfwSetKeyCallback(m_window, key_redirect);
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
-    glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+	//glutReshapeFunc(reshape);
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
@@ -120,8 +132,8 @@ bool World::init(vec2 screen)
 	fprintf(stderr, "Loaded music\n");
 
 	m_current_speed = 1.f;
-
-	return m_hero.init() && m_water.init();
+	zoom_factor = 1.f;
+	return m_hero.init(screen) && m_water.init();
 }
 
 // Releases all the associated resources
@@ -141,10 +153,10 @@ void World::destroy()
 	m_hero.destroy();
 	for (auto& enemy : m_enemys)
 		enemy.destroy();
-	for (auto& h_proj : hero_projectiles)
-		h_proj.destroy();
+	for (auto& fish : m_fish)
+		fish.destroy();
 	m_enemys.clear();
-    hero_projectiles.clear();
+	m_fish.clear();
 	glfwDestroyWindow(m_window);
 }
 
@@ -160,75 +172,37 @@ bool World::update(float elapsed_ms)
 	{
 		if (m_hero.collides_with(enemy))
 		{
-			if (!m_hero.is_alive()) {
+			if (m_hero.is_alive()) {
 				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 				m_water.set_salmon_dead();
-				m_hero.kill();
 			}
+			m_hero.kill();
 			break;
 		}
 	}
 
-//    !!temporarily comment out for merge
-    auto h_proj = hero_projectiles.begin();
-    auto enemy = m_enemys.begin();
-
-    while (enemy != m_enemys.end())
-    {
-            while (h_proj != hero_projectiles.end())
-            {
-                if (enemy->collide_with(*h_proj))
-                {
-                    //enemy->destroy();
-                    enemy = m_enemys.erase(enemy);
-                    //h_proj->destroy();
-                    h_proj = hero_projectiles.erase(h_proj);
-                    break;
-                }
-                ++h_proj;
-            }
-    ++enemy;
-    }
-
-
-//    for (auto & enemy: m_enemys)
-//    {
-//        for (auto & projectile: hero_projectiles)
-//        {
-//            if (enemy.collide_with(projectile))
-//            {
-//                enemy.destroy();
-//                projectile.destroy();
-//                hero_projectiles.erase()
-//                break;
-//            }
-//        }
-//
-//    }
-
-
-    // Checking Salmon - Fish collisions
-//	auto fish_it = m_fish.begin();
-//	while (fish_it != m_fish.end())
-//	{
-//		if (m_hero.is_alive() && m_hero.collides_with(*fish_it))
-//		{
-//			fish_it = m_fish.erase(fish_it);
-//            m_hero.light_up();
-//			Mix_PlayChannel(-1, m_salmon_eat_sound, 0);
-//			++m_points;
-//		}
-//		else
-//			++fish_it;
-//	}
+	// Checking Salmon - Fish collisions
+	auto fish_it = m_fish.begin();
+	while (fish_it != m_fish.end())
+	{
+		if (m_hero.is_alive() && m_hero.collides_with(*fish_it))
+		{
+			fish_it = m_fish.erase(fish_it);
+            m_hero.light_up();
+			Mix_PlayChannel(-1, m_salmon_eat_sound, 0);
+			++m_points;
+		}
+		else
+			++fish_it;
+	}
 
 	// Updating all entities, making the enemy and fish
 	// faster based on current
 	m_hero.update(elapsed_ms);
 	for (auto& enemy : m_enemys)
-		enemy.update(elapsed_ms * m_current_speed);
-	for (auto& h_proj : hero_projectiles)
-		h_proj.update(elapsed_ms * m_current_speed);
+		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+	for (auto& fish : m_fish)
+		fish.update(elapsed_ms * m_current_speed);
 
 	// Removing out of screen enemys
 	auto enemy_it = m_enemys.begin();
@@ -245,17 +219,17 @@ bool World::update(float elapsed_ms)
 	}
 
 	// Removing out of screen fish
-    h_proj = hero_projectiles.begin();
-	while (h_proj != hero_projectiles.end())
+	fish_it = m_fish.begin();
+	while (fish_it != m_fish.end())
 	{
-		float w = h_proj->get_bounding_box().x / 2;
-		if (h_proj->get_position().x + w < 0.f)
+		float w = fish_it->get_bounding_box().x / 2;
+		if (fish_it->get_position().x + w < 0.f)
 		{
-            h_proj = hero_projectiles.erase(h_proj);
+			fish_it = m_fish.erase(fish_it);
 			continue;
 		}
 
-		++h_proj;
+		++fish_it;
 	}
 
 	// Spawning new enemys
@@ -267,8 +241,16 @@ bool World::update(float elapsed_ms)
 
 		Enemy& new_enemy = m_enemys.back();
 
+		int left_or_right_spawn = rand() % 2;
+
+		float screen_x = 0;
+
+		if(left_or_right_spawn == 0){
+			screen_x = screen.x + 150.f;
+		}
+
 		// Setting random initial position
-		new_enemy.set_position({ screen.x + 150, 50 + m_dist(m_rng) * (screen.y - 100) });
+		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
 		m_next_enemy_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
@@ -276,16 +258,16 @@ bool World::update(float elapsed_ms)
 
 	// Spawning new fish
 	m_next_fish_spawn -= elapsed_ms * m_current_speed;
-//	if (hero_projectiles.size() <= MAX_FISH && m_next_fish_spawn < 0.f)
-//	{
-//		if (!spawn_fish())
-//			return false;
-//		Fireball& new_fish = hero_projectiles.back();
-//
-//		new_fish.set_position({ screen.x + 150, 50 + m_dist(m_rng) *  (screen.y - 100) });
-//
-//		m_next_fish_spawn = (FISH_DELAY_MS / 2) + m_dist(m_rng) * (FISH_DELAY_MS / 2);
-//	}
+	if (m_fish.size() <= MAX_FISH && m_next_fish_spawn < 0.f)
+	{
+		if (!spawn_fish())
+			return false;
+		Fish& new_fish = m_fish.back();
+
+		new_fish.set_position({ screen.x + 150, 50 + m_dist(m_rng) *  (screen.y - 100) });
+
+		m_next_fish_spawn = (FISH_DELAY_MS / 2) + m_dist(m_rng) * (FISH_DELAY_MS / 2);
+	}
 
 	// If salmon is dead, restart the game after the fading animation
 	if (!m_hero.is_alive() &&
@@ -293,9 +275,9 @@ bool World::update(float elapsed_ms)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
-        hero_projectiles.clear();
+		m_fish.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 	}
@@ -333,22 +315,58 @@ void World::draw()
 
 	// Fake projection matrix, scales with respect to window coordinates
 	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	float left = 0.f;// *-0.5;
-	float top = 0.f;// (float)h * -0.5;
-	float right = (float)w;// *0.5;
-	float bottom = (float)h;// *0.5;
+	//float left = 0.f;// *-0.5;
+	//float top = 0.f;// (float)h * -0.5;
+	//float right = (float)w;// *0.5;
+	//float bottom = (float)h;// *0.5;
 
-	float sx = 2.f / (right - left);
-	float sy = 2.f / (top - bottom);
-	float tx = -(right + left) / (right - left);
-	float ty = -(top + bottom) / (top - bottom);
+	float sx = zoom_factor * 2.f / (right - left);
+	float sy = zoom_factor * 2.f / (top - bottom);
+	
+
+	//right = left + (float)w;
+	vec2 salmon_position = m_hero.get_position();
+	our_x = salmon_position.x;
+	our_y = salmon_position.y;
+	double w_scaled = (double)w / zoom_factor;
+	double h_scaled = (double)h / zoom_factor;
+	double w_double = (double)w;
+	double h_double = (double)h;
+	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
+	if (left < 0.f) {
+		left = 0.f;
+	}
+	else if (left + w_scaled > w_double) {
+		left = w_double - w_scaled;
+	}
+	top = our_y - (h_scaled / 2); // divided by 2? // and this would be y - 300
+	if (top < 0.f) {
+		top = 0.f;
+	}
+	else if (top + h_scaled > h_double) {
+		top = h_double - h_scaled;
+	}
+	right = left + w_scaled;
+	bottom = top + h_scaled;
+	//left = left_holder;
+	//top = top_holder;
+	//right = right_holder;
+	//bottom = bottom_holder;
+
+	
+	double tx = -zoom_factor * (right + left) / (right - left);
+	double ty = -zoom_factor * (top + bottom) / (top - bottom);
+
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
+
 
 	// Drawing entities
 	for (auto& enemy : m_enemys)
 		enemy.draw(projection_2D);
-	for (auto& h_proj : hero_projectiles)
-		h_proj.draw(projection_2D);
+	for (auto& fish : m_fish)
+		fish.draw(projection_2D);
+
+
 	m_hero.draw(projection_2D);
 
 	/////////////////////
@@ -395,11 +413,10 @@ bool World::spawn_enemy()
 // Creates a new fish and if successfull adds it to the list of fish
 bool World::spawn_fish()
 {
-	//Fish fish;
-    Fireball fish;
-	if (fish.init(-1.f*M_PI))
+	Fish fish;
+	if (fish.init())
 	{
-        hero_projectiles.emplace_back(fish);
+		m_fish.emplace_back(fish);
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fish");
@@ -416,16 +433,25 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
+	int w, h;
+        glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		m_hero.init();
+		m_hero.init(screen);
 		m_enemys.clear();
-        hero_projectiles.clear();
+		m_fish.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
+		left = 0.f;// *-0.5;
+		top = 0.f;// (float)h * -0.5;
+		right = (float)w;// *0.5;
+		bottom = (float)h;// *0.5;
+		zoom_factor = 1.f;
+
 	}
 
 	// Control the current speed with `<` `>`
@@ -435,7 +461,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_current_speed += 0.1f;
 
     //add toggle
-    if (action == GLFW_RELEASE && key == GLFW_KEY_1) {
+    if (action == GLFW_RELEASE && key == GLFW_KEY_A) {
         m_hero.advanced = true;
     }
     if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
@@ -446,26 +472,33 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 	//add key control for direction
 	vec2 cur_direction = m_hero.get_direction();
-	if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
 		m_hero.set_direction({1.0f,cur_direction.y});
 	}
-	else if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+
+	else if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
 		m_hero.set_direction({-1.0f,cur_direction.y});
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_A || key ==GLFW_KEY_D )) {
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_LEFT || key ==GLFW_KEY_RIGHT )) {
 		m_hero.set_direction({0.0f,cur_direction.y});
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
 		m_hero.set_direction({cur_direction.x,-1.0f});
 	}
-	else if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+	else if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
 		m_hero.set_direction({cur_direction.x,1.0f});
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key ==GLFW_KEY_S )) {
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_UP || key ==GLFW_KEY_DOWN )) {
 		m_hero.set_direction({cur_direction.x,0.0f});
 	}
-
+	else if (key == GLFW_KEY_P) {
+		zoom_factor += 0.1f;
+	}
+	else if (key == GLFW_KEY_O) {
+		zoom_factor -= 0.1f;
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -484,8 +517,3 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 }
 
-void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-        m_hero.shoot_projectiles(hero_projectiles);
-}
