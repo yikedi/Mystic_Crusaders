@@ -12,9 +12,9 @@ bool Fireball::init(float radius)
     // Load shared texture
     if (!texture.is_valid())
     {
-        if (!texture.load_from_file(textures_path("fish.png")))
+        if (!texture.load_from_file(textures_path("fireball.png")))
         {
-            fprintf(stderr, "Failed to load turtle texture!");
+            fprintf(stderr, "Failed to load fireball texture!");
             return false;
         }
     }
@@ -60,8 +60,8 @@ bool Fireball::init(float radius)
 
     // Setting initial values, scale is negative to make it face the opposite way
     // 1.0 would be as big as the original texture
-    m_scale.x = -0.1f;
-    m_scale.y = 0.1f;
+    m_scale.x = -0.2f;
+    m_scale.y = 0.2f;
     m_rotation = 0.f;
     initial_speed = 400.f;
 
