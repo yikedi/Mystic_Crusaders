@@ -238,6 +238,9 @@ bool World::update(float elapsed_ms)
             }
             ++h_proj;
         }
+		if (enemy == m_enemys.end() || m_enemys.size() == 0){
+			break;
+		}
         ++enemy;
     }
 
