@@ -234,6 +234,7 @@ bool World::update(float elapsed_ms)
             {
                 enemy = m_enemys.erase(enemy);
                 h_proj = hero_projectiles.erase(h_proj);
+				++m_points;
                 break;
             }
             ++h_proj;
@@ -281,6 +282,7 @@ bool World::update(float elapsed_ms)
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
+		m_points = 0;
 	}
 
 	return true;
@@ -438,6 +440,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		right = (float)w;// *0.5;
 		bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
+		m_points = 0;
 
 	}
 
