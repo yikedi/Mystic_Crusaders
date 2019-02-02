@@ -280,6 +280,7 @@ bool World::update(float elapsed_ms)
 		hero_projectiles.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
+		zoom_factor = 1.f;
 	}
 
 	return true;
@@ -481,9 +482,15 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_P) {
 		zoom_factor += 0.1f;
+		if ((zoom_factor > 1.5f)) {
+			zoom_factor = 1.5f;
+		}
 	}
 	else if (key == GLFW_KEY_O) {
 		zoom_factor -= 0.1f;
+		if ((zoom_factor < 1.f)) {
+			zoom_factor = 1.f;
+		}
 	}
 }
 
