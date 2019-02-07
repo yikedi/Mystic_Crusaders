@@ -11,7 +11,8 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const size_t MAX_TURTLES = 15;
+	const int INIT_MAX_ENEMIES = 5;
+	size_t MAX_TURTLES = INIT_MAX_ENEMIES;
 	const size_t MAX_FISH = 5;
 	const size_t TURTLE_DELAY_MS = 2000;
 	const size_t FISH_DELAY_MS = 5000;
@@ -159,8 +160,11 @@ void World::destroy()
 		enemy.destroy();
 	for (auto& h_proj : hero_projectiles)
 		h_proj.destroy();
+	for (auto& e_proj : enemy_projectiles)
+		e_proj.destroy();
 	m_enemys.clear();
 	hero_projectiles.clear();
+	enemy_projectiles.clear();
 	glfwDestroyWindow(m_window);
 }
 
@@ -171,7 +175,7 @@ bool World::update(float elapsed_ms)
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 
-	// Checking Salmon - Enemy collisions
+	// Checking hero - Enemy collisions
 	for (const auto& enemy : m_enemys)
 	{
 		if (m_hero.collides_with(enemy))
@@ -185,6 +189,34 @@ bool World::update(float elapsed_ms)
 		}
 	}
 
+	// Checking hero - Enemy collisions
+	auto e_proj = enemy_projectiles.begin();
+	while (e_proj != enemy_projectiles.end())
+	{
+		if (m_hero.collides_with(*e_proj))
+		{
+			m_hero.take_damage(20.f);
+			e_proj = enemy_projectiles.erase(e_proj);
+			if (!m_hero.is_alive()) {
+				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+				m_water.set_salmon_dead();
+				m_hero.kill();
+			}
+			break;
+		}
+		++e_proj;
+	}
+
+
+
+	for (Enemy_01 enemy : m_enemys)
+	{
+		if (enemy.needFireProjectile == true)
+		{
+			enemy.shoot_projectiles(enemy_projectiles);
+		}
+	}
+
 
 
 	// Updating all entities, making the enemy and fish
@@ -192,8 +224,10 @@ bool World::update(float elapsed_ms)
 	m_hero.update(elapsed_ms);
 	for (auto& enemy : m_enemys)
 		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-	for (auto& fish : hero_projectiles)
-		fish.update(elapsed_ms * m_current_speed);
+	for (auto& h_proj : hero_projectiles)
+		h_proj.update(elapsed_ms * m_current_speed);
+	for (auto& e_proj : enemy_projectiles)
+		e_proj.update(elapsed_ms * m_current_speed);
 
 	// Removing out of screen enemys
 	auto enemy_it = m_enemys.begin();
@@ -223,6 +257,19 @@ bool World::update(float elapsed_ms)
 		++h_proj;
 	}
 
+	e_proj = enemy_projectiles.begin();
+	while (e_proj != enemy_projectiles.end())
+	{
+		float w = e_proj->get_bounding_box().x / 2;
+		if (e_proj->get_position().x + w < 0.f)
+		{
+			e_proj = enemy_projectiles.erase(e_proj);
+			continue;
+		}
+
+		++e_proj;
+	}
+
     auto enemy = m_enemys.begin();
 
     while (enemy != m_enemys.end())
@@ -235,6 +282,7 @@ bool World::update(float elapsed_ms)
                 enemy = m_enemys.erase(enemy);
                 h_proj = hero_projectiles.erase(h_proj);
 				++m_points;
+				MAX_TURTLES = INIT_MAX_ENEMIES + m_points / 5;
                 break;
             }
             ++h_proj;
@@ -253,7 +301,7 @@ bool World::update(float elapsed_ms)
 		if (!spawn_enemy())
 			return false;
 
-		Enemy& new_enemy = m_enemys.back();
+		Enemy_01& new_enemy = m_enemys.back();
 
 		int left_or_right_spawn = rand() % 2;
 
@@ -279,6 +327,7 @@ bool World::update(float elapsed_ms)
 		m_hero.init(screen);
 		m_enemys.clear();
 		hero_projectiles.clear();
+		enemy_projectiles.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -367,6 +416,8 @@ void World::draw()
 		enemy.draw(projection_2D);
 	for (auto& h_proj : hero_projectiles)
 		h_proj.draw(projection_2D);
+	for (auto& e_proj : enemy_projectiles)
+		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
 
 	m_hero.draw(projection_2D);
@@ -402,8 +453,8 @@ bool World::is_over()const
 // Creates a new enemy and if successfull adds it to the list of enemys
 bool World::spawn_enemy()
 {
-	Enemy enemy;
-	if (enemy.init())
+	Enemy_01 enemy;
+	if (enemy.init(m_points))
 	{
 		m_enemys.emplace_back(enemy);
 		return true;
@@ -433,6 +484,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_hero.init(screen);
 		m_enemys.clear();
 		hero_projectiles.clear();
+		enemy_projectiles.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		left = 0.f;// *-0.5;

@@ -1,12 +1,12 @@
 // Header
-#include "enemy.hpp"
+#include "enemy_01.hpp"
 
 #include <cmath>
 #include <algorithm>
 
-Texture Enemy::enemy_texture;
+Texture Enemy_01::enemy_texture;
 
-bool Enemy::init()
+bool Enemy_01::init(int level)
 {
 	// Load shared texture
 	if (!enemy_texture.is_valid())
@@ -61,13 +61,25 @@ bool Enemy::init()
 	// 1.0 would be as big as the original texture
 	m_scale.x = 1.0f;
 	m_scale.y = 1.0f;
+	needFireProjectile = false;
+	m_rotation = 0.f;
+	enemyRandMoveAngle = 0.f;
+	lastFireProjectileTime = clock();
+	randMovementTime = clock();
+
+	double f = (double)rand() / RAND_MAX;
+    double randAttributeFactor = 1.0 + f * (2.0 - 1.0);
+
+	m_speed = 80.f + (double)level * 2.0f * randAttributeFactor;
+	attackCooldown = 2000.0 - (double)level * 20.0 * randAttributeFactor;
+	randMovementCooldown = 1000.0 - (double)level * 10.0 * randAttributeFactor;
 
 	return true;
 }
 
 // Call if init() was successful
 // Releases all graphics resources
-void Enemy::destroy()
+void Enemy_01::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -79,7 +91,7 @@ void Enemy::destroy()
 }
 
 
-void Enemy::draw(const mat3& projection)
+void Enemy_01::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -134,27 +146,51 @@ void Enemy::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Enemy::update(float ms, vec2 target_pos)
+void Enemy_01::update(float ms, vec2 target_pos)
 {
 	// Move fish along -X based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
-	const float TURTLE_SPEED = 100.f;
-	double del_x =  m_position.x - target_pos.x;
-	double del_y =  m_position.y - target_pos.y;
-	double enemy_angle = atan2(del_y, del_x);
+	float x_diff =  m_position.x - target_pos.x;
+	float y_diff =  m_position.y - target_pos.y;
+	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
+	float enemy_angle = atan2(y_diff, x_diff);
 	int facing = 1;
-	if (del_x > 0.0) {
+	if (x_diff > 0.0) {
 		facing = 0;
 	}
 	set_facing(facing);
+	set_rotation(enemy_angle);
+	clock_t currentTime = clock();
+	if (distance <= 50.f) {
+		needFireProjectile = false;
+		float step = m_speed * (ms / 1000);
+		m_position.x += cos(enemy_angle)*step;
+		m_position.y += sin(enemy_angle)*step;
+	} else if (distance <= 500.f && checkIfCanFire(currentTime)) {
+		needFireProjectile = true;
+		setLastFireProjectileTime(currentTime);
+	} else if (distance <= 500.f) {
+		needFireProjectile = false;
+		float step = -m_speed * (ms / 1000);
+		m_position.x += cos(enemyRandMoveAngle)*step;
+		m_position.y += sin(enemyRandMoveAngle)*step;
+	} else {
+		needFireProjectile = false;
 
-	float step = -TURTLE_SPEED * (ms / 1000);
-	m_position.x += cos(enemy_angle)*step;
-	m_position.y += sin(enemy_angle)*step;
+		float step = -m_speed * (ms / 1000);
+		m_position.x += cos(enemy_angle)*step;
+		m_position.y += sin(enemy_angle)*step;
+	}
+	if (checkIfCanChangeDirectionOfMove(currentTime)){
+		float LO = enemy_angle - 2.0f;
+		float HI = enemy_angle + 2.0f;
+		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+		setRandMovementTime(currentTime);
+	}
 }
 
 
-bool Enemy::collide_with(Projectile &projectile)
+bool Enemy_01::collide_with(Projectile &projectile)
 {
 	float dx = m_position.x - projectile.get_position().x;
 	float dy = m_position.y - projectile.get_position().y;
@@ -169,8 +205,30 @@ bool Enemy::collide_with(Projectile &projectile)
 
 }
 
+bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)
+{
+	EnemyLaser enemyLaser;
 
+	if (enemyLaser.init(m_rotation))
+	{
+		enemyLaser.set_position(m_position);
+		enemy_projectiles.emplace_back(enemyLaser);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn fish");
+	return false;
 
-void Enemy::attack(){
+}
 
+bool Enemy_01::checkIfCanFire(clock_t currentClock)
+{
+	if ((double)(currentClock - lastFireProjectileTime) > attackCooldown) {
+		return true;
+	}
+	return false;
+}
+
+void Enemy_01::setLastFireProjectileTime(clock_t c)
+{
+	lastFireProjectileTime = c;
 }

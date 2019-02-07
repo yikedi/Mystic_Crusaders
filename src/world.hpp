@@ -4,12 +4,13 @@
 #include "common.hpp"
 #include "salmon.hpp"
 #include "turtle.hpp"
-#include "enemy.hpp"
+#include "enemy_01.hpp"
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
 #include "projectile.h"
 #include "fireball.h"
+#include "enemy_laser.h"
 
 // stlib
 #include <vector>
@@ -75,8 +76,9 @@ private:
 
 	// Game entities
 	Hero m_hero;
-	std::vector<Enemy> m_enemys;
+	std::vector<Enemy_01> m_enemys;
 	std::vector<Fireball> hero_projectiles;
+	std::vector<EnemyLaser> enemy_projectiles;
 
 	float m_current_speed;
 	float m_next_enemy_spawn;
