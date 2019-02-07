@@ -7,7 +7,7 @@
 
 Texture Fireball::texture;
 
-bool Fireball::init(float radius)
+bool Fireball::init(float radius, float projectileSpeed)
 {
     // Load shared texture
     if (!texture.is_valid())
@@ -60,9 +60,10 @@ bool Fireball::init(float radius)
 
     // Setting initial values, scale is negative to make it face the opposite way
     // 1.0 would be as big as the original texture
-    m_scale.x = -0.2f;
-    m_scale.y = 0.2f;
-    m_rotation = 0.f;
+    m_scale.x = 0.2f;
+    m_scale.y = -0.2f;
+    m_rotation = radius;
+
     initial_speed = 400.f;
 
     velocity.x = initial_speed * cosf(radius);

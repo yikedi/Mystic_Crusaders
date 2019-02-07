@@ -72,6 +72,7 @@ public:
 	void take_damage(float damage);
 	void change_hp(float d_hp);
 	void change_mp(float d_mp);
+	float get_hp();
 	void apply_momentum(vec2 f);
 	void set_speed(vec2 speed);
 	bool shoot_projectiles(std::vector<Fireball> & hero_projectiles);

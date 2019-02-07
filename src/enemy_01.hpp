@@ -42,4 +42,5 @@ public:
 
 	private:
 	clock_t lastFireProjectileTime;
+	float projectileSpeed;
 };

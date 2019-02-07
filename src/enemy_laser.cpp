@@ -7,7 +7,7 @@
 
 Texture EnemyLaser::texture;
 
-bool EnemyLaser::init(float radius)
+bool EnemyLaser::init(float radius, float projectileSpeed)
 {
     // Load shared texture
     if (!texture.is_valid())
@@ -62,8 +62,8 @@ bool EnemyLaser::init(float radius)
     // 1.0 would be as big as the original texture
     m_scale.x = -0.5f;
     m_scale.y = 0.3f;
-    m_rotation = 0.f;
-    initial_speed = 300.f;
+    m_rotation = radius;
+    initial_speed = projectileSpeed;
 
     velocity.x = initial_speed * -cosf(radius);
     velocity.y = initial_speed * -sinf(radius);

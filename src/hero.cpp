@@ -407,6 +407,11 @@ void Hero::change_mp(float d_mp)
 	mp = std::max(0.5f, mp);
 }
 
+float Hero::get_hp()
+{
+	return hp;
+}
+
 bool Hero::shoot_projectiles(std::vector<Fireball> & hero_projectiles)
 {
 	//Fish fish;

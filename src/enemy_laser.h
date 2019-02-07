@@ -13,7 +13,7 @@ class EnemyLaser: public Projectile
     static Texture texture;
 
 public :
-    bool init(float radius);
+    bool init(float radius, float projectileSpeed = 300.f);
 
     // Releases all the associated resources
     void destroy();

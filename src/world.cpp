@@ -195,7 +195,7 @@ bool World::update(float elapsed_ms)
 	{
 		if (m_hero.collides_with(*e_proj))
 		{
-			m_hero.take_damage(20.f);
+			m_hero.take_damage(10.f);
 			e_proj = enemy_projectiles.erase(e_proj);
 			if (!m_hero.is_alive()) {
 				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
@@ -350,7 +350,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points;
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp();
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////

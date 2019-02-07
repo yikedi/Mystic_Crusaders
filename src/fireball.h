@@ -13,7 +13,7 @@ class Fireball: public Projectile
     static Texture texture;
 
 public :
-    bool init(float radius);
+    bool init(float radius, float projectileSpeed = 0);
 
     // Releases all the associated resources
     void destroy();

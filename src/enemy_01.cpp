@@ -70,9 +70,10 @@ bool Enemy_01::init(int level)
 	double f = (double)rand() / RAND_MAX;
     double randAttributeFactor = 1.0 + f * (2.0 - 1.0);
 
-	m_speed = 80.f + (double)level * 2.0f * randAttributeFactor;
-	attackCooldown = 2000.0 - (double)level * 20.0 * randAttributeFactor;
-	randMovementCooldown = 1000.0 - (double)level * 10.0 * randAttributeFactor;
+	m_speed = std::min(80.0 + (double)level * 2.0 * randAttributeFactor, 200.0);
+	attackCooldown = std::max(2000.0 - (double)level * 20.0 * randAttributeFactor, 200.0);
+	randMovementCooldown = std::max(1000.0 - (double)level * 10.0 * randAttributeFactor, 100.0);
+	projectileSpeed = std::min(200.0 + (double)level * 4.0 * randAttributeFactor, 450.0);
 
 	return true;
 }
@@ -161,7 +162,7 @@ void Enemy_01::update(float ms, vec2 target_pos)
 	set_facing(facing);
 	set_rotation(enemy_angle);
 	clock_t currentTime = clock();
-	if (distance <= 50.f) {
+	if (distance <= 100.f) {
 		needFireProjectile = false;
 		float step = m_speed * (ms / 1000);
 		m_position.x += cos(enemy_angle)*step;
@@ -209,7 +210,7 @@ bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)
 {
 	EnemyLaser enemyLaser;
 
-	if (enemyLaser.init(m_rotation))
+	if (enemyLaser.init(m_rotation, projectileSpeed))
 	{
 		enemyLaser.set_position(m_position);
 		enemy_projectiles.emplace_back(enemyLaser);

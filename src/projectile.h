@@ -14,7 +14,7 @@ class Projectile: public Renderable
 
 public:
     // Creates all the associated render resources and default transform
-    virtual bool init(float radius) = 0;
+    virtual bool init(float radius, float projectileSpeed) = 0;
 
     // Releases all the associated resources
     virtual void destroy() = 0;
