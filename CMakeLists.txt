@@ -43,6 +43,7 @@ set(SOURCE_FILES
     src/enemies.cpp
     src/fireball.cpp
     src/projectile.cpp
+    src/start_screen.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -56,6 +57,7 @@ set(SOURCE_FILES
     src/enemies.hpp
     src/fireball.h
     src/projectile.h
+    src/start_screen.hpp
 
 	)
 

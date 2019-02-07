@@ -25,6 +25,7 @@ namespace
 	float bottom_holder = 100.f;
 	float our_x = 0.f;
 	float our_y = 0.f;
+	//int stage = 0;
 
 	namespace
 	{
@@ -55,6 +56,7 @@ bool World::init(vec2 screen)
 	//-------------------------------------------------------------------------
 	// GLFW / OGL Initialization
 	// Core Opengl 3.
+
 	glfwSetErrorCallback(glfw_err_cb);
 	if (!glfwInit())
 	{
@@ -70,6 +72,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	//m_window = Startscreen.get_window();
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
@@ -326,16 +329,17 @@ void World::draw()
 	float sx = zoom_factor * 2.f / (right - left);
 	float sy = zoom_factor * 2.f / (top - bottom);
 
-
-	//right = left + (float)w;
-	vec2 salmon_position = m_hero.get_position();
+	vec2 salmon_position = m_hero.get_position(); //get the hero position
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
+
 	float w_scaled = (float)w / zoom_factor;
 	float h_scaled = (float)h / zoom_factor;
 	float w_double = (float)w;
 	float h_double = (float)h;
 	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
+
+	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
 	if (left < 0.f) {
 		left = 0.f;
 	}
@@ -351,10 +355,6 @@ void World::draw()
 	}
 	right = left + w_scaled;
 	bottom = top + h_scaled;
-	//left = left_holder;
-	//top = top_holder;
-	//right = right_holder;
-	//bottom = bottom_holder;
 
 	float tx = -zoom_factor * (right + left) / (right - left);
 	float ty = -zoom_factor * (top + bottom) / (top - bottom);
