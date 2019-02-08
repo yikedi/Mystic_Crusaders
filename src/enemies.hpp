@@ -29,7 +29,9 @@ public:
 	// Returns the enemy' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box()const;
 
-    void take_damage(int damage);
+    void take_damage(float damage, vec2 direction);
+
+    bool Enemies::is_alive()const;
 
     void set_speed(float speed);
 
@@ -47,9 +49,13 @@ public:
     float m_speed; // enemy speed
 	int m_face_left_or_right; // 0 is left, 1 is right
     float m_rotation; // facing hero's angle, use for shoot projectile and attack
-    int m_HP;
-    int m_damage;
+    float hp;
+    bool m_is_alive; // True if the enemy is alive
     float randMovementCooldown;
     clock_t randMovementTime;
     float enemyRandMoveAngle;
+    vec2 momentum;
+    float deceleration;
+    float momentum_factor;
+    int m_level;
 };

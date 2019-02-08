@@ -4,6 +4,7 @@
 #include "projectile.h"
 #include "fireball.h"
 #include "enemy_01.hpp"
+#include "enemy_02.hpp"
 
 class Enemy_01;
 class Fish;
@@ -38,7 +39,7 @@ public:
 	void draw(const mat3& projection)override;
 
 	// Collision routines for enemys and fish
-	bool collides_with(const Enemy_01& enemy);
+	bool collides_with(const Enemy_02& enemy);
 	bool collides_with(Projectile &projectile);
 	bool collides_with(const Fish& fish);
 

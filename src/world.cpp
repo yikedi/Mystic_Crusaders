@@ -11,11 +11,10 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const int INIT_MAX_ENEMIES = 5;
-	size_t MAX_TURTLES = INIT_MAX_ENEMIES;
-	const size_t MAX_FISH = 5;
-	const size_t TURTLE_DELAY_MS = 2000;
-	const size_t FISH_DELAY_MS = 5000;
+	const int INIT_MAX_ENEMIES = 3;
+	size_t MAX_ENEMIES_01 = INIT_MAX_ENEMIES;
+	size_t MAX_ENEMIES_02 = INIT_MAX_ENEMIES;
+	const size_t ENEMY_DELAY_MS = 2000;
 	float left = 0.f;
 	float right = 100.f;
 	float top = 0.f;
@@ -38,10 +37,12 @@ namespace
 
 World::World() :
 	m_points(0),
-	m_next_enemy_spawn(0.f),
+	m_next_enemy1_spawn(0.f),
+	m_next_enemy2_spawn(1.f),
 	m_next_fish_spawn(0.f)
 {
 	// Seeding rng with random device
+
 	m_rng = std::default_random_engine(std::random_device()());
 }
 
@@ -156,13 +157,16 @@ void World::destroy()
 	Mix_CloseAudio();
 
 	m_hero.destroy();
-	for (auto& enemy : m_enemys)
+	for (auto& enemy : m_enemys_01)
+		enemy.destroy();
+	for (auto& enemy : m_enemys_02)
 		enemy.destroy();
 	for (auto& h_proj : hero_projectiles)
 		h_proj.destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
-	m_enemys.clear();
+	m_enemys_01.clear();
+	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
 	glfwDestroyWindow(m_window);
@@ -175,41 +179,44 @@ bool World::update(float elapsed_ms)
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 
-	// Checking hero - Enemy collisions
-	for (const auto& enemy : m_enemys)
-	{
-		if (m_hero.collides_with(enemy))
+	if (m_hero.is_alive()) {
+
+		// Checking hero - Enemy collisions
+		for (const auto& enemy : m_enemys_02)
 		{
-			if (m_hero.is_alive()) {
-				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-				m_water.set_salmon_dead();
+			if (m_hero.collides_with(enemy))
+			{
+				if (!m_hero.is_alive()) {
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+					m_water.set_salmon_dead();
+					m_hero.kill();
+					break;
+				}
 			}
-			m_hero.kill();
-			break;
+		}
+
+		// Checking hero - Enemy collisions
+		auto e_proj = enemy_projectiles.begin();
+		while (e_proj != enemy_projectiles.end())
+		{
+			if (m_hero.collides_with(*e_proj))
+			{
+				m_hero.take_damage(10.f);
+				e_proj = enemy_projectiles.erase(e_proj);
+				if (!m_hero.is_alive()) {
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+					m_water.set_salmon_dead();
+					m_hero.kill();
+				}
+				break;
+			}
+			++e_proj;
 		}
 	}
 
-	// Checking hero - Enemy collisions
-	auto e_proj = enemy_projectiles.begin();
-	while (e_proj != enemy_projectiles.end())
-	{
-		if (m_hero.collides_with(*e_proj))
-		{
-			m_hero.take_damage(10.f);
-			e_proj = enemy_projectiles.erase(e_proj);
-			if (!m_hero.is_alive()) {
-				Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-				m_water.set_salmon_dead();
-				m_hero.kill();
-			}
-			break;
-		}
-		++e_proj;
-	}
 
 
-
-	for (Enemy_01 enemy : m_enemys)
+	for (Enemy_01 enemy : m_enemys_01)
 	{
 		if (enemy.needFireProjectile == true)
 		{
@@ -222,7 +229,9 @@ bool World::update(float elapsed_ms)
 	// Updating all entities, making the enemy and fish
 	// faster based on current
 	m_hero.update(elapsed_ms);
-	for (auto& enemy : m_enemys)
+	for (auto& enemy : m_enemys_01)
+		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+	for (auto& enemy : m_enemys_02)
 		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 	for (auto& h_proj : hero_projectiles)
 		h_proj.update(elapsed_ms * m_current_speed);
@@ -230,17 +239,31 @@ bool World::update(float elapsed_ms)
 		e_proj.update(elapsed_ms * m_current_speed);
 
 	// Removing out of screen enemys
-	auto enemy_it = m_enemys.begin();
-	while (enemy_it != m_enemys.end())
+	auto enemy_it = m_enemys_01.begin();
+	while (enemy_it != m_enemys_01.end())
 	{
 		float w = enemy_it->get_bounding_box().x / 2;
 		if (enemy_it->get_position().x + w < 0.f)
 		{
-			enemy_it = m_enemys.erase(enemy_it);
+			enemy_it = m_enemys_01.erase(enemy_it);
 			continue;
 		}
 
 		++enemy_it;
+	}
+
+	// Removing out of screen enemys
+	auto enemy_it2 = m_enemys_02.begin();
+	while (enemy_it2 != m_enemys_02.end())
+	{
+		float w = enemy_it2->get_bounding_box().x / 2;
+		if (enemy_it2->get_position().x + w < 0.f)
+		{
+			enemy_it2 = m_enemys_02.erase(enemy_it2);
+			continue;
+		}
+
+		++enemy_it2;
 	}
 
     //remove out of screen fireball
@@ -257,7 +280,8 @@ bool World::update(float elapsed_ms)
 		++h_proj;
 	}
 
-	e_proj = enemy_projectiles.begin();
+	//remove out of screen lasers
+	auto e_proj = enemy_projectiles.begin();
 	while (e_proj != enemy_projectiles.end())
 	{
 		float w = e_proj->get_bounding_box().x / 2;
@@ -270,38 +294,68 @@ bool World::update(float elapsed_ms)
 		++e_proj;
 	}
 
-    auto enemy = m_enemys.begin();
+	auto enemy = m_enemys_01.begin();
 
-    while (enemy != m_enemys.end())
-    {
+	while (enemy != m_enemys_01.end())
+	{
 		h_proj = hero_projectiles.begin();
-        while (h_proj != hero_projectiles.end())
-        {
-            if (enemy->collide_with(*h_proj))
-            {
-                enemy = m_enemys.erase(enemy);
-                h_proj = hero_projectiles.erase(h_proj);
-				++m_points;
-				MAX_TURTLES = INIT_MAX_ENEMIES + m_points / 5;
-                break;
-            }
-            ++h_proj;
-        }
-		if (enemy == m_enemys.end() || m_enemys.size() == 0){
+		while (h_proj != hero_projectiles.end())
+		{
+			if (enemy->collide_with(*h_proj))
+			{
+				enemy->take_damage(20.0f, h_proj->get_velocity());
+				h_proj = hero_projectiles.erase(h_proj);
+				if(!enemy->is_alive()) {
+					enemy = m_enemys_01.erase(enemy);
+					++m_points;
+					MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+				}
+				break;
+			}
+			++h_proj;
+		}
+		if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0){
 			break;
 		}
-        ++enemy;
-    }
+		++enemy;
+	}
 
+	auto enemy2 = m_enemys_02.begin();
 
-    // Spawning new enemys
-	m_next_enemy_spawn -= elapsed_ms * m_current_speed;
-	if (m_enemys.size() <= MAX_TURTLES && m_next_enemy_spawn < 0.f)
+	while (enemy2 != m_enemys_02.end())
 	{
-		if (!spawn_enemy())
+		h_proj = hero_projectiles.begin();
+		while (h_proj != hero_projectiles.end())
+		{
+			if (enemy2->collide_with(*h_proj))
+			{
+				enemy2->take_damage(20.0f, h_proj->get_velocity());
+				h_proj = hero_projectiles.erase(h_proj);
+				if(!enemy2->is_alive()) {
+					enemy2 = m_enemys_02.erase(enemy2);
+					++m_points;
+					MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+				}
+				break;
+			}
+			++h_proj;
+		}
+		if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0){
+			break;
+		}
+		++enemy2;
+	}
+
+
+
+	// Spawning new enemys
+	m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
+	if (m_enemys_01.size() <= MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
+	{
+		if (!spawn_enemy_01())
 			return false;
 
-		Enemy_01& new_enemy = m_enemys.back();
+		Enemy_01& new_enemy = m_enemys_01.back();
 
 		int left_or_right_spawn = rand() % 2;
 
@@ -315,8 +369,31 @@ bool World::update(float elapsed_ms)
 		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
-		m_next_enemy_spawn = (TURTLE_DELAY_MS / 2) + m_dist(m_rng) * (TURTLE_DELAY_MS/2);
+		m_next_enemy1_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS);
 	}
+	m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
+	if (m_enemys_02.size() <= MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
+	{
+		if (!spawn_enemy_02())
+			return false;
+
+		Enemy_02& new_enemy = m_enemys_02.back();
+
+		int left_or_right_spawn = rand() % 2;
+
+		float screen_x = 0;
+
+		if(left_or_right_spawn == 0){
+			screen_x = screen.x + 150.f;
+		}
+
+		// Setting random initial position
+		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+		// Next spawn
+		m_next_enemy2_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS);
+	}
+
 
 	// If salmon is dead, restart the game after the fading animation
 	if (!m_hero.is_alive() &&
@@ -325,7 +402,8 @@ bool World::update(float elapsed_ms)
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
 		m_hero.init(screen);
-		m_enemys.clear();
+		m_enemys_01.clear();
+		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		m_water.reset_salmon_dead_time();
@@ -412,7 +490,9 @@ void World::draw()
 
 
 	// Drawing entities
-	for (auto& enemy : m_enemys)
+	for (auto& enemy : m_enemys_01)
+		enemy.draw(projection_2D);
+	for (auto& enemy : m_enemys_02)
 		enemy.draw(projection_2D);
 	for (auto& h_proj : hero_projectiles)
 		h_proj.draw(projection_2D);
@@ -451,15 +531,28 @@ bool World::is_over()const
 }
 
 // Creates a new enemy and if successfull adds it to the list of enemys
-bool World::spawn_enemy()
+bool World::spawn_enemy_01()
 {
 	Enemy_01 enemy;
 	if (enemy.init(m_points))
 	{
-		m_enemys.emplace_back(enemy);
+		m_enemys_01.emplace_back(enemy);
 		return true;
 	}
-	fprintf(stderr, "Failed to spawn enemy");
+	fprintf(stderr, "Failed to spawn enemy 01");
+	return false;
+}
+
+// Creates a new enemy and if successfull adds it to the list of enemys
+bool World::spawn_enemy_02()
+{
+	Enemy_02 enemy;
+	if (enemy.init(m_points))
+	{
+		m_enemys_02.emplace_back(enemy);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn enemy 02");
 	return false;
 }
 
@@ -482,7 +575,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
 		m_hero.init(screen);
-		m_enemys.clear();
+		m_enemys_01.clear();
+		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		m_water.reset_salmon_dead_time();

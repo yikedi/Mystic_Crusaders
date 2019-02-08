@@ -41,6 +41,7 @@ set(SOURCE_FILES
     src/hero.cpp
     src/enemies.cpp
     src/enemy_01.cpp
+    src/enemy_02.cpp
     src/fireball.cpp
     src/projectile.cpp
     src/enemy_laser.cpp
@@ -55,6 +56,7 @@ set(SOURCE_FILES
     src/hero.hpp
     src/enemies.hpp
     src/enemy_01.hpp
+    src/enemy_02.hpp
     src/fireball.h
     src/projectile.h
     src/enemy_laser.h

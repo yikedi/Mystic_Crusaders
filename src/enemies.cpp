@@ -40,3 +40,17 @@ bool Enemies::checkIfCanChangeDirectionOfMove(clock_t currentClock){
 	}
 	return false;
 }
+
+void Enemies::take_damage(float damage, vec2 direction){
+	hp = hp - 1.f * damage;
+	if (hp <= 0.5f) {
+		m_is_alive = false;
+	}
+	momentum.x = direction.x / 100.f * damage / 10.f * momentum_factor;
+	momentum.y = direction.y / 100.f * damage / 10.f * momentum_factor;
+}
+
+bool Enemies::is_alive()const
+{
+	return m_is_alive;
+}

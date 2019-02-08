@@ -3,6 +3,7 @@
 
 // internal
 #include "enemy_01.hpp"
+#include "enemy_02.hpp"
 #include "fish.hpp"
 
 
@@ -182,7 +183,7 @@ void Hero::draw(const mat3& projection)
 }
 
 // Simple bounding box collision check,
-bool Hero::collides_with(const Enemy_01& enemy)
+bool Hero::collides_with(const Enemy_02& enemy)
 {
 	float dx = m_position.x - enemy.get_position().x;
 	float dy = m_position.y - enemy.get_position().y;
