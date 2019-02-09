@@ -369,7 +369,7 @@ bool World::update(float elapsed_ms)
 		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
-		m_next_enemy1_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS);
+		m_next_enemy1_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
 	}
 	m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
 	if (m_enemys_02.size() <= MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
@@ -391,7 +391,7 @@ bool World::update(float elapsed_ms)
 		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 		// Next spawn
-		m_next_enemy2_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS);
+		m_next_enemy2_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
 	}
 
 
