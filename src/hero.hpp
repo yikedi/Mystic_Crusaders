@@ -3,8 +3,10 @@
 #include "common.hpp"
 #include "projectile.h"
 #include "fireball.h"
+#include "enemy_01.hpp"
+#include "enemy_02.hpp"
 
-class Enemy;
+class Enemy_01;
 class Fish;
 
 class Hero : public Renderable
@@ -37,7 +39,8 @@ public:
 	void draw(const mat3& projection)override;
 
 	// Collision routines for enemys and fish
-	bool collides_with(const Enemy& enemy);
+	bool collides_with(const Enemy_02& enemy);
+	bool collides_with(Projectile &projectile);
 	bool collides_with(const Fish& fish);
 
 	// Returns the current salmon position
@@ -70,6 +73,7 @@ public:
 	void take_damage(float damage);
 	void change_hp(float d_hp);
 	void change_mp(float d_mp);
+	float get_hp();
 	void apply_momentum(vec2 f);
 	void set_speed(vec2 speed);
 	bool shoot_projectiles(std::vector<Fireball> & hero_projectiles);

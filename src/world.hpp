@@ -4,12 +4,14 @@
 #include "common.hpp"
 #include "salmon.hpp"
 #include "turtle.hpp"
-#include "enemy.hpp"
+#include "enemy_01.hpp"
+#include "enemy_02.hpp"
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
 #include "projectile.h"
 #include "fireball.h"
+#include "enemy_laser.h"
 
 // stlib
 #include <vector>
@@ -44,7 +46,8 @@ public:
 
 private:
 	// Generates a new enemy
-	bool spawn_enemy();
+	bool spawn_enemy_01();
+	bool spawn_enemy_02();
 
 	// Generates a new fish
 	bool spawn_fish();
@@ -75,11 +78,14 @@ private:
 
 	// Game entities
 	Hero m_hero;
-	std::vector<Enemy> m_enemys;
+	std::vector<Enemy_01> m_enemys_01;
+	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Fireball> hero_projectiles;
+	std::vector<EnemyLaser> enemy_projectiles;
 
 	float m_current_speed;
-	float m_next_enemy_spawn;
+	float m_next_enemy1_spawn;
+	float m_next_enemy2_spawn;
 	float m_next_fish_spawn;
 
 	Mix_Music* m_background_music;
