@@ -31,7 +31,7 @@ public:
 
     void take_damage(float damage, vec2 direction);
 
-    bool Enemies::is_alive()const;
+    bool is_alive()const;
 
     void set_speed(float speed);
 
