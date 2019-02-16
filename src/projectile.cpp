@@ -26,3 +26,6 @@ void Projectile::update(float ms)
     m_position.y += stepy;
 }
 
+vec2 Projectile::get_velocity() const{
+    return velocity;
+}

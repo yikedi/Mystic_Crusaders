@@ -1,17 +1,17 @@
 // Header
-#include "enemy.hpp"
+#include "enemy_02.hpp"
 
 #include <cmath>
 #include <algorithm>
 
-Texture Enemy::enemy_texture;
+Texture Enemy_02::enemy_texture;
 
-bool Enemy::init()
+bool Enemy_02::init(int level)
 {
 	// Load shared texture
 	if (!enemy_texture.is_valid())
 	{
-		if (!enemy_texture.load_from_file(textures_path("enemy_01.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_02.png")))
 		{
 			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
@@ -59,15 +59,31 @@ bool Enemy::init()
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 1.0f;
-	m_scale.y = 1.0f;
+	m_scale.x = 0.8f;
+	m_scale.y = 0.8f;
+	m_rotation = 0.f;
+	enemyRandMoveAngle = 0.f;
+	randMovementTime = clock();
+	m_is_alive = true;
+
+	float f = (float)rand() / RAND_MAX;
+    float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
+
+	m_speed = std::min(120.0f + (float)level * 1.5f * randAttributeFactor, 300.0f);
+	randMovementCooldown = std::max(800.0 - (double)level * 5.0 * randAttributeFactor, 200.0);
+	hp = 50.f;
+	deceleration = 1.0f;
+	momentum_factor = 1.3f;
+	momentum.x = 0.f;
+	momentum.y = 0.f;
+	m_level = level;
 
 	return true;
 }
 
 // Call if init() was successful
 // Releases all graphics resources
-void Enemy::destroy()
+void Enemy_02::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -79,7 +95,7 @@ void Enemy::destroy()
 }
 
 
-void Enemy::draw(const mat3& projection)
+void Enemy_02::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -87,9 +103,9 @@ void Enemy::draw(const mat3& projection)
 	transform_translate(m_position);
 
 	if(m_face_left_or_right == 1){
-		m_scale.x = -1.0f;
+		m_scale.x = 0.8f;
 	} else {
-		m_scale.x = 1.0f;
+		m_scale.x = -0.8f;
 	}
 
 	transform_scale(m_scale);
@@ -134,27 +150,66 @@ void Enemy::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Enemy::update(float ms, vec2 target_pos)
+void Enemy_02::update(float ms, vec2 target_pos)
 {
+	//momentum first
+	m_position.x += momentum.x;
+	m_position.y += momentum.y;
+
+	if (momentum.x > 0.5f) {
+		momentum.x = std::max(momentum.x - deceleration, 0.f);
+	}
+	if (momentum.x < -0.5f) {
+		momentum.x = std::min(momentum.x + deceleration, 0.f);
+	}
+
+	if (momentum.y > 0.5f) {
+		momentum.y = std::max(momentum.y - deceleration, 0.f);
+	}
+	if (momentum.y < -0.5f) {
+		momentum.y = std::min(momentum.y + deceleration, 0.f);
+	}
+
 	// Move fish along -X based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
-	const float TURTLE_SPEED = 100.f;
-	double del_x =  m_position.x - target_pos.x;
-	double del_y =  m_position.y - target_pos.y;
-	double enemy_angle = atan2(del_y, del_x);
+	float x_diff =  m_position.x - target_pos.x;
+	float y_diff =  m_position.y - target_pos.y;
+	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
+	float enemy_angle = atan2(y_diff, x_diff);
+	float m_speed_rand_LO = m_speed * 0.8f;
+	float m_speed_rand_HI = m_speed * 1.2f;
+	float m_speed_rand = m_speed_rand_LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(m_speed_rand_HI-m_speed_rand_LO)));
+
 	int facing = 1;
-	if (del_x > 0.0) {
+	if (x_diff > 0.0) {
 		facing = 0;
 	}
 	set_facing(facing);
-
-	float step = -TURTLE_SPEED * (ms / 1000);
-	m_position.x += cos(enemy_angle)*step;
-	m_position.y += sin(enemy_angle)*step;
+	set_rotation(enemy_angle);
+	clock_t currentTime = clock();
+	if (distance <= 100.f) {
+		float step = -1.2f * m_speed_rand * (ms / 1000);
+		m_position.x += cos(enemy_angle)*step;
+		m_position.y += sin(enemy_angle)*step;
+	} else if (distance <= 500.f) {
+		float step = -m_speed_rand * (ms / 1000);
+		m_position.x += cos(enemyRandMoveAngle)*step;
+		m_position.y += sin(enemyRandMoveAngle)*step;
+	} else {
+		float step = -m_speed_rand * (ms / 1000);
+		m_position.x += cos(enemy_angle)*step;
+		m_position.y += sin(enemy_angle)*step;
+	}
+	if (checkIfCanChangeDirectionOfMove(currentTime)){
+		float LO = enemy_angle - 1.1f;
+		float HI = enemy_angle + 1.1f;
+		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+		setRandMovementTime(currentTime);
+	}
 }
 
 
-bool Enemy::collide_with(Projectile &projectile)
+bool Enemy_02::collide_with(Projectile &projectile)
 {
 	float dx = m_position.x - projectile.get_position().x;
 	float dy = m_position.y - projectile.get_position().y;
@@ -169,8 +224,7 @@ bool Enemy::collide_with(Projectile &projectile)
 
 }
 
-
-
-void Enemy::attack(){
-
+bool Enemy_02::checkIfCanFire(clock_t currentClock)
+{
+	return false;
 }

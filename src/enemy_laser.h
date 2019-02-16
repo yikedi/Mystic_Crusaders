@@ -2,18 +2,18 @@
 // Created by douglas on 19/1/27.
 //
 
-#ifndef INC_436D_Fireball_H
-#define INC_436D_Fireball_H
+#ifndef INC_436D_Enemy_Laser_H
+#define INC_436D_Enemy_Laser_H
 
 
 #include "projectile.h"
 
-class Fireball: public Projectile
+class EnemyLaser: public Projectile
 {
     static Texture texture;
 
 public :
-    bool init(float radius, float projectileSpeed = 0);
+    bool init(float radius, float projectileSpeed = 300.f);
 
     // Releases all the associated resources
     void destroy();
@@ -28,4 +28,4 @@ public :
 };
 
 
-#endif //INC_436D_Fireball_H
+#endif //INC_436D_Enemy_Laser_H
