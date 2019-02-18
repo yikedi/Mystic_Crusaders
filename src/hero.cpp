@@ -2,7 +2,8 @@
 #include "Hero.hpp"
 
 // internal
-#include "enemy.hpp"
+#include "enemy_01.hpp"
+#include "enemy_02.hpp"
 #include "fish.hpp"
 
 
@@ -182,7 +183,7 @@ void Hero::draw(const mat3& projection)
 }
 
 // Simple bounding box collision check,
-bool Hero::collides_with(const Enemy& enemy)
+bool Hero::collides_with(const Enemy_02& enemy)
 {
 	float dx = m_position.x - enemy.get_position().x;
 	float dy = m_position.y - enemy.get_position().y;
@@ -227,6 +228,21 @@ bool Hero::collides_with(const Enemy& enemy)
     }
 
 	return false;
+}
+
+bool Hero::collides_with(Projectile &projectile)
+{
+	float dx = m_position.x - projectile.get_position().x;
+	float dy = m_position.y - projectile.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+			return true;
+	return false;
+
 }
 
 bool Hero::collides_with(const Fish& fish)
@@ -390,6 +406,11 @@ void Hero::change_mp(float d_mp)
 	mp += d_mp;
 	mp = std::min(mp, max_mp);
 	mp = std::max(0.5f, mp);
+}
+
+float Hero::get_hp()
+{
+	return hp;
 }
 
 bool Hero::shoot_projectiles(std::vector<Fireball> & hero_projectiles)

@@ -39,11 +39,13 @@ set(SOURCE_FILES
 	src/water.cpp
 	src/world.cpp
     src/hero.cpp
-    src/enemy.cpp
     src/enemies.cpp
+    src/enemy_01.cpp
+    src/enemy_02.cpp
     src/fireball.cpp
     src/projectile.cpp
     src/start_screen.cpp
+    src/enemy_laser.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -53,11 +55,14 @@ set(SOURCE_FILES
 	src/water.hpp
 	src/world.hpp
     src/hero.hpp
-    src/enemy.hpp
     src/enemies.hpp
+    src/enemy_01.hpp
+    src/enemy_02.hpp
     src/fireball.h
     src/projectile.h
     src/start_screen.hpp
+    src/enemy_laser.h
+
 
 	)
 

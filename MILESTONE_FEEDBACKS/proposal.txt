@@ -1,0 +1,11 @@
+Team 7 Grade 85
+Grader Edoardo
+-5 General lack of in-depth technical details
+-5 Lacking/unclear more complex geometric feature 
+-5 Lacking/unclear physics component
+
+The proposal is generally complete and the target goals are reasonable, but it still leaves us with a few open questions as well as not being descriptive (technically) enough.
+You mention you plan on using collision detection on meshes but also say that the game will use sprites for all the game elements, how exactly do you plan on satisfying the rendering/geometry requirement?
+The particle system described in the advanced components doesn’t seem to be interactive, just a normal animation that follows the player.
+For the physics requirement rigid body dynamics are mentioned, but which interactions/forces do you plan on modeling specifically ? Also, will everything be considered a point mass or are you planning on setting up more complex entities.
+We also have similar corners regarding the advanced components. The technical details are lacking, how much will the XP/system and skills be in-depth with respect to other game mechanics.

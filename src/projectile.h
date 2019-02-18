@@ -14,7 +14,7 @@ class Projectile: public Renderable
 
 public:
     // Creates all the associated render resources and default transform
-    virtual bool init(float radius) = 0;
+    virtual bool init(float radius, float projectileSpeed) = 0;
 
     // Releases all the associated resources
     virtual void destroy() = 0;
@@ -34,6 +34,8 @@ public:
 
     // Returns the enemy' bounding box for collision detection, called by collides_with()
     virtual vec2 get_bounding_box() const = 0;
+
+    vec2 get_velocity() const;
 
 protected:
     vec2 m_position; // Window coordinates

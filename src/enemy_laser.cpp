@@ -2,19 +2,19 @@
 // Created by douglas on 19/1/27.
 //
 
-#include "fireball.h"
+#include "enemy_laser.h"
 #include <cmath>
 
-Texture Fireball::texture;
+Texture EnemyLaser::texture;
 
-bool Fireball::init(float radius, float projectileSpeed)
+bool EnemyLaser::init(float radius, float projectileSpeed)
 {
     // Load shared texture
     if (!texture.is_valid())
     {
-        if (!texture.load_from_file(textures_path("fireball.png")))
+        if (!texture.load_from_file(textures_path("enemyLaser.png")))
         {
-            fprintf(stderr, "Failed to load fireball texture!");
+            fprintf(stderr, "Failed to load enemy laser texture!");
             return false;
         }
     }
@@ -60,18 +60,17 @@ bool Fireball::init(float radius, float projectileSpeed)
 
     // Setting initial values, scale is negative to make it face the opposite way
     // 1.0 would be as big as the original texture
-    m_scale.x = 0.2f;
-    m_scale.y = -0.2f;
+    m_scale.x = -0.5f;
+    m_scale.y = 0.3f;
     m_rotation = radius;
+    initial_speed = projectileSpeed;
 
-    initial_speed = 400.f;
-
-    velocity.x = initial_speed * cosf(radius);
-    velocity.y = initial_speed * sinf(radius);
+    velocity.x = initial_speed * -cosf(radius);
+    velocity.y = initial_speed * -sinf(radius);
     return true;
 }
 
-void Fireball::destroy()
+void EnemyLaser::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
@@ -82,7 +81,7 @@ void Fireball::destroy()
     glDeleteShader(effect.program);
 }
 
-void Fireball::draw(const mat3 &projection)
+void EnemyLaser::draw(const mat3 &projection)
 {
     // Transformation code, see Rendering and Transformation in the template specification for more info
     // Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -129,10 +128,9 @@ void Fireball::draw(const mat3 &projection)
 
     // Drawing!
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-
 }
 
-vec2 Fireball::get_bounding_box() const
+vec2 EnemyLaser::get_bounding_box() const
 {
     return { std::fabs(m_scale.x) * texture.width, std::fabs(m_scale.y) * texture.height };
 }
