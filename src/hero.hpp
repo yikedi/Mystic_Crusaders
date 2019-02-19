@@ -5,14 +5,17 @@
 #include "fireball.h"
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
+#include "sprite_sheet.hpp"
 
 class Enemy_01;
 class Fish;
 
+enum class HeroMoveState { STANDING, MOVING, ATTACKING };
+
 class Hero : public Renderable
 {
 
-	static Texture hero_texture;
+	static SpriteSheet hero_texture;
 
 public:
 	// Creates all the associated render resources and default transform
@@ -65,6 +68,10 @@ public:
 
 	vec2 get_direction();
 
+    void set_moveState(HeroMoveState state);
+
+    HeroMoveState get_moveState();
+
     bool mesh_collision(vec3 point, std::vector<vec3> &cur_vertices);
     void transform_current_vertex(std::vector<vec3> &cur_vertices);
 	void set_color(vec3 color);
@@ -85,6 +92,10 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
+
+    // animation
+    float m_animTime = 0.0f;
+    HeroMoveState m_moveState = HeroMoveState::STANDING;
 
 	//add salmon speed
 	vec2 m_direction;

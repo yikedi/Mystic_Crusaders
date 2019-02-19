@@ -12,7 +12,7 @@
 #include <string>
 #include <algorithm>
 
-Texture Hero::hero_texture;
+SpriteSheet Hero::hero_texture;
 
 bool Hero::init(vec2 screen)
 {
@@ -20,18 +20,18 @@ bool Hero::init(vec2 screen)
 	//std::vector<uint16_t> indices;
 
 	// Load shared texture
-	if (!hero_texture.is_valid())
+	if (!hero_texture.texture.is_valid())
 	{
-		if (!hero_texture.load_from_file(textures_path("hero.png")))
+		if (!hero_texture.texture.load_from_file(textures_path("hero.png")))
 		{
-			fprintf(stderr, "Failed to load enemy texture!");
+			fprintf(stderr, "Failed to load hero texture!");
 			return false;
 		}
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = hero_texture.width * 0.5f;
-	float hr = hero_texture.height * 0.5f;
+	float wr = hero_texture.texture.width * 0.5f;
+	float hr = hero_texture.texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.01f };
@@ -108,6 +108,10 @@ void Hero::update(float ms)
 {
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
+
+    int tileIndex;
+    int numTiles;
+
 	if (m_is_alive)
 	{
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -115,6 +119,16 @@ void Hero::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		vec2 displacement = {m_direction.x * step, m_direction.y * step};
 		move(displacement);
+        if (m_moveState == HeroMoveState::MOVING) {
+            // load moving sprites
+            tileIndex = 9;
+            numTiles = 4;
+        }
+        else {
+            // load standing sprite
+            tileIndex = 8;
+            numTiles = 1;
+        }
 	}
 	else
 	{
@@ -170,7 +184,7 @@ void Hero::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, hero_texture.id);
+	glBindTexture(GL_TEXTURE_2D, hero_texture.texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -329,6 +343,17 @@ void Hero::set_direction(vec2 direction)
 vec2 Hero::get_direction()
 {
 	return m_direction;
+}
+
+// Animation
+void Hero::set_moveState(HeroMoveState state)
+{
+    m_moveState = state;
+}
+
+HeroMoveState Hero::get_moveState() 
+{
+    return m_moveState;
 }
 
 void Hero::transform_current_vertex(std::vector<vec3> &cur_vertices)
