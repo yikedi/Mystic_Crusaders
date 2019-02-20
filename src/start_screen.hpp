@@ -8,46 +8,29 @@
 
 #include "common.hpp"
 
-class Startscreen
+
+class Startscreen : public Renderable
 {
+	static Texture start_screen;
+
 public:
-	Startscreen();
-	~Startscreen();
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen);
+	bool init(vec2 screen);	//vec2 screen
 
 	// Releases all associated resources
 	void destroy();
 
-	// Renders the water
-	void draw();
-	bool update();
-
-	bool is_over()const;
+	// Renders
+	void draw(const mat3& projection)override;
+	void update(Startscreen s);
+	vec2 set_scale(float w, float h, vec2 screen);
+	bool is_over();
 
 private:
-	// Window handle
-	GLFWwindow* m_window;
-
-	// Screen texture
-	// The draw loop first renders to this texture, then it is used for the water shader
-	GLuint m_frame_buffer;
-	Texture m_screen_tex;
-
-
-	// Number of fish eaten by the salmon, displayed in the window title
-	unsigned int m_points;
-
-	//zoom
-	float zoom_factor;
-
-
-
-	Mix_Music* m_background_music;
-	Mix_Chunk* m_salmon_dead_sound;
-	Mix_Chunk* m_salmon_eat_sound;
-
-	// C++ rng
-	std::default_random_engine m_rng;
-	std::uniform_real_distribution<float> m_dist;
+	vec2 m_position; // Window coordinates
+	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+	float m_rotation;
+	int g_level;
+	bool s_is_over;
+	
 };

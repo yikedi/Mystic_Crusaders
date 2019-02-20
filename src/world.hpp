@@ -12,6 +12,7 @@
 #include "projectile.h"
 #include "fireball.h"
 #include "enemy_laser.h"
+#include "start_screen.hpp"
 
 // stlib
 #include <vector>
@@ -62,6 +63,7 @@ private:
 	// Window handle
 	GLFWwindow* m_window;
 
+	Startscreen start;
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;

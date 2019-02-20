@@ -13,7 +13,6 @@
 using Clock = std::chrono::high_resolution_clock;
 
 // Global 
-//Startscreen start;
 World world;
 const int width = 1200;
 const int height = 800;
@@ -22,14 +21,6 @@ const char* title = "Your Title Here";
 // Entry point
 int main(int argc, char* argv[])
 {
-	// Initializing world (after renderer.init().. sorry)
-	//if (!start.init({ (float)width, (float)height }))
-	//{
-	//	// time to read the error message
-	//	std::cout << "press any key to exit" << std::endl;
-	//	std::cin.get();
-	//	return exit_failure;
-	//}
 
 	if (!world.init({ (float)width, (float)height }))
 	{

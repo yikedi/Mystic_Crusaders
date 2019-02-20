@@ -74,7 +74,6 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	//m_window = Startscreen.get_window();
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
@@ -142,7 +141,13 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
-	return m_hero.init(screen) && m_water.init();
+	if (start.is_over()) {
+		return m_hero.init(screen) && m_water.init();
+	}
+	else {
+		return start.init(screen) && m_water.init();
+	}
+	
 }
 
 // Releases all the associated resources
@@ -404,6 +409,8 @@ bool World::update(float elapsed_ms)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
+		//asd
+		//start.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -488,7 +495,7 @@ void World::draw()
 
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
-
+	start.draw(projection_2D);
 	// Drawing entities
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
@@ -498,8 +505,6 @@ void World::draw()
 		h_proj.draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
-	m_hero.draw(projection_2D);
-
 	m_hero.draw(projection_2D);
 
 	/////////////////////
