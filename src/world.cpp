@@ -214,7 +214,7 @@ bool World::update(float elapsed_ms)
 			++e_proj;
 		}
 
-		if (m_points - previous_point > 5)
+		if (m_points - previous_point > 20)
 		{
 			previous_point = m_points;
 			m_hero.level_up();
