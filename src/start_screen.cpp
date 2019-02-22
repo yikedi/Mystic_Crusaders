@@ -112,12 +112,12 @@ void Startscreen::draw(const mat3& projection) {
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
-void Startscreen::update(Startscreen s) {
-//	int w, h;
-	//glfwGetFramebufferSize(m_window, &w, &h);
-	//vec2 screen = { (float)w, (float)h };
-	if (s.is_over()) {
-		s.destroy();
+void Startscreen::update(bool game_on, bool is_alive) {
+	if (game_on || !is_alive) {
+		s_is_over = false;
+	}
+	else {
+		s_is_over = true;
 	}
 }
 vec2 Startscreen::set_scale(float w, float h, vec2 screen)
@@ -125,10 +125,10 @@ vec2 Startscreen::set_scale(float w, float h, vec2 screen)
 	// temp code, will change after get window is possible
 	float xscale = screen.x / w;
 	float yscale = screen.y / h;
-
+	//return{ 1.f,1.f };
 	return { xscale, yscale };
 }
 bool Startscreen::is_over()
 {
-	return s_is_over; // glfwWindowShouldClose(m_window);
+	return s_is_over; // 
 }

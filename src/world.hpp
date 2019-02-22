@@ -78,6 +78,9 @@ private:
 	//zoom
 	float zoom_factor;
 
+	//start screen
+	bool start_is_over;
+
 	// Game entities
 	Hero m_hero;
 	std::vector<Enemy_01> m_enemys_01;

@@ -141,12 +141,11 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
-	if (start.is_over()) {
-		return m_hero.init(screen) && m_water.init();
-	}
-	else {
-		return start.init(screen) && m_water.init();
-	}
+	start.init(screen);
+	m_water.init();
+	start_is_over = start.is_over();
+	return start.init(screen) && m_water.init();
+	//m_hero.init(screen) && m_water.init();
 	
 }
 
@@ -177,6 +176,7 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
+	start.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -186,220 +186,225 @@ bool World::update(float elapsed_ms)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
+	
+	
+	start.update(start_is_over, m_hero.is_alive());
+	if (start_is_over) {
+		if (m_hero.is_alive()) {
 
-	if (m_hero.is_alive()) {
-
-		// Checking hero - Enemy collisions
-		for (const auto& enemy : m_enemys_02)
-		{
-			if (m_hero.collides_with(enemy))
+			// Checking hero - Enemy collisions
+			for (const auto& enemy : m_enemys_02)
 			{
-				if (!m_hero.is_alive()) {
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-					m_water.set_salmon_dead();
-					m_hero.kill();
+				if (m_hero.collides_with(enemy))
+				{
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+						break;
+					}
+				}
+			}
+
+			// Checking hero - Enemy collisions
+			auto e_proj = enemy_projectiles.begin();
+			while (e_proj != enemy_projectiles.end())
+			{
+				if (m_hero.collides_with(*e_proj))
+				{
+					m_hero.take_damage(10.f);
+					e_proj = enemy_projectiles.erase(e_proj);
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+					}
 					break;
 				}
+				++e_proj;
 			}
 		}
 
-		// Checking hero - Enemy collisions
+
+
+		for (Enemy_01 enemy : m_enemys_01)
+		{
+			if (enemy.needFireProjectile == true)
+			{
+				enemy.shoot_projectiles(enemy_projectiles);
+			}
+		}
+
+
+
+		// Updating all entities, making the enemy and fish
+		// faster based on current
+
+		m_hero.update(elapsed_ms);
+		for (auto& enemy : m_enemys_01)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& enemy : m_enemys_02)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& h_proj : hero_projectiles)
+			h_proj.update(elapsed_ms * m_current_speed);
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.update(elapsed_ms * m_current_speed);
+
+		// Removing out of screen enemys
+		auto enemy_it = m_enemys_01.begin();
+		while (enemy_it != m_enemys_01.end())
+		{
+			float w = enemy_it->get_bounding_box().x / 2;
+			if (enemy_it->get_position().x + w < 0.f)
+			{
+				enemy_it = m_enemys_01.erase(enemy_it);
+				continue;
+			}
+
+			++enemy_it;
+		}
+
+		// Removing out of screen enemys
+		auto enemy_it2 = m_enemys_02.begin();
+		while (enemy_it2 != m_enemys_02.end())
+		{
+			float w = enemy_it2->get_bounding_box().x / 2;
+			if (enemy_it2->get_position().x + w < 0.f)
+			{
+				enemy_it2 = m_enemys_02.erase(enemy_it2);
+				continue;
+			}
+
+			++enemy_it2;
+		}
+
+		//remove out of screen fireball
+		auto h_proj = hero_projectiles.begin();
+		while (h_proj != hero_projectiles.end())
+		{
+			float w = h_proj->get_bounding_box().x / 2;
+			if (h_proj->get_position().x + w < 0.f)
+			{
+				h_proj = hero_projectiles.erase(h_proj);
+				continue;
+			}
+
+			++h_proj;
+		}
+
+		//remove out of screen lasers
 		auto e_proj = enemy_projectiles.begin();
 		while (e_proj != enemy_projectiles.end())
 		{
-			if (m_hero.collides_with(*e_proj))
+			float w = e_proj->get_bounding_box().x / 2;
+			if (e_proj->get_position().x + w < 0.f)
 			{
-				m_hero.take_damage(10.f);
 				e_proj = enemy_projectiles.erase(e_proj);
-				if (!m_hero.is_alive()) {
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-					m_water.set_salmon_dead();
-					m_hero.kill();
-				}
-				break;
+				continue;
 			}
+
 			++e_proj;
 		}
-	}
 
+		auto enemy = m_enemys_01.begin();
 
-
-	for (Enemy_01 enemy : m_enemys_01)
-	{
-		if (enemy.needFireProjectile == true)
+		while (enemy != m_enemys_01.end())
 		{
-			enemy.shoot_projectiles(enemy_projectiles);
-		}
-	}
-
-
-
-	// Updating all entities, making the enemy and fish
-	// faster based on current
-	m_hero.update(elapsed_ms);
-	for (auto& enemy : m_enemys_01)
-		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-	for (auto& enemy : m_enemys_02)
-		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-	for (auto& h_proj : hero_projectiles)
-		h_proj.update(elapsed_ms * m_current_speed);
-	for (auto& e_proj : enemy_projectiles)
-		e_proj.update(elapsed_ms * m_current_speed);
-
-	// Removing out of screen enemys
-	auto enemy_it = m_enemys_01.begin();
-	while (enemy_it != m_enemys_01.end())
-	{
-		float w = enemy_it->get_bounding_box().x / 2;
-		if (enemy_it->get_position().x + w < 0.f)
-		{
-			enemy_it = m_enemys_01.erase(enemy_it);
-			continue;
-		}
-
-		++enemy_it;
-	}
-
-	// Removing out of screen enemys
-	auto enemy_it2 = m_enemys_02.begin();
-	while (enemy_it2 != m_enemys_02.end())
-	{
-		float w = enemy_it2->get_bounding_box().x / 2;
-		if (enemy_it2->get_position().x + w < 0.f)
-		{
-			enemy_it2 = m_enemys_02.erase(enemy_it2);
-			continue;
-		}
-
-		++enemy_it2;
-	}
-
-    //remove out of screen fireball
-	auto h_proj = hero_projectiles.begin();
-	while (h_proj != hero_projectiles.end())
-	{
-		float w = h_proj->get_bounding_box().x / 2;
-		if (h_proj->get_position().x + w < 0.f)
-		{
-			h_proj = hero_projectiles.erase(h_proj);
-			continue;
-		}
-
-		++h_proj;
-	}
-
-	//remove out of screen lasers
-	auto e_proj = enemy_projectiles.begin();
-	while (e_proj != enemy_projectiles.end())
-	{
-		float w = e_proj->get_bounding_box().x / 2;
-		if (e_proj->get_position().x + w < 0.f)
-		{
-			e_proj = enemy_projectiles.erase(e_proj);
-			continue;
-		}
-
-		++e_proj;
-	}
-
-	auto enemy = m_enemys_01.begin();
-
-	while (enemy != m_enemys_01.end())
-	{
-		h_proj = hero_projectiles.begin();
-		while (h_proj != hero_projectiles.end())
-		{
-			if (enemy->collide_with(*h_proj))
+			h_proj = hero_projectiles.begin();
+			while (h_proj != hero_projectiles.end())
 			{
-				enemy->take_damage(20.0f, h_proj->get_velocity());
-				h_proj = hero_projectiles.erase(h_proj);
-				if(!enemy->is_alive()) {
-					enemy = m_enemys_01.erase(enemy);
-					++m_points;
-					MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+				if (enemy->collide_with(*h_proj))
+				{
+					enemy->take_damage(20.0f, h_proj->get_velocity());
+					h_proj = hero_projectiles.erase(h_proj);
+					if (!enemy->is_alive()) {
+						enemy = m_enemys_01.erase(enemy);
+						++m_points;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
 				}
+				++h_proj;
+			}
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
 				break;
 			}
-			++h_proj;
+			++enemy;
 		}
-		if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0){
-			break;
-		}
-		++enemy;
-	}
 
-	auto enemy2 = m_enemys_02.begin();
+		auto enemy2 = m_enemys_02.begin();
 
-	while (enemy2 != m_enemys_02.end())
-	{
-		h_proj = hero_projectiles.begin();
-		while (h_proj != hero_projectiles.end())
+		while (enemy2 != m_enemys_02.end())
 		{
-			if (enemy2->collide_with(*h_proj))
+			h_proj = hero_projectiles.begin();
+			while (h_proj != hero_projectiles.end())
 			{
-				enemy2->take_damage(20.0f, h_proj->get_velocity());
-				h_proj = hero_projectiles.erase(h_proj);
-				if(!enemy2->is_alive()) {
-					enemy2 = m_enemys_02.erase(enemy2);
-					++m_points;
-					MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+				if (enemy2->collide_with(*h_proj))
+				{
+					enemy2->take_damage(20.0f, h_proj->get_velocity());
+					h_proj = hero_projectiles.erase(h_proj);
+					if (!enemy2->is_alive()) {
+						enemy2 = m_enemys_02.erase(enemy2);
+						++m_points;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
 				}
+				++h_proj;
+			}
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
 				break;
 			}
-			++h_proj;
-		}
-		if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0){
-			break;
-		}
-		++enemy2;
-	}
-
-
-
-	// Spawning new enemys
-	m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
-	if (m_enemys_01.size() <= MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
-	{
-		if (!spawn_enemy_01())
-			return false;
-
-		Enemy_01& new_enemy = m_enemys_01.back();
-
-		int left_or_right_spawn = rand() % 2;
-
-		float screen_x = 0;
-
-		if(left_or_right_spawn == 0){
-			screen_x = screen.x + 150.f;
+			++enemy2;
 		}
 
-		// Setting random initial position
-		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
-		// Next spawn
-		m_next_enemy1_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
-	}
-	m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
-	if (m_enemys_02.size() <= MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
-	{
-		if (!spawn_enemy_02())
-			return false;
 
-		Enemy_02& new_enemy = m_enemys_02.back();
+		// Spawning new enemys
+		m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
+		if (m_enemys_01.size() <= MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
+		{
+			if (!spawn_enemy_01())
+				return false;
 
-		int left_or_right_spawn = rand() % 2;
+			Enemy_01& new_enemy = m_enemys_01.back();
 
-		float screen_x = 0;
+			int left_or_right_spawn = rand() % 2;
 
-		if(left_or_right_spawn == 0){
-			screen_x = screen.x + 150.f;
+			float screen_x = 0;
+
+			if (left_or_right_spawn == 0) {
+				screen_x = screen.x + 150.f;
+			}
+
+			// Setting random initial position
+			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+			// Next spawn
+			m_next_enemy1_spawn = (ENEMY_DELAY_MS)+m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 200;
 		}
+		m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
+		if (m_enemys_02.size() <= MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
+		{
+			if (!spawn_enemy_02())
+				return false;
 
-		// Setting random initial position
-		new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+			Enemy_02& new_enemy = m_enemys_02.back();
 
-		// Next spawn
-		m_next_enemy2_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
+			int left_or_right_spawn = rand() % 2;
+
+			float screen_x = 0;
+
+			if (left_or_right_spawn == 0) {
+				screen_x = screen.x + 150.f;
+			}
+
+			// Setting random initial position
+			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+			// Next spawn
+			m_next_enemy2_spawn = (ENEMY_DELAY_MS)+m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 200;
+		}
 	}
 
 
@@ -409,9 +414,8 @@ bool World::update(float elapsed_ms)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
-		//asd
-		//start.init(screen);
 		m_hero.init(screen);
+		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
 		hero_projectiles.clear();
@@ -420,7 +424,12 @@ bool World::update(float elapsed_ms)
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		start_is_over = false;
 	}
+	//if (!m_hero.is_alive() && start_is_over) {
+	//	m_hero.init(screen);
+	//}
+
 
 	return true;
 }
@@ -579,6 +588,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
+		start.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -646,6 +656,13 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			zoom_factor = 1.f;
 		}
 	}
+	else if (key == GLFW_KEY_G && start_is_over == false) {
+		start_is_over = true;
+		start.destroy();
+	}
+	else if (key == GLFW_KEY_H) {
+		//shopping
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -655,18 +672,19 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	float angle = 0.f;
-	vec2 salmon_position = m_hero.get_position();
-	if (xpos - salmon_position.x != 0)
-		angle = atan2((ypos-salmon_position.y),(xpos-salmon_position.x));
+	if (start_is_over) {
+		float angle = 0.f;
+		vec2 salmon_position = m_hero.get_position();
+		if (xpos - salmon_position.x != 0)
+			angle = atan2((ypos - salmon_position.y), (xpos - salmon_position.x));
 
-	m_hero.set_rotation(angle);
-
+		m_hero.set_rotation(angle);
+	}
 }
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over)
 		m_hero.shoot_projectiles(hero_projectiles);
 }
 
