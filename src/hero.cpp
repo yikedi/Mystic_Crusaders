@@ -20,18 +20,32 @@ bool Hero::init(vec2 screen)
 	//std::vector<uint16_t> indices;
 
 	// Load shared texture
-	if (!hero_texture.texture.is_valid())
+	if (!hero_texture.is_valid())
 	{
-		if (!hero_texture.texture.load_from_file(textures_path("hero.png")))
+		if (!hero_texture.load_from_file(textures_path("hero_animation.png")))
 		{
 			fprintf(stderr, "Failed to load hero texture!");
 			return false;
 		}
 	}
 
+    hero_texture.totalTiles = 21; // custom to sprite sheet
+    numTiles = 1;
+    tileIndex = 8;
+    float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
+
+    if (!hero_texture.is_valid())
+    {
+        if (!hero_texture.updateTexture(textures_path("hero_animation.png"), tileIndex))
+        {
+            fprintf(stderr, "Failed to update hero texture!");
+            return false;
+        }
+    }
+
 	// The position corresponds to the center of the texture
-	float wr = hero_texture.texture.width * 0.5f;
-	float hr = hero_texture.texture.height * 0.5f;
+	float wr = tileWidth * 0.5f;
+	float hr = hero_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.01f };
@@ -109,9 +123,6 @@ void Hero::update(float ms)
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
 
-    int tileIndex;
-    int numTiles;
-
 	if (m_is_alive)
 	{
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -184,7 +195,7 @@ void Hero::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, hero_texture.texture.id);
+	glBindTexture(GL_TEXTURE_2D, hero_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);

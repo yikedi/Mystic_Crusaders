@@ -2,11 +2,8 @@
 
 #include "common.hpp"
 
-class SpriteSheet {
-public:
-
-    Texture texture;
-    vec2 dims;
-
-    bool init();
+struct SpriteSheet : public Texture {
+    int totalTiles;
+    bool load_from_file(const char* path);
+    bool updateTexture(const char* path, int index);
 };

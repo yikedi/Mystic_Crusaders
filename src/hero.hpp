@@ -26,6 +26,9 @@ public:
 	float mp;
 	//std::vector<skill> skill_list;
 
+    int numTiles;
+    int tileIndex;
+
 	float m_color[3];
 	bool advanced;
 	vec2 m_screen;
