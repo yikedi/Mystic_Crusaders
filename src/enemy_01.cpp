@@ -237,7 +237,7 @@ bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)
 	float LO = m_rotation - 0.15f * (float) log((m_level/2) + 1);
 	float HI = m_rotation + 0.15f * (float) log((m_level/2) + 1);
 	float fireDir = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
-	if (enemyLaser.init(fireDir, projectileSpeed))
+	if (enemyLaser.init(fireDir, projectileSpeed, 10.0f))
 	{
 		enemyLaser.set_position(m_position);
 		enemy_projectiles.emplace_back(enemyLaser);

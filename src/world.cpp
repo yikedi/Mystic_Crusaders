@@ -37,6 +37,7 @@ namespace
 
 World::World() :
 	m_points(0),
+	previous_point(0),
 	m_next_enemy1_spawn(0.f),
 	m_next_enemy2_spawn(1.f),
 	m_next_fish_spawn(0.f)
@@ -162,7 +163,7 @@ void World::destroy()
 	for (auto& enemy : m_enemys_02)
 		enemy.destroy();
 	for (auto& h_proj : hero_projectiles)
-		h_proj.destroy();
+		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
 	m_enemys_01.clear();
@@ -201,7 +202,7 @@ bool World::update(float elapsed_ms)
 		{
 			if (m_hero.collides_with(*e_proj))
 			{
-				m_hero.take_damage(10.f);
+				m_hero.take_damage(e_proj->get_damage());
 				e_proj = enemy_projectiles.erase(e_proj);
 				if (!m_hero.is_alive()) {
 					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
@@ -211,6 +212,12 @@ bool World::update(float elapsed_ms)
 				break;
 			}
 			++e_proj;
+		}
+
+		if (m_points - previous_point > 5)
+		{
+			previous_point = m_points;
+			m_hero.level_up();
 		}
 	}
 
@@ -225,7 +232,6 @@ bool World::update(float elapsed_ms)
 	}
 
 
-
 	// Updating all entities, making the enemy and fish
 	// faster based on current
 	m_hero.update(elapsed_ms);
@@ -234,7 +240,7 @@ bool World::update(float elapsed_ms)
 	for (auto& enemy : m_enemys_02)
 		enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 	for (auto& h_proj : hero_projectiles)
-		h_proj.update(elapsed_ms * m_current_speed);
+		h_proj->update(elapsed_ms * m_current_speed);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.update(elapsed_ms * m_current_speed);
 
@@ -267,18 +273,31 @@ bool World::update(float elapsed_ms)
 	}
 
     //remove out of screen fireball
-	auto h_proj = hero_projectiles.begin();
-	while (h_proj != hero_projectiles.end())
-	{
-		float w = h_proj->get_bounding_box().x / 2;
+//	Projectile* h_proj = hero_projectiles.front();
+//	while (h_proj != hero_projectiles.back())
+//	{
+//
+//		float w = h_proj->get_bounding_box().x / 2;
+//		if (h_proj->get_position().x + w < 0.f)
+//		{
+//			h_proj = hero_projectiles.erase(h_proj);
+//			continue;
+//		}
+//
+//		++h_proj;
+//	}
+
+    int len = (int) hero_projectiles.size() - 1;
+    for (int i = len; i >= 0; i--)
+    {
+        Projectile* h_proj= hero_projectiles.at(i);
+        float w = h_proj->get_bounding_box().x / 2;
 		if (h_proj->get_position().x + w < 0.f)
 		{
-			h_proj = hero_projectiles.erase(h_proj);
+            hero_projectiles.erase(hero_projectiles.begin() + i);
 			continue;
 		}
-
-		++h_proj;
-	}
+    }
 
 	//remove out of screen lasers
 	auto e_proj = enemy_projectiles.begin();
@@ -298,22 +317,40 @@ bool World::update(float elapsed_ms)
 
 	while (enemy != m_enemys_01.end())
 	{
-		h_proj = hero_projectiles.begin();
-		while (h_proj != hero_projectiles.end())
-		{
-			if (enemy->collide_with(*h_proj))
-			{
-				enemy->take_damage(20.0f, h_proj->get_velocity());
-				h_proj = hero_projectiles.erase(h_proj);
-				if(!enemy->is_alive()) {
+//		h_proj = hero_projectiles.begin();
+//		while (h_proj != hero_projectiles.end())
+//		{
+//			if (enemy->collide_with(*h_proj))
+//			{
+//				enemy->take_damage(20.0f, h_proj->get_velocity());
+//				h_proj = hero_projectiles.erase(h_proj);
+//				if(!enemy->is_alive()) {
+//					enemy = m_enemys_01.erase(enemy);
+//					++m_points;
+//					MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+//				}
+//				break;
+//			}
+//			++h_proj;
+//		}
+        int len = (int) hero_projectiles.size() - 1;
+        for (int i = len; i >= 0; i--)
+        {
+            Projectile* h_proj= hero_projectiles.at(i);
+            if (enemy->collide_with(*h_proj))
+            {
+                enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+                hero_projectiles.erase(hero_projectiles.begin() + i);
+                if(!enemy->is_alive()) {
 					enemy = m_enemys_01.erase(enemy);
 					++m_points;
 					MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
 				}
-				break;
-			}
-			++h_proj;
-		}
+                break;
+            }
+
+        }
+
 		if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0){
 			break;
 		}
@@ -324,28 +361,27 @@ bool World::update(float elapsed_ms)
 
 	while (enemy2 != m_enemys_02.end())
 	{
-		h_proj = hero_projectiles.begin();
-		while (h_proj != hero_projectiles.end())
-		{
-			if (enemy2->collide_with(*h_proj))
-			{
-				enemy2->take_damage(20.0f, h_proj->get_velocity());
-				h_proj = hero_projectiles.erase(h_proj);
-				if(!enemy2->is_alive()) {
-					enemy2 = m_enemys_02.erase(enemy2);
-					++m_points;
-					MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
-				}
-				break;
-			}
-			++h_proj;
-		}
+        int len = (int) hero_projectiles.size() - 1;
+        for (int i = len; i >= 0; i--)
+        {
+            Projectile* h_proj= hero_projectiles.at(i);
+            if (enemy2->collide_with(*h_proj))
+            {
+                enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+                hero_projectiles.erase(hero_projectiles.begin() + i);
+                if(!enemy2->is_alive()) {
+                    enemy2 = m_enemys_02.erase(enemy2);
+                    ++m_points;
+                    MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+                }
+                break;
+            }
+        }
 		if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0){
 			break;
 		}
 		++enemy2;
 	}
-
 
 
 	// Spawning new enemys
@@ -428,7 +464,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp();
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp();
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -495,7 +531,7 @@ void World::draw()
 	for (auto& enemy : m_enemys_02)
 		enemy.draw(projection_2D);
 	for (auto& h_proj : hero_projectiles)
-		h_proj.draw(projection_2D);
+		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
@@ -663,5 +699,8 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		m_hero.shoot_projectiles(hero_projectiles);
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
+
 

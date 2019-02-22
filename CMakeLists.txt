@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/fireball.cpp
     src/projectile.cpp
     src/enemy_laser.cpp
+        src/Ice_arrow.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -60,8 +61,7 @@ set(SOURCE_FILES
     src/fireball.h
     src/projectile.h
     src/enemy_laser.h
-
-	)
+        src/Ice_arrow.h src/Ice_arrow_skill.cpp src/Ice_arrow_skill.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)

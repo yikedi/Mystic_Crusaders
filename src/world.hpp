@@ -72,6 +72,7 @@ private:
 
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
+	unsigned int previous_point;
 
 	//zoom
 	float zoom_factor;
@@ -80,7 +81,7 @@ private:
 	Hero m_hero;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
-	std::vector<Fireball> hero_projectiles;
+	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 
 	float m_current_speed;
