@@ -431,7 +431,7 @@ bool World::update(float elapsed_ms)
 	}
 
 
-	// If salmon is dead, restart the game after the fading animation
+	// If hero is dead, restart the game after the fading animation
 	if (!m_hero.is_alive() &&
 		m_water.get_salmon_dead_time() > 5) {
 		int w, h;

@@ -10,7 +10,7 @@ bool Ice_arrow::init(float radius, float projectileSpeed, float p_damage)
     // Load shared texture
     if (!texture.is_valid())
     {
-        if (!texture.load_from_file(textures_path("Ice_arrow.png")))
+        if (!texture.load_from_file(textures_path("icearrow.png")))
         {
             fprintf(stderr, "Failed to load Ice_arrow texture!");
             return false;
@@ -58,8 +58,8 @@ bool Ice_arrow::init(float radius, float projectileSpeed, float p_damage)
 
     // Setting initial values, scale is negative to make it face the opposite way
     // 1.0 would be as big as the original texture
-    m_scale.x = 0.1f;
-    m_scale.y = -0.1f;
+    m_scale.x = 0.5f;
+    m_scale.y = -0.5f;
     m_rotation = radius;
 
     initial_speed = projectileSpeed;
