@@ -27,7 +27,7 @@ float Ice_arrow_skill::get_mpcost(){return mp_cost;}
 float Ice_arrow_skill::shoot_ice_arrow(std::vector<Projectile *> &hero_projectiles, float radius, vec2 position)
 {
     float d_angle = shoot_range_angle/(num_arrows-1);
-    float start_angle = radius - shoot_range_angle;
+    float start_angle = radius - shoot_range_angle/2.f;
     for (int i= 0; i<num_arrows; i++)
     {
         float current_angle = start_angle + d_angle * i;
@@ -44,9 +44,9 @@ void Ice_arrow_skill::level_up()
     if (level < 4)
     {
         level++;
-        damage += 20;
-        num_arrows += 2;
-        shoot_range_angle += (float) M_PI * 15 /180;
-        mp_cost += 3;
+        damage += 10;
+        num_arrows += 1;
+        shoot_range_angle += (float) M_PI * 7.5 /180;
+        mp_cost += 1;
     }
 }

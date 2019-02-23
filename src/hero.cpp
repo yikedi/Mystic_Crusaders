@@ -118,7 +118,7 @@ void Hero::update(float ms)
 		move(displacement);
         if (mp < max_mp)
         {
-            mp += 0.1;
+            mp += 0.05;
         }
 	}
 	else
