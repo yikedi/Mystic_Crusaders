@@ -189,7 +189,7 @@ bool World::update(float elapsed_ms)
 	vec2 screen = { (float)w, (float)h };
 
 
-	start.update(start_is_over, m_hero.is_alive());
+	start.update(start_is_over);
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
 
@@ -692,7 +692,6 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
 		start_is_over = true;
-		start.destroy();
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping

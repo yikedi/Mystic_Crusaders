@@ -22,7 +22,7 @@ public:
 
 	// Renders
 	void draw(const mat3& projection)override;
-	void update(bool game_on, bool is_alive);		//, int coins
+	void update(bool game_on);		
 	vec2 set_scale(float w, float h, vec2 screen);
 	bool is_over();
 
