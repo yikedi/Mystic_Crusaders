@@ -285,19 +285,6 @@ bool World::update(float elapsed_ms)
 		}
 
 		//remove out of screen fireball
-	//	Projectile* h_proj = hero_projectiles.front();
-	//	while (h_proj != hero_projectiles.back())
-	//	{
-	//
-	//		float w = h_proj->get_bounding_box().x / 2;
-	//		if (h_proj->get_position().x + w < 0.f)
-	//		{
-	//			h_proj = hero_projectiles.erase(h_proj);
-	//			continue;
-	//		}
-	//
-	//		++h_proj;
-	//	}
 
 		int len = (int) hero_projectiles.size() - 1;
 		for (int i = len; i >= 0; i--)
@@ -452,9 +439,6 @@ bool World::update(float elapsed_ms)
 		map.set_is_over(true);
 		start_is_over = false;
 	}
-	//if (!m_hero.is_alive() && start_is_over) {
-	//	m_hero.init(screen);
-	//}
 
 
 	return true;
