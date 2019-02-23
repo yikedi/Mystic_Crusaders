@@ -6,18 +6,20 @@
 #define INC_436D_PROJECTILE_H
 
 #include "common.hpp"
+#include <cmath>
 
 
 class Projectile: public Renderable
 {
-    static Texture projectile_texture;
+    static Texture texture;
 
 public:
     // Creates all the associated render resources and default transform
-    virtual bool init(float radius, float projectileSpeed) = 0;
+
+    virtual bool init(float radius, float projectileSpeed, float damage) = 0;
 
     // Releases all the associated resources
-    virtual void destroy() = 0;
+    virtual void destroy();
 
     // Update enemy due to current
     // ms represents the number of milliseconds elapsed from the previous update() call
@@ -37,12 +39,15 @@ public:
 
     vec2 get_velocity() const;
 
+    float get_damage() const;
+
 protected:
     vec2 m_position; // Window coordinates
     vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
     float m_rotation; // in radians
     vec2 velocity;
     float initial_speed;
+    float damage;
 
 };
 
