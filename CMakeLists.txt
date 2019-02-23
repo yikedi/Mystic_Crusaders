@@ -46,6 +46,8 @@ set(SOURCE_FILES
     src/projectile.cpp
     src/start_screen.cpp
     src/enemy_laser.cpp
+    src/Ice_arrow.cpp
+    src/Ice_arrow_skill.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -62,6 +64,8 @@ set(SOURCE_FILES
     src/projectile.h
     src/start_screen.hpp
     src/enemy_laser.h
+    src/Ice_arrow.h
+    src/Ice_arrow_skill.h
 
 
 	)
