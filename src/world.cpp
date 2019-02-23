@@ -142,8 +142,6 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
-	start.init(screen);
-	m_water.init();
 	start_is_over = start.is_over();
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
@@ -458,6 +456,7 @@ bool World::update(float elapsed_ms)
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		map.set_is_over(true);
 		start_is_over = false;
 	}
 	//if (!m_hero.is_alive() && start_is_over) {
@@ -540,6 +539,7 @@ void World::draw()
 
 	start.draw(projection_2D);
 	// Drawing entities
+	map.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -636,6 +636,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
+		map.set_is_over(true);
 		start_is_over = false;
 	}
 
@@ -691,7 +692,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
+		map.init(screen);
 		start_is_over = true;
+		zoom_factor = 1.1f;
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping

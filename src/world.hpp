@@ -12,6 +12,7 @@
 #include "projectile.h"
 #include "fireball.h"
 #include "enemy_laser.h"
+#include "map_screen.hpp"
 #include "start_screen.hpp"
 
 // stlib
@@ -68,7 +69,7 @@ private:
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
 	Texture m_screen_tex;
-
+	Mapscreen map;
 	// Water effect
 	Water m_water;
 
