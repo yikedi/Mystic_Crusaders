@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/fireball.cpp
     src/projectile.cpp
     src/enemy_laser.cpp
+	src/map_screen.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -60,6 +61,7 @@ set(SOURCE_FILES
     src/fireball.h
     src/projectile.h
     src/enemy_laser.h
+	src/map_screen.hpp
 
 	)
 

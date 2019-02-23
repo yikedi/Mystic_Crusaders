@@ -139,7 +139,14 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
-	return m_hero.init(screen) && m_water.init();
+	//return m_hero.init(screen) && m_water.init();
+	if (map.is_over()) {
+		return m_hero.init(screen) && m_water.init();
+	}
+	else {
+		return map.init(screen) && m_water.init();
+	}
+
 }
 
 // Releases all the associated resources
@@ -490,6 +497,7 @@ void World::draw()
 
 
 	// Drawing entities
+	map.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
