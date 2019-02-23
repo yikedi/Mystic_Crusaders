@@ -44,8 +44,11 @@ set(SOURCE_FILES
     src/enemy_02.cpp
     src/fireball.cpp
     src/projectile.cpp
+    src/start_screen.cpp
     src/enemy_laser.cpp
 	src/map_screen.cpp
+    src/Ice_arrow.cpp
+    src/Ice_arrow_skill.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -60,8 +63,12 @@ set(SOURCE_FILES
     src/enemy_02.hpp
     src/fireball.h
     src/projectile.h
+    src/start_screen.hpp
     src/enemy_laser.h
 	src/map_screen.hpp
+    src/Ice_arrow.h
+    src/Ice_arrow_skill.h
+
 
 	)
 

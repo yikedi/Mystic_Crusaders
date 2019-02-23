@@ -1,4 +1,4 @@
-#include "map_screen.hpp"
+#include "start_screen.hpp"
 
 #include <iostream>
 
@@ -7,12 +7,12 @@
 #include <sstream>
 
 #include <gl3w.h>
-Texture Mapscreen::map_screen;
+Texture Startscreen::start_screen;
 
-bool Mapscreen::init(vec2 screen) {
-	map_screen.load_from_file(textures_path("grass2.png"));
-	float w = map_screen.width;
-	float h = map_screen.height;
+bool Startscreen::init(vec2 screen) {
+	start_screen.load_from_file(textures_path("start.png"));
+	float w = start_screen.width;
+	float h = start_screen.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
 
@@ -51,12 +51,12 @@ bool Mapscreen::init(vec2 screen) {
 		return false;
 	m_scale = set_scale(w, h, screen);
 	m_rotation = 0.f;
-	m_is_over = false;
+	s_is_over = false;
 	m_position = { float(screen.x / 2), float(screen.y / 2) };
 	return true;
 }
 
-void Mapscreen::destroy() {
+void Startscreen::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteBuffers(1, &mesh.vao);
@@ -67,8 +67,8 @@ void Mapscreen::destroy() {
 	//g_level = 1;
 }
 
-void Mapscreen::draw(const mat3& projection) {
-	if (!m_is_over) {
+void Startscreen::draw(const mat3& projection) {
+	if (!s_is_over) {
 		gl_flush_errors();
 
 		transform_begin();
@@ -102,7 +102,7 @@ void Mapscreen::draw(const mat3& projection) {
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, map_screen.id);
+		glBindTexture(GL_TEXTURE_2D, start_screen.id);
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -114,27 +114,23 @@ void Mapscreen::draw(const mat3& projection) {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	}
 }
-void Mapscreen::update(Mapscreen s) {
-	//	int w, h;
-		//glfwGetFramebufferSize(m_window, &w, &h);
-		//vec2 screen = { (float)w, (float)h };
-	if (s.is_over()) {
-		s.destroy();
+void Startscreen::update(bool game_on) {
+	if (game_on) {
+		s_is_over = true;
+	}
+	else {
+		s_is_over = false;
 	}
 }
-vec2 Mapscreen::set_scale(float w, float h, vec2 screen)
+vec2 Startscreen::set_scale(float w, float h, vec2 screen)
 {
 	// temp code, will change after get window is possible
 	float xscale = screen.x / w;
 	float yscale = screen.y / h;
-
+	//return{ 1.f,1.f };
 	return { xscale, yscale };
 }
-bool Mapscreen::is_over()
+bool Startscreen::is_over()
 {
-	return m_is_over; // glfwWindowShouldClose(m_window);
-}
-void Mapscreen::set_is_over(bool over)
-{
-	m_is_over = over;
+	return s_is_over; // 
 }

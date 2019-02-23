@@ -1,0 +1,16 @@
+Team 7
+Grade: 85
+Creative:
++15 Camera centered at the player, allowing zoom in/out.
+
+Issue/Missing:
+-5 The current background is the default blank blue, while the milestone requirement asks for a working background.
+
+Feedback:
+Planning:
+It seems that your team plans to finish most of the art-creation tasks at the beginning, which is reasonable. Just remember that each member needs to contribute to the code. The final grades are going to be adjusted based on individual overall code contribution.
+I checked the plan in your proposal. Compared to the early milestone plans, I noticed that the later milestone plans are relatively vague. Remember to plan along the way and maybe consider 1-2 milestone ahead.
+The progress is also a bit behind the plan. Try starting important parts (play skill system and the corresponding UI) as soon as possible.
+Game:
+You may want to consider more complicated enemy behaviors. I think a genre that fits your game setting is the bullet hell game. You may want to borrow ideas from there.
+You may also want to introduce some simple and predictable mechanics, such as enemies moving in fixed patterns. So the game is slightly easier and thus more friendly to the player.

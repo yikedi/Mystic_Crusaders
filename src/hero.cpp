@@ -86,6 +86,7 @@ bool Hero::init(vec2 screen)
 	max_mp = 100.f;
 	hp = max_hp;
 	mp = max_mp;
+    ice_arrow_skill.init();
 	return true;
 }
 
@@ -115,6 +116,10 @@ void Hero::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		vec2 displacement = {m_direction.x * step, m_direction.y * step};
 		move(displacement);
+        if (mp < max_mp)
+        {
+            mp += 0.05;
+        }
 	}
 	else
 	{
@@ -413,18 +418,35 @@ float Hero::get_hp()
 	return hp;
 }
 
-bool Hero::shoot_projectiles(std::vector<Fireball> & hero_projectiles)
+float Hero::get_mp()
+{
+    return mp;
+}
+
+bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
 	//Fish fish;
-	Fireball fireball;
-	if (fireball.init(m_rotation))
-	{
-		fireball.set_position(m_position);
-		hero_projectiles.emplace_back(fireball);
-		return true;
-	}
-	fprintf(stderr, "Failed to spawn fish");
-	return false;
+	Fireball* fireball = new Fireball(m_rotation, 400.f, 20.0f);
+	fireball->set_position(m_position);
+	hero_projectiles.emplace_back(fireball);
+	return true;
 
+}
+
+bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
+{
+    if (mp > ice_arrow_skill.get_mpcost())
+    {
+        float mp_cost = ice_arrow_skill.shoot_ice_arrow(hero_projectiles,m_rotation,m_position);
+        change_mp(-1 * mp_cost);
+        return true;
+    }
+    return false;
+
+}
+
+void Hero::level_up()
+{
+    ice_arrow_skill.level_up();
 }
 
