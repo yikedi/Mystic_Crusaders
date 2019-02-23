@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <stdlib.h>
 
 SpriteSheet Hero::hero_texture;
 
@@ -19,13 +20,13 @@ bool Hero::init(vec2 screen)
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
     hero_texture.totalTiles = 21; // custom to sprite sheet
+    hero_texture.currIndex = 8;
     numTiles = 1;
-    tileIndex = 8;
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
 	{
-		if (!hero_texture.load_from_file(textures_path("hero_animation.png"), tileIndex))
+		if (!hero_texture.load_from_file(textures_path("hero_animation.png")))
 		{
 			fprintf(stderr, "Failed to load hero texture!");
 			return false;
@@ -130,16 +131,47 @@ void Hero::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		vec2 displacement = {m_direction.x * step, m_direction.y * step};
 		move(displacement);
-        if (m_moveState == HeroMoveState::MOVING) {
+        if (abs(m_direction.x) > 0.0f || abs(m_direction.y) > 0.0f) {
             // load moving sprites
-            tileIndex = 9;
+            float animSpeed = abs(m_direction.x) * 0.025f;
+            hero_texture.currIndex = 9;
             numTiles = 4;
+            if (m_moveState != HeroMoveState::MOVING) {
+                m_moveState = HeroMoveState::MOVING;
+                m_animTime = 0.0f;
+            }
         }
         else {
             // load standing sprite
-            tileIndex = 8;
+            hero_texture.currIndex = 8;
             numTiles = 1;
+            m_moveState = HeroMoveState::STANDING;
         }
+
+        m_animTime += step;
+
+        if (m_moveState == HeroMoveState::MOVING) {
+            hero_texture.currIndex += (int)m_animTime % numTiles;
+        }
+
+        //float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
+
+        //if (!hero_texture.updateTexture(textures_path("hero_animation.png"))) {
+        //    fprintf(stderr, "Failed to update hero texture!");
+        //}
+
+        //float wr = tileWidth * 0.5f;
+        //float hr = hero_texture.height * 0.5f;
+
+        //TexturedVertex vertices[4];
+        //vertices[0].position = { -wr, +hr, -0.01f };
+        //vertices[0].texcoord = { 0.f, 1.f };
+        //vertices[1].position = { +wr, +hr, -0.01f };
+        //vertices[1].texcoord = { 1.f, 1.f, };
+        //vertices[2].position = { +wr, -hr, -0.01f };
+        //vertices[2].texcoord = { 1.f, 0.f };
+        //vertices[3].position = { -wr, -hr, -0.01f };
+        //vertices[3].texcoord = { 0.f, 0.f };
 	}
 	else
 	{
@@ -147,6 +179,8 @@ void Hero::update(float ms)
 		set_rotation(3.1415f);
 		move({ 0.f, step });
 	}
+
+    
 
 	if (m_light_up_countdown_ms > 0.f) {
 		m_light_up_countdown_ms -= ms;
