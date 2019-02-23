@@ -18,30 +18,30 @@ bool Hero::init(vec2 screen)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
+    hero_texture.totalTiles = 21; // custom to sprite sheet
+    numTiles = 1;
+    tileIndex = 8;
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
 	{
-		if (!hero_texture.load_from_file(textures_path("hero_animation.png")))
+		if (!hero_texture.load_from_file(textures_path("hero_animation.png"), tileIndex))
 		{
 			fprintf(stderr, "Failed to load hero texture!");
 			return false;
 		}
 	}
 
-    hero_texture.totalTiles = 21; // custom to sprite sheet
-    numTiles = 1;
-    tileIndex = 8;
     float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
 
-    if (!hero_texture.is_valid())
+    /*if (!hero_texture.is_valid())
     {
         if (!hero_texture.updateTexture(textures_path("hero_animation.png"), tileIndex))
         {
             fprintf(stderr, "Failed to update hero texture!");
             return false;
         }
-    }
+    }*/
 
 	// The position corresponds to the center of the texture
 	float wr = tileWidth * 0.5f;
