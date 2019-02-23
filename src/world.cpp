@@ -212,6 +212,7 @@ bool World::update(float elapsed_ms)
 			if (m_hero.collides_with(*e_proj))
 			{
 				m_hero.take_damage(e_proj->get_damage());
+                e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
 				if (!m_hero.is_alive()) {
 					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
@@ -260,6 +261,7 @@ bool World::update(float elapsed_ms)
 			float w = enemy_it->get_bounding_box().x / 2;
 			if (enemy_it->get_position().x + w < 0.f)
 			{
+                enemy_it->destroy();
 				enemy_it = m_enemys_01.erase(enemy_it);
 				continue;
 			}
@@ -274,6 +276,7 @@ bool World::update(float elapsed_ms)
 			float w = enemy_it2->get_bounding_box().x / 2;
 			if (enemy_it2->get_position().x + w < 0.f)
 			{
+                enemy_it2->destroy();
 				enemy_it2 = m_enemys_02.erase(enemy_it2);
 				continue;
 			}
@@ -303,6 +306,7 @@ bool World::update(float elapsed_ms)
 			float w = h_proj->get_bounding_box().x / 2;
 			if (h_proj->get_position().x + w < 0.f)
 			{
+                h_proj->destroy();
 				hero_projectiles.erase(hero_projectiles.begin() + i);
 				continue;
 			}
@@ -315,6 +319,7 @@ bool World::update(float elapsed_ms)
 			float w = e_proj->get_bounding_box().x / 2;
 			if (e_proj->get_position().x + w < 0.f)
 			{
+                e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
 				continue;
 			}
@@ -326,22 +331,6 @@ bool World::update(float elapsed_ms)
 
 		while (enemy != m_enemys_01.end())
 		{
-	//		h_proj = hero_projectiles.begin();
-	//		while (h_proj != hero_projectiles.end())
-	//		{
-	//			if (enemy->collide_with(*h_proj))
-	//			{
-	//				enemy->take_damage(20.0f, h_proj->get_velocity());
-	//				h_proj = hero_projectiles.erase(h_proj);
-	//				if(!enemy->is_alive()) {
-	//					enemy = m_enemys_01.erase(enemy);
-	//					++m_points;
-	//					MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
-	//				}
-	//				break;
-	//			}
-	//			++h_proj;
-	//		}
 			int len = (int) hero_projectiles.size() - 1;
 			for (int i = len; i >= 0; i--)
 			{
@@ -349,8 +338,10 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*h_proj))
 				{
 					enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+                    h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if(!enemy->is_alive()) {
+                        enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
@@ -377,8 +368,10 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*h_proj))
 				{
 					enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+                    h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if(!enemy2->is_alive()) {
+                        enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
