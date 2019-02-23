@@ -4,6 +4,7 @@
 
 #include "projectile.h"
 #include <cmath>
+#define _USE_MATH_DEFINES
 
 vec2 Projectile::get_position()
 {
