@@ -4,9 +4,11 @@
 
 #ifndef INC_436D_ICE_ARROW_SKILL_H
 #define INC_436D_ICE_ARROW_SKILL_H
+#define _USE_MATH_DEFINES
 
 #include "projectile.h"
 #include <cmath>
+#include <math.h>
 
 class Ice_arrow_skill {
 public:
