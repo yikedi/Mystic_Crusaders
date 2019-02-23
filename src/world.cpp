@@ -694,6 +694,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (key == GLFW_KEY_G && start_is_over == false) {
 		map.init(screen);
 		start_is_over = true;
+		zoom_factor = 1.1f;
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping
