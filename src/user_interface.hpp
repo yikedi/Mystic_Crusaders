@@ -6,7 +6,6 @@
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
 #include "hero.hpp"
-#include "world.hpp"
 
 class Enemy_01;
 class Fish;
@@ -59,7 +58,6 @@ public:
 	void change_mp(float d_mp);
 
 private:
-	World m_world;
 	Hero m_hero;
 	double w;
 	double h;

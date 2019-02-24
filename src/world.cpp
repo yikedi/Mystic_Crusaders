@@ -143,7 +143,7 @@ bool World::init(vec2 screen)
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
-	return start.init(screen) && m_water.init();
+	return start.init(screen) && m_water.init() && m_interface.init(screen);
 	//m_hero.init(screen) && m_water.init();
 
 }
@@ -526,6 +526,9 @@ void World::draw()
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
+
+	// Testing TODO
+	m_interface.draw(projection_2D);
 
 	/////////////////////
 	// Truely render to the screen

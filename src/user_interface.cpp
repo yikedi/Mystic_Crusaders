@@ -32,11 +32,11 @@ bool UserInterface::init(vec2 screen)
 	}
 
 	// The position corresponds to the center of the texture
-	vec2 worldSize = m_world.getScreenSize();
+	vec2 worldSize = screen; // MUST HAVE WORLD SCREEN SIZE PASSED TO IT
 	w = worldSize.x;
 	h = worldSize.y *(double) 0.25; // scale to an appropriate size for our UI
-	double wr = w / (double) 2; // UserInterface_texture.width * 0.5f;
-	double hr = h / (double) 2; // UserInterface_texture.height * 0.5f;
+	float wr = w / (double) 2; // UserInterface_texture.width * 0.5f;
+	float hr = h / (double) 2; // UserInterface_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.01f };
@@ -79,7 +79,7 @@ bool UserInterface::init(vec2 screen)
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	m_is_alive = true;
-	m_position = { (double) 0, h * (double) 3 };
+	m_position = { 0.f, (float) h * 3.f };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
 

@@ -14,6 +14,7 @@
 #include "enemy_laser.h"
 #include "map_screen.hpp"
 #include "start_screen.hpp"
+#include "user_interface.hpp"
 
 // stlib
 #include <vector>
@@ -92,6 +93,7 @@ private:
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	UserInterface m_interface;
 
 	float m_current_speed;
 	float m_next_enemy1_spawn;
