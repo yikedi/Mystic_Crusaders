@@ -703,4 +703,10 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
 
+vec2 World::getScreenSize()
+{
+	int w, h;
+	glfwGetFramebufferSize(m_window, &w, &h);
+	return { (float)w, (float)h };
+}
 
