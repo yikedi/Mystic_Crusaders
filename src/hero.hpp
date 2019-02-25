@@ -6,6 +6,8 @@
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
 #include "sprite_sheet.hpp"
+#include "Ice_arrow_skill.h"
+#include "Ice_arrow.h"
 
 class Enemy_01;
 class Fish;
@@ -86,16 +88,18 @@ public:
 	void change_hp(float d_hp);
 	void change_mp(float d_mp);
 	float get_hp();
+    float get_mp();
 	void apply_momentum(vec2 f);
 	void set_speed(vec2 speed);
-	bool shoot_projectiles(std::vector<Fireball> & hero_projectiles);
-
+	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
+	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
+    void level_up();
+	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 private:
     TexturedVertex texVertices[4];
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates
-	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
 
@@ -106,4 +110,9 @@ private:
 	//add salmon speed
 	vec2 m_direction;
 	int m_light_up;
+    Ice_arrow_skill ice_arrow_skill;
+
+	vec2 momentum;
+    float deceleration;
+    float momentum_factor;
 };

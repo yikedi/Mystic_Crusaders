@@ -73,6 +73,11 @@ bool Hero::init(vec2 screen)
 	max_mp = 100.f;
 	hp = max_hp;
 	mp = max_mp;
+    ice_arrow_skill.init();
+	deceleration = 1.0f;
+	momentum_factor = 1.0f;
+	momentum.x = 0.f;
+	momentum.y = 0.f;
 	return true;
 }
 
@@ -93,6 +98,24 @@ void Hero::destroy()
 // Called on each frame by World::update()
 void Hero::update(float ms)
 {
+	//momentum first
+	m_position.x += momentum.x;
+	m_position.y += momentum.y;
+
+	if (momentum.x > 0.5f) {
+		momentum.x = std::max(momentum.x - deceleration, 0.f);
+	}
+	if (momentum.x < -0.5f) {
+		momentum.x = std::min(momentum.x + deceleration, 0.f);
+	}
+
+	if (momentum.y > 0.5f) {
+		momentum.y = std::max(momentum.y - deceleration, 0.f);
+	}
+	if (momentum.y < -0.5f) {
+		momentum.y = std::min(momentum.y + deceleration, 0.f);
+	}
+
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
     float animSpeed = 0.0f;
@@ -103,6 +126,11 @@ void Hero::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		vec2 displacement = {m_direction.x * step, m_direction.y * step};
 		move(displacement);
+
+        if (mp < max_mp)
+        {
+            mp += 0.05;
+        }
         
         // setting player movement state
         if (m_direction.x > 0.0f && m_direction.y == 0.0f) {
@@ -168,8 +196,7 @@ void Hero::update(float ms)
         else {
             int currIndex = 14;
             setTextureLocs(currIndex);
-        }
-
+        }        
 	}
 	else
 	{
@@ -288,8 +315,7 @@ bool Hero::collides_with(const Enemy_02& enemy)
     else {	// mesh level collision detection
         r *= 1.0f;
         float top,bottom,left,right;
-		// 0.8 is 2*0.4, 0.4 is the scale of enemy, 2 is because I need to devide by 2 to the distance to the center
-		// I need 0.4 because enemy.transform would contain do the scale so I need to scale back before transform
+
 		float scale_back = 2.0f;
         top =  -1.f * enemy.get_bounding_box().y / scale_back;
         bottom =  enemy.get_bounding_box().y / scale_back;
@@ -510,18 +536,41 @@ float Hero::get_hp()
 	return hp;
 }
 
-bool Hero::shoot_projectiles(std::vector<Fireball> & hero_projectiles)
+float Hero::get_mp()
+{
+    return mp;
+}
+
+bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
 	//Fish fish;
-	Fireball fireball;
-	if (fireball.init(m_rotation))
-	{
-		fireball.set_position(m_position);
-		hero_projectiles.emplace_back(fireball);
-		return true;
-	}
-	fprintf(stderr, "Failed to spawn fish");
-	return false;
+	Fireball* fireball = new Fireball(m_rotation, 400.f, 20.0f);
+	fireball->set_position(m_position);
+	hero_projectiles.emplace_back(fireball);
+	return true;
 
+}
+
+bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
+{
+    if (mp > ice_arrow_skill.get_mpcost())
+    {
+        float mp_cost = ice_arrow_skill.shoot_ice_arrow(hero_projectiles,m_rotation,m_position);
+        change_mp(-1 * mp_cost);
+        return true;
+    }
+    return false;
+
+}
+
+void Hero::level_up()
+{
+    ice_arrow_skill.level_up();
+}
+
+void Hero::apply_momentum(vec2 f)
+{
+	momentum.x += f.x;
+	momentum.y += f.y;
 }
 

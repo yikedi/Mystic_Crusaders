@@ -1,20 +1,18 @@
 //
-// Created by douglas on 19/1/27.
+// Created by douglas on 19/2/21.
 //
 
-#include "fireball.h"
+#include "Ice_arrow.h"
+Texture Ice_arrow::texture;
 
-Texture Fireball::texture;
-
-
-bool Fireball::init(float radius, float projectileSpeed, float p_damage)
+bool Ice_arrow::init(float radius, float projectileSpeed, float p_damage)
 {
     // Load shared texture
     if (!texture.is_valid())
     {
-        if (!texture.load_from_file(textures_path("fireball.png")))
+        if (!texture.load_from_file(textures_path("icearrow.png")))
         {
-            fprintf(stderr, "Failed to load fireball texture!");
+            fprintf(stderr, "Failed to load Ice_arrow texture!");
             return false;
         }
     }
@@ -60,8 +58,8 @@ bool Fireball::init(float radius, float projectileSpeed, float p_damage)
 
     // Setting initial values, scale is negative to make it face the opposite way
     // 1.0 would be as big as the original texture
-    m_scale.x = 0.2f;
-    m_scale.y = -0.2f;
+    m_scale.x = 0.5f;
+    m_scale.y = -0.5f;
     m_rotation = radius;
 
     initial_speed = projectileSpeed;
@@ -72,7 +70,7 @@ bool Fireball::init(float radius, float projectileSpeed, float p_damage)
     return true;
 }
 
-void Fireball::draw(const mat3 &projection)
+void Ice_arrow::draw(const mat3 &projection)
 {
     // Transformation code, see Rendering and Transformation in the template specification for more info
     // Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -122,8 +120,7 @@ void Fireball::draw(const mat3 &projection)
 
 }
 
-vec2 Fireball::get_bounding_box() const
+vec2 Ice_arrow::get_bounding_box() const
 {
     return { std::fabs(m_scale.x) * texture.width, std::fabs(m_scale.y) * texture.height };
 }
-

@@ -12,6 +12,8 @@
 #include "projectile.h"
 #include "fireball.h"
 #include "enemy_laser.h"
+#include "map_screen.hpp"
+#include "start_screen.hpp"
 
 // stlib
 #include <vector>
@@ -62,25 +64,30 @@ private:
 	// Window handle
 	GLFWwindow* m_window;
 
+	Startscreen start;
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
 	Texture m_screen_tex;
-
+	Mapscreen map;
 	// Water effect
 	Water m_water;
 
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
+	unsigned int previous_point;
 
 	//zoom
 	float zoom_factor;
+
+	//start screen
+	bool start_is_over;
 
 	// Game entities
 	Hero m_hero;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
-	std::vector<Fireball> hero_projectiles;
+	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 
 	float m_current_speed;
@@ -95,4 +102,7 @@ private:
 	// C++ rng
 	std::default_random_engine m_rng;
 	std::uniform_real_distribution<float> m_dist; // default 0..1
+
+	float m_window_width;
+	float m_window_height;
 };

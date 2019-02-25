@@ -1,6 +1,7 @@
 // internal
 #include "common.hpp"
 #include "world.hpp"
+#include "start_screen.hpp"
 
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
@@ -20,7 +21,7 @@ const char* title = "Your Title Here";
 // Entry point
 int main(int argc, char* argv[])
 {
-	// Initializing world (after renderer.init().. sorry)
+
 	if (!world.init({ (float)width, (float)height }))
 	{
 		// Time to read the error message
