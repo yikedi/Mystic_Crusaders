@@ -228,18 +228,18 @@ bool World::update(float elapsed_ms)
 		}
 
 		if (m_hero.get_position().y > m_window_height - m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, -10.f};
+			vec2 force = {0.f, -20.f};
 			m_hero.apply_momentum(force);
 		} else if (m_hero.get_position().y < m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, 10.f};
+			vec2 force = {0.f, 20.f};
 			m_hero.apply_momentum(force);
 		}
 
 		if (m_hero.get_position().x > m_window_width - m_hero.m_scale.x * 2) {
-			vec2 force = {-10.f, 0.f};
+			vec2 force = {-20.f, 0.f};
 			m_hero.apply_momentum(force);
 		} else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
-			vec2 force = {10.f, 0.f};
+			vec2 force = {20.f, 0.f};
 			m_hero.apply_momentum(force);
 		}
 
@@ -512,18 +512,18 @@ void World::draw()
 	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
 
 	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
-	if (left < 0.f) {
-		left = 0.f;
+	if (left < m_hero.m_scale.x * 2) {
+		left = m_hero.m_scale.x * 2;
 	}
-	else if (left + w_scaled > w_double) {
-		left = w_double - w_scaled;
+	else if (left + w_scaled > w_double - m_hero.m_scale.x * 2) {
+		left = w_double - w_scaled - m_hero.m_scale.x * 2;
 	}
 	top = our_y - (h_scaled / 2); // divided by 2? // and this would be y - 300
-	if (top < 0.f) {
-		top = 0.f;
+	if (top < m_hero.m_scale.y * 2) {
+		top = m_hero.m_scale.y * 2;
 	}
-	else if (top + h_scaled > h_double) {
-		top = h_double - h_scaled;
+	else if (top + h_scaled > h_double - m_hero.m_scale.y * 2) {
+		top = h_double - h_scaled - m_hero.m_scale.y * 2;
 	}
 	right = left + w_scaled;
 	bottom = top + h_scaled;
@@ -531,7 +531,10 @@ void World::draw()
 	float tx = -zoom_factor * (right + left) / (right - left);
 	float ty = -zoom_factor * (top + bottom) / (top - bottom);
 
-	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
+	mat3 scaling_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ 0.f, 0.f, 1.f} };
+	mat3 translate_2D{ { 1.f, 0.f, 0.f },{ 0.f, 1.f, 0.f },{ tx, ty, 1.f} };
+
+	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
 	// Drawing entities
