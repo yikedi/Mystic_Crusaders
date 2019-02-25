@@ -45,7 +45,6 @@ set(SOURCE_FILES
     src/fireball.cpp
     src/projectile.cpp
     src/enemy_laser.cpp
-	src/sprite_sheet.cpp
 
     src/project_path.hpp
 	src/common.hpp
