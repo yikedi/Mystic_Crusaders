@@ -18,11 +18,7 @@ namespace
 	float left = 0.f;
 	float right = 100.f;
 	float top = 0.f;
-	float bottom = 100.f;
-	float left_holder = 0.f;
-	float right_holder = 100.f;
-	float top_holder = 0.f;
-	float bottom_holder = 100.f;
+	float bottom1 = 100.f;	// called bottom1 to avoid ambiguity
 	float our_x = 0.f;
 	float our_y = 0.f;
 	//int stage = 0;
@@ -228,18 +224,18 @@ bool World::update(float elapsed_ms)
 		}
 
 		if (m_hero.get_position().y > m_window_height - m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, -20.f};
+			vec2 force = {0.f, -10.f};
 			m_hero.apply_momentum(force);
 		} else if (m_hero.get_position().y < m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, 20.f};
+			vec2 force = {0.f, 10.f};
 			m_hero.apply_momentum(force);
 		}
 
 		if (m_hero.get_position().x > m_window_width - m_hero.m_scale.x * 2) {
-			vec2 force = {-20.f, 0.f};
+			vec2 force = {-10.f, 0.f};
 			m_hero.apply_momentum(force);
 		} else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
-			vec2 force = {20.f, 0.f};
+			vec2 force = {10.f, 0.f};
 			m_hero.apply_momentum(force);
 		}
 
@@ -499,37 +495,37 @@ void World::draw()
 	//float bottom = (float)h;// *0.5;
 
 	float sx = zoom_factor * 2.f / (right - left);
-	float sy = zoom_factor * 2.f / (top - bottom);
+	float sy = zoom_factor * 2.f / (top - bottom1);	// named "bottom1" now because compiler complained about ambiguity
 
 	vec2 salmon_position = m_hero.get_position(); //get the hero position
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
 
-	float w_scaled = (float)w / zoom_factor;
-	float h_scaled = (float)h / zoom_factor;
-	float w_double = (float)w;
-	float h_double = (float)h;
-	left = our_x - (w_scaled / 2); // divided by 2? // in your case this would be x - 400
+	float w_not_scaled = (float)w;
+	float h_not_scaled = (float)h;
+	float w_scaled = (float)w*zoom_factor;
+	float h_scaled = (float)h*zoom_factor;
+	left = our_x*zoom_factor - (w_not_scaled / 2); // divided by 2? // in your case this would be x - 400
 
 	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
 	if (left < m_hero.m_scale.x * 2) {
 		left = m_hero.m_scale.x * 2;
 	}
-	else if (left + w_scaled > w_double - m_hero.m_scale.x * 2) {
-		left = w_double - w_scaled - m_hero.m_scale.x * 2;
+	else if (left + w_not_scaled > w_scaled - m_hero.m_scale.x * 2) {
+		left = w_scaled - w_not_scaled - m_hero.m_scale.x * 2;
 	}
-	top = our_y - (h_scaled / 2); // divided by 2? // and this would be y - 300
-	if (top < m_hero.m_scale.y * 2) {
-		top = m_hero.m_scale.y * 2;
+	top = our_y*zoom_factor - (h_not_scaled / 2); // divided by 2? // and this would be y - 300
+	if (top < m_hero.m_scale.y * 2 * zoom_factor) {
+		top = m_hero.m_scale.y * 2 * zoom_factor;
 	}
-	else if (top + h_scaled > h_double - m_hero.m_scale.y * 2) {
-		top = h_double - h_scaled - m_hero.m_scale.y * 2;
+	else if (top + h_not_scaled > h_scaled - m_hero.m_scale.y * 2) {
+		top = h_scaled - h_not_scaled - m_hero.m_scale.y * 2;
 	}
-	right = left + w_scaled;
-	bottom = top + h_scaled;
+	right = left + w_not_scaled;
+	bottom1 = top + h_not_scaled;
 
-	float tx = -zoom_factor * (right + left) / (right - left);
-	float ty = -zoom_factor * (top + bottom) / (top - bottom);
+	float tx = -1 * (right + left) / (right - left);
+	float ty = -1 * (top + bottom1) / (top - bottom1);
 
 	mat3 scaling_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ 0.f, 0.f, 1.f} };
 	mat3 translate_2D{ { 1.f, 0.f, 0.f },{ 0.f, 1.f, 0.f },{ tx, ty, 1.f} };
@@ -632,7 +628,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		left = 0.f;// *-0.5;
 		top = 0.f;// (float)h * -0.5;
 		right = (float)w;// *0.5;
-		bottom = (float)h;// *0.5;
+		bottom1 = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
 		map.set_is_over(true);
