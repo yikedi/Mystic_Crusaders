@@ -26,8 +26,7 @@ public:
 	float mp;
 	//std::vector<skill> skill_list;
 
-    int numTiles;
-    int tileIndex;
+    int numTiles = 1;
 
 	float m_color[3];
 	bool advanced;
@@ -51,6 +50,9 @@ public:
 
 	// Returns the current salmon position
 	vec2 get_position()const;
+
+    // set Texture locations
+    void setTextureLocs(int index);
 
 	// Moves the salmon's position by the specified offset
 	void move(vec2 off);
@@ -89,6 +91,7 @@ public:
 	bool shoot_projectiles(std::vector<Fireball> & hero_projectiles);
 
 private:
+    TexturedVertex texVertices[4];
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates

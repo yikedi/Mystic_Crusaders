@@ -20,8 +20,7 @@ bool Hero::init(vec2 screen)
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
     hero_texture.totalTiles = 21; // custom to sprite sheet
-    hero_texture.currIndex = 8;
-    numTiles = 1;
+    hero_texture.subWidth = 64;
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
@@ -35,45 +34,18 @@ bool Hero::init(vec2 screen)
 
     float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
 
-    /*if (!hero_texture.is_valid())
-    {
-        if (!hero_texture.updateTexture(textures_path("hero_animation.png"), tileIndex))
-        {
-            fprintf(stderr, "Failed to update hero texture!");
-            return false;
-        }
-    }*/
-
 	// The position corresponds to the center of the texture
 	float wr = tileWidth * 0.5f;
 	float hr = hero_texture.height * 0.5f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.01f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.01f };
-	vertices[1].texcoord = { 1.f, 1.f,  };
-	vertices[2].position = { +wr, -hr, -0.01f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.01f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.01f };
+    texVertices[1].position = { +wr, +hr, -0.01f };
+	texVertices[2].position = { +wr, -hr, -0.01f };
+	texVertices[3].position = { -wr, -hr, -0.01f };
 
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
-
-	// Clearing errors
-	gl_flush_errors();
-
-	// Vertex Buffer creation
-	glGenBuffers(1, &mesh.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
-	glGenBuffers(1, &mesh.ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
-
+    glGenBuffers(1, &mesh.vbo);
+    glGenBuffers(1, &mesh.ibo);
+    setTextureLocs(8);
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -90,7 +62,7 @@ bool Hero::init(vec2 screen)
 	m_position = { screen.x/2, screen.y/2 };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
-
+    
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 	set_color({1.0f,1.0f,1.0f});
@@ -123,7 +95,6 @@ void Hero::update(float ms)
 {
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
-
 	if (m_is_alive)
 	{
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -134,8 +105,6 @@ void Hero::update(float ms)
         if (abs(m_direction.x) > 0.0f || abs(m_direction.y) > 0.0f) {
             // load moving sprites
             float animSpeed = abs(m_direction.x) * 0.025f;
-            hero_texture.currIndex = 9;
-            numTiles = 4;
             if (m_moveState != HeroMoveState::MOVING) {
                 m_moveState = HeroMoveState::MOVING;
                 m_animTime = 0.0f;
@@ -143,39 +112,42 @@ void Hero::update(float ms)
         }
         else {
             // load standing sprite
-            hero_texture.currIndex = 8;
-            numTiles = 1;
             m_moveState = HeroMoveState::STANDING;
+            setTextureLocs(8);
         }
 
-        m_animTime += step;
-
+        m_animTime += step * 2;
+        
         if (m_moveState == HeroMoveState::MOVING) {
-            hero_texture.currIndex += (int)m_animTime % numTiles;
+            int currIndex = 9;
+            numTiles = 4;
+            currIndex += (int)m_animTime % numTiles;
+            setTextureLocs(currIndex);
         }
 
-        //float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
+        /*float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
 
-        //if (!hero_texture.updateTexture(textures_path("hero_animation.png"))) {
-        //    fprintf(stderr, "Failed to update hero texture!");
-        //}
+        if (!hero_texture.load_from_file(textures_path("hero_animation.png"))) {
+            fprintf(stderr, "Failed to update hero texture!");
+        }
 
-        //float wr = tileWidth * 0.5f;
-        //float hr = hero_texture.height * 0.5f;
+        float wr = tileWidth * 0.5f;
+        float hr = hero_texture.height * 0.5f;
 
-        //TexturedVertex vertices[4];
-        //vertices[0].position = { -wr, +hr, -0.01f };
-        //vertices[0].texcoord = { 0.f, 1.f };
-        //vertices[1].position = { +wr, +hr, -0.01f };
-        //vertices[1].texcoord = { 1.f, 1.f, };
-        //vertices[2].position = { +wr, -hr, -0.01f };
-        //vertices[2].texcoord = { 1.f, 0.f };
-        //vertices[3].position = { -wr, -hr, -0.01f };
-        //vertices[3].texcoord = { 0.f, 0.f };
+        TexturedVertex vertices[4];
+        vertices[0].position = { -wr, +hr, -0.01f };
+        vertices[0].texcoord = { 0.f, 1.f };
+        vertices[1].position = { +wr, +hr, -0.01f };
+        vertices[1].texcoord = { 1.f, 1.f, };
+        vertices[2].position = { +wr, -hr, -0.01f };
+        vertices[2].texcoord = { 1.f, 0.f };
+        vertices[3].position = { -wr, -hr, -0.01f };
+        vertices[3].texcoord = { 0.f, 0.f };*/
 	}
 	else
 	{
 		// If dead we make it face upwards and sink deep down
+        setTextureLocs(8);
 		set_rotation(3.1415f);
 		move({ 0.f, step });
 	}
@@ -190,6 +162,34 @@ void Hero::update(float ms)
 		m_light_up = 0;
 
 
+}
+
+void Hero::setTextureLocs(int index) {
+    std::vector<float> texture_locs;
+    for (int i = 0; i <= hero_texture.totalTiles; i++) {
+        texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
+    }
+
+    texVertices[0].texcoord = { texture_locs[index], 1.f };//top left
+    texVertices[1].texcoord = { texture_locs[index + 1], 1.f };//top right
+    texVertices[2].texcoord = { texture_locs[index + 1], 0.f };//bottom right
+    texVertices[3].texcoord = { texture_locs[index], 0.f };//bottom left
+    
+    // counterclockwise as it's the default opengl front winding direction
+    uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+    // Clearing errors
+    gl_flush_errors();
+
+    // Vertex Buffer creation
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+    // Index Buffer creation
+    glGenBuffers(1, &mesh.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
 void Hero::draw(const mat3& projection)
