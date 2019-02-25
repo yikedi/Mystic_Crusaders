@@ -143,6 +143,8 @@ bool World::init(vec2 screen)
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
+	m_window_width = screen.x;
+	m_window_height = screen.y;
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -222,6 +224,22 @@ bool World::update(float elapsed_ms)
 				break;
 			}
 			++e_proj;
+		}
+
+		if (m_hero.get_position().y > m_window_height - m_hero.m_scale.y * 2) {
+			vec2 force = {0.f, -10.f};
+			m_hero.apply_momentum(force);
+		} else if (m_hero.get_position().y < m_hero.m_scale.y * 2) {
+			vec2 force = {0.f, 10.f};
+			m_hero.apply_momentum(force);
+		}
+
+		if (m_hero.get_position().x > m_window_width - m_hero.m_scale.x * 2) {
+			vec2 force = {-10.f, 0.f};
+			m_hero.apply_momentum(force);
+		} else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
+			vec2 force = {10.f, 0.f};
+			m_hero.apply_momentum(force);
 		}
 
 		if (m_points - previous_point > 20)
