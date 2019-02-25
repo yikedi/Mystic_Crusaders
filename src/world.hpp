@@ -102,4 +102,7 @@ private:
 	// C++ rng
 	std::default_random_engine m_rng;
 	std::uniform_real_distribution<float> m_dist; // default 0..1
+
+	float m_window_width;
+	float m_window_height;
 };

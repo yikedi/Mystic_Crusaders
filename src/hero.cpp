@@ -87,6 +87,10 @@ bool Hero::init(vec2 screen)
 	hp = max_hp;
 	mp = max_mp;
     ice_arrow_skill.init();
+	deceleration = 1.0f;
+	momentum_factor = 1.0f;
+	momentum.x = 0.f;
+	momentum.y = 0.f;
 	return true;
 }
 
@@ -107,6 +111,24 @@ void Hero::destroy()
 // Called on each frame by World::update()
 void Hero::update(float ms)
 {
+	//momentum first
+	m_position.x += momentum.x;
+	m_position.y += momentum.y;
+
+	if (momentum.x > 0.5f) {
+		momentum.x = std::max(momentum.x - deceleration, 0.f);
+	}
+	if (momentum.x < -0.5f) {
+		momentum.x = std::min(momentum.x + deceleration, 0.f);
+	}
+
+	if (momentum.y > 0.5f) {
+		momentum.y = std::max(momentum.y - deceleration, 0.f);
+	}
+	if (momentum.y < -0.5f) {
+		momentum.y = std::min(momentum.y + deceleration, 0.f);
+	}
+
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
 	if (m_is_alive)
@@ -447,5 +469,11 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 void Hero::level_up()
 {
     ice_arrow_skill.level_up();
+}
+
+void Hero::apply_momentum(vec2 f)
+{
+	momentum.x += f.x;
+	momentum.y += f.y;
 }
 

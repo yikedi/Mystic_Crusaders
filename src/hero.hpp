@@ -82,11 +82,11 @@ public:
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void level_up();
+	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 private:
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates
-	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
 
@@ -94,4 +94,8 @@ private:
 	vec2 m_direction;
 	int m_light_up;
     Ice_arrow_skill ice_arrow_skill;
+
+	vec2 momentum;
+    float deceleration;
+    float momentum_factor;
 };
