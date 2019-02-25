@@ -79,7 +79,7 @@ bool UserInterface::init(vec2 screen)
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	m_is_alive = true;
-	m_position = { 0.f, (float) h * 3.f };
+	m_position = { (float) w / 2.f, (float) h * 3.5f };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
 
