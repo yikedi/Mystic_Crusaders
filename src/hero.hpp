@@ -5,16 +5,19 @@
 #include "fireball.h"
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
+#include "sprite_sheet.hpp"
 #include "Ice_arrow_skill.h"
 #include "Ice_arrow.h"
 
 class Enemy_01;
 class Fish;
 
+enum class HeroMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
+
 class Hero : public Renderable
 {
 
-	static Texture hero_texture;
+	static SpriteSheet hero_texture;
 
 public:
 	// Creates all the associated render resources and default transform
@@ -24,6 +27,8 @@ public:
 	float hp;
 	float mp;
 	//std::vector<skill> skill_list;
+
+    int numTiles = 1;
 
 	float m_color[3];
 	bool advanced;
@@ -48,6 +53,9 @@ public:
 	// Returns the current salmon position
 	vec2 get_position()const;
 
+    // set Texture locations
+    void setTextureLocs(int index);
+
 	// Moves the salmon's position by the specified offset
 	void move(vec2 off);
 
@@ -67,6 +75,10 @@ public:
 
 	vec2 get_direction();
 
+    void set_moveState(HeroMoveState state);
+
+    HeroMoveState get_moveState();
+
     bool mesh_collision(vec3 point, std::vector<vec3> &cur_vertices);
     void transform_current_vertex(std::vector<vec3> &cur_vertices);
 	void set_color(vec3 color);
@@ -82,16 +94,25 @@ public:
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void level_up();
+	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 private:
+    TexturedVertex texVertices[4];
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates
-	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
+
+    // animation
+    float m_animTime = 0.0f;
+    HeroMoveState m_moveState = HeroMoveState::STANDING;
 
 	//add salmon speed
 	vec2 m_direction;
 	int m_light_up;
     Ice_arrow_skill ice_arrow_skill;
+
+	vec2 momentum;
+    float deceleration;
+    float momentum_factor;
 };

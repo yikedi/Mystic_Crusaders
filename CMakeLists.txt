@@ -69,11 +69,10 @@ set(SOURCE_FILES
     src/screen_manager.hpp
     src/user_interface.hpp
     src/enemy_laser.h
+	src/sprite_sheet.hpp
 	src/map_screen.hpp
     src/Ice_arrow.h
     src/Ice_arrow_skill.h
-
-
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
