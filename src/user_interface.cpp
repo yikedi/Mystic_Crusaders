@@ -111,20 +111,12 @@ void UserInterface::destroy()
 }
 
 // Called on each frame by World::update()
-void UserInterface::update(float ms)
+void UserInterface::update(vec2 position)
 {
 	hp = m_hero.get_hp();
 	mp = 80.f;
 	// mp = m_hero.get_mp(); later when we merge
 
-
-
-	if (m_light_up_countdown_ms > 0.f) {
-		m_light_up_countdown_ms -= ms;
-		m_light_up = 1;
-	}
-	else
-		m_light_up = 0;
 
 
 }

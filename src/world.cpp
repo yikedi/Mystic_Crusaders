@@ -280,7 +280,7 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
-
+		m_interface.update({ screen_left, screen_top });
 		// Removing out of screen enemys
 		auto enemy_it = m_enemys_01.begin();
 		while (enemy_it != m_enemys_01.end())

@@ -34,7 +34,7 @@ public:
 
 	// Update salmon position based on direction
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	void update(float ms);
+	void update(vec2 position);
 
 	// Renders the salmon
 	void draw(const mat3& projection)override;
