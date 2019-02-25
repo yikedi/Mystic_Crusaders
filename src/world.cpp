@@ -15,10 +15,10 @@ namespace
 	size_t MAX_ENEMIES_01 = INIT_MAX_ENEMIES;
 	size_t MAX_ENEMIES_02 = INIT_MAX_ENEMIES;
 	const size_t ENEMY_DELAY_MS = 2000;
-	float left = 0.f;
-	float right = 100.f;
-	float top = 0.f;
-	float bottom1 = 100.f;	// called bottom1 to avoid ambiguity
+	float screen_left = 0.f;
+	float screen_right = 100.f;
+	float screen_top = 0.f;
+	float screen_bottom = 100.f;	// called screen_bottom to avoid ambiguity
 	float our_x = 0.f;
 	float our_y = 0.f;
 	//int stage = 0;
@@ -489,13 +489,13 @@ void World::draw()
 
 	// Fake projection matrix, scales with respect to window coordinates
 	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	//float left = 0.f;// *-0.5;
-	//float top = 0.f;// (float)h * -0.5;
-	//float right = (float)w;// *0.5;
+	//float screen_left = 0.f;// *-0.5;
+	//float screen_top = 0.f;// (float)h * -0.5;
+	//float screen_right = (float)w;// *0.5;
 	//float bottom = (float)h;// *0.5;
 
-	float sx = zoom_factor * 2.f / (right - left);
-	float sy = zoom_factor * 2.f / (top - bottom1);	// named "bottom1" now because compiler complained about ambiguity
+	float sx = zoom_factor * 2.f / (screen_right - screen_left);
+	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	// named "screen_bottom" now because compiler complained about ambiguity
 
 	vec2 salmon_position = m_hero.get_position(); //get the hero position
 	our_x = salmon_position.x;
@@ -503,29 +503,29 @@ void World::draw()
 
 	float w_not_scaled = (float)w;
 	float h_not_scaled = (float)h;
-	float w_scaled = (float)w*zoom_factor;
-	float h_scaled = (float)h*zoom_factor;
-	left = our_x*zoom_factor - (w_not_scaled / 2); // divided by 2? // in your case this would be x - 400
+	float w_scaled = (float)w * zoom_factor;
+	float h_scaled = (float)h * zoom_factor;
+	screen_left = our_x * zoom_factor - (w_not_scaled / 2); // divided by 2? // in your case this would be x - 400
 
 	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
-	if (left < m_hero.m_scale.x * 2) {
-		left = m_hero.m_scale.x * 2;
+	if (screen_left < m_hero.m_scale.x * 2) {
+		screen_left = m_hero.m_scale.x * 2;
 	}
-	else if (left + w_not_scaled > w_scaled - m_hero.m_scale.x * 2) {
-		left = w_scaled - w_not_scaled - m_hero.m_scale.x * 2;
+	else if (screen_left + w_not_scaled > w_scaled - m_hero.m_scale.x * 2) {
+		screen_left = w_scaled - w_not_scaled - m_hero.m_scale.x * 2;
 	}
-	top = our_y*zoom_factor - (h_not_scaled / 2); // divided by 2? // and this would be y - 300
-	if (top < m_hero.m_scale.y * 2 * zoom_factor) {
-		top = m_hero.m_scale.y * 2 * zoom_factor;
+	screen_top = our_y * zoom_factor - (h_not_scaled / 2); // divided by 2? // and this would be y - 300
+	if (screen_top < m_hero.m_scale.y * 2 * zoom_factor) {
+		screen_top = m_hero.m_scale.y * 2 * zoom_factor;
 	}
-	else if (top + h_not_scaled > h_scaled - m_hero.m_scale.y * 2) {
-		top = h_scaled - h_not_scaled - m_hero.m_scale.y * 2;
+	else if (screen_top + h_not_scaled > h_scaled - m_hero.m_scale.y * 2) {
+		screen_top = h_scaled - h_not_scaled - m_hero.m_scale.y * 2;
 	}
-	right = left + w_not_scaled;
-	bottom1 = top + h_not_scaled;
+	screen_right = screen_left + w_not_scaled;
+	screen_bottom = screen_top + h_not_scaled;
 
-	float tx = -1 * (right + left) / (right - left);
-	float ty = -1 * (top + bottom1) / (top - bottom1);
+	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
+	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
 
 	mat3 scaling_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ 0.f, 0.f, 1.f} };
 	mat3 translate_2D{ { 1.f, 0.f, 0.f },{ 0.f, 1.f, 0.f },{ tx, ty, 1.f} };
@@ -625,10 +625,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		enemy_projectiles.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
-		left = 0.f;// *-0.5;
-		top = 0.f;// (float)h * -0.5;
-		right = (float)w;// *0.5;
-		bottom1 = (float)h;// *0.5;
+		screen_left = 0.f;// *-0.5;
+		screen_top = 0.f;// (float)h * -0.5;
+		screen_right = (float)w;// *0.5;
+		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
 		map.set_is_over(true);
