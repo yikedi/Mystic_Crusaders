@@ -19,8 +19,8 @@ bool Hero::init(vec2 screen)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
-    hero_texture.totalTiles = 21; // custom to sprite sheet
-    hero_texture.subWidth = 64;
+    hero_texture.totalTiles = 21; // custom to current sprite sheet
+    hero_texture.subWidth = 64; // custom to current sprite sheet
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
@@ -45,7 +45,7 @@ bool Hero::init(vec2 screen)
 
     glGenBuffers(1, &mesh.vbo);
     glGenBuffers(1, &mesh.ibo);
-    setTextureLocs(8);
+    setTextureLocs(14);
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -95,6 +95,7 @@ void Hero::update(float ms)
 {
 	const float SALMON_SPEED = 200.f;
 	float step = SALMON_SPEED * (ms / 1000);
+    float animSpeed = 0.0f;
 	if (m_is_alive)
 	{
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -102,52 +103,78 @@ void Hero::update(float ms)
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		vec2 displacement = {m_direction.x * step, m_direction.y * step};
 		move(displacement);
-        if (abs(m_direction.x) > 0.0f || abs(m_direction.y) > 0.0f) {
-            // load moving sprites
-            float animSpeed = abs(m_direction.x) * 0.025f;
-            if (m_moveState != HeroMoveState::MOVING) {
-                m_moveState = HeroMoveState::MOVING;
+        
+        // setting player movement state
+        if (m_direction.x > 0.0f && m_direction.y == 0.0f) {
+            animSpeed = abs(m_direction.x) * 0.025f;
+            if (m_moveState != HeroMoveState::RIGHTMOVING) {
+                m_moveState = HeroMoveState::RIGHTMOVING;
+                m_animTime = 0.0f;
+            }
+        }
+        else if (m_direction.x < 0.0f && m_direction.y == 0.0f){
+            animSpeed = abs(m_direction.x) * 0.025f;
+            if (m_moveState != HeroMoveState::LEFTMOVING) {
+                m_moveState = HeroMoveState::LEFTMOVING;
+                m_animTime = 0.0f;
+            }
+        }
+        else if (m_direction.y > 0.0f) {
+            animSpeed = abs(m_direction.y) * 0.025f;
+            if (m_moveState != HeroMoveState::FRONTMOVING) {
+                m_moveState = HeroMoveState::FRONTMOVING;
+                m_animTime = 0.0f;
+            }
+        }
+        else if (m_direction.y < 0.0f) {
+            animSpeed = abs(m_direction.y) * 0.025f;
+            if (m_moveState != HeroMoveState::BACKMOVING) {
+                m_moveState = HeroMoveState::BACKMOVING;
                 m_animTime = 0.0f;
             }
         }
         else {
             // load standing sprite
             m_moveState = HeroMoveState::STANDING;
-            setTextureLocs(8);
+            m_animTime = 0.0f;
         }
-
-        m_animTime += step * 2;
+        m_animTime += animSpeed * 2;
         
-        if (m_moveState == HeroMoveState::MOVING) {
-            int currIndex = 9;
+        // setting texture coordinates
+        if (m_moveState == HeroMoveState::LEFTMOVING) {
+            int currIndex = 15;
+            numTiles = 6;
+            currIndex += (int)m_animTime % numTiles;
+            setTextureLocs(currIndex);
+        }
+        else if (m_moveState == HeroMoveState::RIGHTMOVING) {
+            int currIndex = 8;
+            numTiles = 5;
+            currIndex += (int)m_animTime % numTiles;
+            setTextureLocs(currIndex);
+        }
+        else if (m_moveState == HeroMoveState::FRONTMOVING) {
+            int currIndex = 0;
             numTiles = 4;
             currIndex += (int)m_animTime % numTiles;
             setTextureLocs(currIndex);
         }
-
-        /*float tileWidth = (float)hero_texture.width / hero_texture.totalTiles;
-
-        if (!hero_texture.load_from_file(textures_path("hero_animation.png"))) {
-            fprintf(stderr, "Failed to update hero texture!");
+        else if (m_moveState == HeroMoveState::BACKMOVING) {
+            int currIndex = 4;
+            numTiles = 4;
+            currIndex += (int)m_animTime % numTiles;
+            setTextureLocs(currIndex);
+        }
+        else {
+            int currIndex = 14;
+            setTextureLocs(currIndex);
         }
 
-        float wr = tileWidth * 0.5f;
-        float hr = hero_texture.height * 0.5f;
-
-        TexturedVertex vertices[4];
-        vertices[0].position = { -wr, +hr, -0.01f };
-        vertices[0].texcoord = { 0.f, 1.f };
-        vertices[1].position = { +wr, +hr, -0.01f };
-        vertices[1].texcoord = { 1.f, 1.f, };
-        vertices[2].position = { +wr, -hr, -0.01f };
-        vertices[2].texcoord = { 1.f, 0.f };
-        vertices[3].position = { -wr, -hr, -0.01f };
-        vertices[3].texcoord = { 0.f, 0.f };*/
 	}
 	else
 	{
 		// If dead we make it face upwards and sink deep down
-        setTextureLocs(8);
+        setTextureLocs(14);
 		set_rotation(3.1415f);
 		move({ 0.f, step });
 	}
@@ -170,10 +197,10 @@ void Hero::setTextureLocs(int index) {
         texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
     }
 
-    texVertices[0].texcoord = { texture_locs[index], 1.f };//top left
-    texVertices[1].texcoord = { texture_locs[index + 1], 1.f };//top right
-    texVertices[2].texcoord = { texture_locs[index + 1], 0.f };//bottom right
-    texVertices[3].texcoord = { texture_locs[index], 0.f };//bottom left
+    texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
+    texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
+    texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
+    texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
     
     // counterclockwise as it's the default opengl front winding direction
     uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -198,7 +225,7 @@ void Hero::draw(const mat3& projection)
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(m_position);
-	transform_rotate(m_rotation);
+	// transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();
 
