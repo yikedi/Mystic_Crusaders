@@ -25,6 +25,7 @@ namespace
 	float bottom_holder = 100.f;
 	float our_x = 0.f;
 	float our_y = 0.f;
+	// bool in_main_game = false;
 	//int stage = 0;
 
 	namespace
@@ -143,7 +144,8 @@ bool World::init(vec2 screen)
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
-	return start.init(screen) && m_water.init() && m_interface.init(screen);
+	// in_main_game = false;
+	return start.init(screen) && m_water.init(); // && m_interface.init(screen);
 	//m_hero.init(screen) && m_water.init();
 
 }
@@ -175,6 +177,8 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
+	// in_main_game = false;
+	m_interface.destroy();
 	start.destroy();
 	glfwDestroyWindow(m_window);
 }
@@ -190,6 +194,15 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
+
+		// Initialize UI interface
+		if (!m_interface.init(screen)) {
+			fprintf(stderr, "UI not initialized inside World::update");
+			// in_main_game = false;
+		}
+		else {
+			// in_main_game = true;
+		}
 
 		// Checking hero - Enemy collisions
 		for (const auto& enemy : m_enemys_02)
@@ -432,6 +445,8 @@ bool World::update(float elapsed_ms)
 		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		// in_main_game = false;
+		m_interface.destroy();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -528,7 +543,9 @@ void World::draw()
 	m_hero.draw(projection_2D);
 
 	// Testing TODO
-	m_interface.draw(projection_2D);
+	if (start_is_over) {
+		m_interface.draw(projection_2D);
+	}
 
 	/////////////////////
 	// Truely render to the screen
@@ -608,6 +625,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		m_interface.destroy();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		left = 0.f;// *-0.5;
