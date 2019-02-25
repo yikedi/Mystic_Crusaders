@@ -24,7 +24,7 @@ bool UserInterface::init(vec2 screen)
 	// Load shared texture
 	if (!UserInterface_texture.is_valid())
 	{
-		if (!UserInterface_texture.load_from_file(textures_path("UI.png")))
+		if (!UserInterface_texture.load_from_file(textures_path("UI-2.bmp")))
 		{
 			fprintf(stderr, "Failed to load UI texture!");
 			return false;
@@ -133,6 +133,8 @@ void UserInterface::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
+	
+	
 	transform_begin();
 	transform_translate(m_position);
 	transform_rotate(m_rotation);
@@ -143,7 +145,7 @@ void UserInterface::draw(const mat3& projection)
 	glUseProgram(effect.program);
 
 	// Enabling alpha channel for textures
-	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND); glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
 	// Getting uniform locations for glUniform* calls
