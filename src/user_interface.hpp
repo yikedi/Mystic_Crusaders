@@ -34,7 +34,7 @@ public:
 
 	// Update salmon position based on direction
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	void update(vec2 position);
+	void update(vec2 hp_mp, float zoom_factor);
 
 	// Renders the salmon
 	void draw(const mat3& projection)override;
@@ -56,11 +56,12 @@ public:
 	//hero functions
 	void change_hp(float d_hp);
 	void change_mp(float d_mp);
+	void set_position(vec2 position);
 
 private:
-	Hero m_hero;
 	double w;
 	double h;
+	float zoom_factor;
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates

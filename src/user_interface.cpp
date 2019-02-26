@@ -16,7 +16,7 @@
 Texture UserInterface::UserInterface_texture;
 
 
-bool UserInterface::init(vec2 screen)
+bool UserInterface::init(vec2 size)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
@@ -24,7 +24,7 @@ bool UserInterface::init(vec2 screen)
 	// Load shared texture
 	if (!UserInterface_texture.is_valid())
 	{
-		if (!UserInterface_texture.load_from_file(textures_path("UI-2.bmp")))
+		if (!UserInterface_texture.load_from_file(textures_path("UI-white.bmp")))
 		{
 			fprintf(stderr, "Failed to load UI texture!");
 			return false;
@@ -32,9 +32,8 @@ bool UserInterface::init(vec2 screen)
 	}
 
 	// The position corresponds to the center of the texture
-	vec2 worldSize = screen; // MUST HAVE WORLD SCREEN SIZE PASSED TO IT
-	w = worldSize.x;
-	h = worldSize.y *(double) 0.25; // scale to an appropriate size for our UI
+	w = size.x;
+	h = size.y; // scale to an appropriate size for our UI
 	float wr = w / (double) 2; // UserInterface_texture.width * 0.5f;
 	float hr = h / (double) 2; // UserInterface_texture.height * 0.5f;
 
@@ -111,12 +110,12 @@ void UserInterface::destroy()
 }
 
 // Called on each frame by World::update()
-void UserInterface::update(vec2 position)
+void UserInterface::update(vec2 hp_mp, float zoom)
 {
-	hp = m_hero.get_hp();
-	mp = 80.f;
-	// mp = m_hero.get_mp(); later when we merge
-
+	hp = hp_mp.x;
+	mp = hp_mp.y;
+	zoom_factor = zoom;
+	m_scale = { 1.f / zoom, 1.f / zoom };
 
 
 }
@@ -170,6 +169,118 @@ void UserInterface::draw(const mat3& projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+	// Transformation code, see Rendering and Transformation in the template specification for more info
+	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
+
+	/* 
+	HP bar 
+	*/
+	float HP_scale_factor = hp / max_hp; // a value (theoretically) between 0 and 1
+	vec2 hp_scale = { m_scale.x * HP_scale_factor, m_scale.y * 0.2f };
+	if (HP_scale_factor > 0.f) {
+		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for 
+		// finding how far it goes. zoom_factor is for making sure it fits on screen.
+		vec2 hp_position = { m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y - 0.f };
+		transform_begin();
+		transform_translate(hp_position);
+		transform_rotate(m_rotation);
+		transform_scale(hp_scale);
+		transform_end();
+
+		// Setting shaders
+		glUseProgram(effect.program);
+
+		// Enabling alpha channel for textures
+		glEnable(GL_BLEND); glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST);
+
+		// Getting uniform locations for glUniform* calls
+		transform_uloc = glGetUniformLocation(effect.program, "transform");
+		color_uloc = glGetUniformLocation(effect.program, "fcolor");
+		projection_uloc = glGetUniformLocation(effect.program, "projection");
+
+		// Setting vertices and indices
+		glBindVertexArray(mesh.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+
+		// Input data location as in the vertex buffer
+		in_position_loc = glGetAttribLocation(effect.program, "in_position");
+		in_texcoord_loc = glGetAttribLocation(effect.program, "in_texcoord");
+		glEnableVertexAttribArray(in_position_loc);
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, UserInterface_texture.id);
+
+		// Setting uniform values to the currently bound program
+		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
+		float colorHP[] = { 1.f, 0.f, 0.f };
+		glUniform3fv(color_uloc, 1, colorHP);
+		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+		// Drawing!
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	}
+
+	/*
+	MP bar
+	*/
+	float MP_scale_factor = mp / max_mp; // a value (theoretically) between 0 and 1
+	vec2 mp_scale = { m_scale.x * MP_scale_factor, m_scale.y * 0.2f };
+	if (MP_scale_factor > 0.f) {
+		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for 
+		// finding how far it goes. zoom_factor is for making sure it fits on screen.
+		vec2 mp_position = { m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y + 12.f / zoom_factor };
+		transform_begin();
+		transform_translate(mp_position);
+		transform_rotate(m_rotation);
+		transform_scale(mp_scale);
+		transform_end();
+
+		// Setting shaders
+		glUseProgram(effect.program);
+
+		// Enabling alpha channel for textures
+		glEnable(GL_BLEND); glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST);
+
+		// Getting uniform locations for glUniform* calls
+		transform_uloc = glGetUniformLocation(effect.program, "transform");
+		color_uloc = glGetUniformLocation(effect.program, "fcolor");
+		projection_uloc = glGetUniformLocation(effect.program, "projection");
+
+		// Setting vertices and indices
+		glBindVertexArray(mesh.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+
+		// Input data location as in the vertex buffer
+		in_position_loc = glGetAttribLocation(effect.program, "in_position");
+		in_texcoord_loc = glGetAttribLocation(effect.program, "in_texcoord");
+		glEnableVertexAttribArray(in_position_loc);
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, UserInterface_texture.id);
+
+		// Setting uniform values to the currently bound program
+		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
+		float colorHP[] = { 0.f, 0.f, 1.f };
+		glUniform3fv(color_uloc, 1, colorHP);
+		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+		// Drawing!
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	}
+	
 }
 
 void UserInterface::set_rotation(float radians)
@@ -201,4 +312,9 @@ void UserInterface::change_mp(float d_mp)
 	mp += d_mp;
 	mp = std::min(mp, max_mp);
 	mp = std::max(0.5f, mp);
+}
+
+void UserInterface::set_position(vec2 position) 
+{
+	m_position = { position.x / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
 }

@@ -142,6 +142,7 @@ bool World::init(vec2 screen)
 	start_is_over = start.is_over();
 	m_window_width = screen.x;
 	m_window_height = screen.y;
+	m_hero.init(screen);
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -192,8 +193,9 @@ bool World::update(float elapsed_ms)
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
 
-		// Initialize UI interface
-		if (!m_interface.init(screen)) {
+		
+		// Initialize UI interface with size
+			if (!m_interface.init({ 300.f, 50.f })) {
 			fprintf(stderr, "UI not initialized inside World::update");
 			// in_main_game = false;
 		}
@@ -280,7 +282,8 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
-		m_interface.update({ screen_left, screen_top });
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
+
 		// Removing out of screen enemys
 		auto enemy_it = m_enemys_01.begin();
 		while (enemy_it != m_enemys_01.end())
@@ -537,6 +540,9 @@ void World::draw()
 	}
 	screen_right = screen_left + w_not_scaled;
 	screen_bottom = screen_top + h_not_scaled;
+
+	// for our UI bar
+	m_interface.set_position({ screen_left, screen_top });
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
