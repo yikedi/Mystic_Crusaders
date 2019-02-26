@@ -97,6 +97,7 @@ public:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 private:
     TexturedVertex texVertices[4];
+    std::vector<float> texture_locs;
 	float m_light_up_countdown_ms; // Used to keep track for how long the salmon should be lit up
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates

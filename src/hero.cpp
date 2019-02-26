@@ -43,6 +43,10 @@ bool Hero::init(vec2 screen)
 	texVertices[2].position = { +wr, -hr, -0.01f };
 	texVertices[3].position = { -wr, -hr, -0.01f };
 
+    for (int i = 0; i <= hero_texture.totalTiles; i++) {
+        texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
+    }
+
     glGenBuffers(1, &mesh.vbo);
     glGenBuffers(1, &mesh.ibo);
     setTextureLocs(14);
@@ -219,10 +223,6 @@ void Hero::update(float ms)
 }
 
 void Hero::setTextureLocs(int index) {
-    std::vector<float> texture_locs;
-    for (int i = 0; i <= hero_texture.totalTiles; i++) {
-        texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
-    }
 
     texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
     texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
