@@ -24,7 +24,7 @@ bool UserInterface::init(vec2 size)
 	// Load shared texture
 	if (!UserInterface_texture.is_valid())
 	{
-		if (!UserInterface_texture.load_from_file(textures_path("UI-white.bmp")))
+		if (!UserInterface_texture.load_from_file(textures_path("BAR.png")))
 		{
 			fprintf(stderr, "Failed to load UI texture!");
 			return false;
