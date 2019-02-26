@@ -743,7 +743,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over)
 		m_hero.shoot_projectiles(hero_projectiles);
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
 
