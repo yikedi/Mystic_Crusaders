@@ -425,6 +425,7 @@ bool World::update(float elapsed_ms)
 		enemy_projectiles.clear();
 		// in_main_game = false;
 		m_interface.destroy();
+		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -610,6 +611,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		m_interface.destroy();
+		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;
