@@ -193,7 +193,7 @@ bool World::update(float elapsed_ms)
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
 
-		
+
 		// Initialize UI interface with size
 			if (!m_interface.init({ 300.f, 50.f })) {
 			fprintf(stderr, "UI not initialized inside World::update");
@@ -283,36 +283,6 @@ bool World::update(float elapsed_ms)
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
-
-		// Removing out of screen enemys
-		auto enemy_it = m_enemys_01.begin();
-		while (enemy_it != m_enemys_01.end())
-		{
-			float w = enemy_it->get_bounding_box().x / 2;
-			if (enemy_it->get_position().x + w < 0.f)
-			{
-                //enemy_it->destroy();
-				enemy_it = m_enemys_01.erase(enemy_it);
-				continue;
-			}
-
-			++enemy_it;
-		}
-
-		// Removing out of screen enemys
-		auto enemy_it2 = m_enemys_02.begin();
-		while (enemy_it2 != m_enemys_02.end())
-		{
-			float w = enemy_it2->get_bounding_box().x / 2;
-			if (enemy_it2->get_position().x + w < 0.f)
-			{
-                //enemy_it2->destroy();
-				enemy_it2 = m_enemys_02.erase(enemy_it2);
-				continue;
-			}
-
-			++enemy_it2;
-		}
 
 		//remove out of screen fireball
 
