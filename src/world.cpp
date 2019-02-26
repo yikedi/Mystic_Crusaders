@@ -21,6 +21,7 @@ namespace
 	float screen_bottom = 100.f;	// called screen_bottom to avoid ambiguity
 	float our_x = 0.f;
 	float our_y = 0.f;
+	// bool in_main_game = false;
 	//int stage = 0;
 
 	namespace
@@ -141,6 +142,8 @@ bool World::init(vec2 screen)
 	start_is_over = start.is_over();
 	m_window_width = screen.x;
 	m_window_height = screen.y;
+	m_hero.init(screen);
+	m_interface.init({ 300.f, 50.f });
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -173,6 +176,8 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
+	// in_main_game = false;
+	m_interface.destroy();
 	start.destroy();
 	glfwDestroyWindow(m_window);
 }
@@ -268,36 +273,7 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
-
-		// Removing out of screen enemys
-		auto enemy_it = m_enemys_01.begin();
-		while (enemy_it != m_enemys_01.end())
-		{
-			float w = enemy_it->get_bounding_box().x / 2;
-			if (enemy_it->get_position().x + w < 0.f)
-			{
-                //enemy_it->destroy();
-				enemy_it = m_enemys_01.erase(enemy_it);
-				continue;
-			}
-
-			++enemy_it;
-		}
-
-		// Removing out of screen enemys
-		auto enemy_it2 = m_enemys_02.begin();
-		while (enemy_it2 != m_enemys_02.end())
-		{
-			float w = enemy_it2->get_bounding_box().x / 2;
-			if (enemy_it2->get_position().x + w < 0.f)
-			{
-                //enemy_it2->destroy();
-				enemy_it2 = m_enemys_02.erase(enemy_it2);
-				continue;
-			}
-
-			++enemy_it2;
-		}
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
 
 		//remove out of screen fireball
 
@@ -447,6 +423,8 @@ bool World::update(float elapsed_ms)
 		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		// in_main_game = false;
+		m_interface.destroy();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -524,6 +502,9 @@ void World::draw()
 	screen_right = screen_left + w_not_scaled;
 	screen_bottom = screen_top + h_not_scaled;
 
+	// for our UI bar
+	m_interface.set_position({ screen_left, screen_top });
+
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
 
@@ -544,6 +525,11 @@ void World::draw()
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
+
+	// Testing TODO
+	if (start_is_over) {
+		m_interface.draw(projection_2D);
+	}
 
 	/////////////////////
 	// Truely render to the screen
@@ -623,6 +609,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		m_interface.destroy();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;
@@ -717,8 +704,14 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over)
 		m_hero.shoot_projectiles(hero_projectiles);
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
 
+vec2 World::getScreenSize()
+{
+	int w, h;
+	glfwGetFramebufferSize(m_window, &w, &h);
+	return { (float)w, (float)h };
+}
 

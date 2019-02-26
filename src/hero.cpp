@@ -44,6 +44,10 @@ bool Hero::init(vec2 screen)
 	texVertices[2].position = { +wr, -hr, -0.01f };
 	texVertices[3].position = { -wr, -hr, -0.01f };
 
+    for (int i = 0; i <= hero_texture.totalTiles; i++) {
+        texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
+    }
+
     glGenBuffers(1, &mesh.vbo);
     glGenBuffers(1, &mesh.ibo);
     setTextureLocs(14);
@@ -63,7 +67,7 @@ bool Hero::init(vec2 screen)
 	m_position = { screen.x/2, screen.y/2 };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
-    
+
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 	set_color({1.0f,1.0f,1.0f});
@@ -132,7 +136,7 @@ void Hero::update(float ms)
         {
             mp += 0.05;
         }
-        
+
         // setting player movement state
         if (m_direction.x > 0.0f && m_direction.y == 0.0f) {
             animSpeed = abs(m_direction.x) * 0.025f;
@@ -168,7 +172,7 @@ void Hero::update(float ms)
             m_animTime = 0.0f;
         }
         m_animTime += animSpeed * 2;
-        
+
         // setting texture coordinates
         if (m_moveState == HeroMoveState::LEFTMOVING) {
             int currIndex = 15;
@@ -197,7 +201,7 @@ void Hero::update(float ms)
         else {
             int currIndex = 14;
             setTextureLocs(currIndex);
-        }        
+        }
 	}
 	else
 	{
@@ -207,7 +211,7 @@ void Hero::update(float ms)
 		move({ 0.f, step });
 	}
 
-    
+
 
 	if (m_light_up_countdown_ms > 0.f) {
 		m_light_up_countdown_ms -= ms;
@@ -220,21 +224,20 @@ void Hero::update(float ms)
 }
 
 void Hero::setTextureLocs(int index) {
-    std::vector<float> texture_locs;
-    for (int i = 0; i < hero_texture.totalTiles; i++) {
-        texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
-    }
 
     texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
     texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
     texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
     texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
-    
+
     // counterclockwise as it's the default opengl front winding direction
     uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
 
     // Clearing errors
     gl_flush_errors();
+
+	// Clear memory allocation
+	destroy();
 
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
@@ -450,7 +453,7 @@ void Hero::set_moveState(HeroMoveState state)
     m_moveState = state;
 }
 
-HeroMoveState Hero::get_moveState() 
+HeroMoveState Hero::get_moveState()
 {
     return m_moveState;
 }

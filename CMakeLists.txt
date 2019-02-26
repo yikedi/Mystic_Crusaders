@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/fireball.cpp
     src/projectile.cpp
     src/start_screen.cpp
+    src/user_interface.cpp
     src/enemy_laser.cpp
 	src/map_screen.cpp
     src/Ice_arrow.cpp
@@ -64,6 +65,7 @@ set(SOURCE_FILES
     src/fireball.h
     src/projectile.h
     src/start_screen.hpp
+    src/user_interface.hpp
     src/enemy_laser.h
 	src/sprite_sheet.hpp
 	src/map_screen.hpp
