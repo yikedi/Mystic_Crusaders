@@ -21,6 +21,7 @@ bool Hero::init(vec2 screen)
 	//std::vector<uint16_t> indices;
     hero_texture.totalTiles = 21; // custom to current sprite sheet
     hero_texture.subWidth = 64; // custom to current sprite sheet
+    m_is_alive = false;
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
@@ -50,6 +51,7 @@ bool Hero::init(vec2 screen)
     glGenBuffers(1, &mesh.vbo);
     glGenBuffers(1, &mesh.ibo);
     setTextureLocs(14);
+
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -236,8 +238,10 @@ void Hero::setTextureLocs(int index) {
     gl_flush_errors();
 
 	// Clear memory allocation
-	destroy();
-
+    if (m_is_alive) {
+        destroy();
+    }
+    
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
