@@ -143,6 +143,7 @@ bool World::init(vec2 screen)
 	m_window_width = screen.x;
 	m_window_height = screen.y;
 	m_hero.init(screen);
+	m_interface.init({ 300.f, 50.f });
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -192,16 +193,6 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
-
-
-		// Initialize UI interface with size
-			if (!m_interface.init({ 300.f, 50.f })) {
-			fprintf(stderr, "UI not initialized inside World::update");
-			// in_main_game = false;
-		}
-		else {
-			// in_main_game = true;
-		}
 
 		// Checking hero - Enemy collisions
 		for (const auto& enemy : m_enemys_02)
