@@ -124,13 +124,13 @@ void UserInterface::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
-	
-	
-	//transform_begin();
-	//transform_translate(m_position);
-	//transform_rotate(m_rotation);
-	//transform_scale(m_scale);
-	//transform_end();
+
+
+	transform_begin();
+	transform_translate(m_position);
+	transform_rotate(m_rotation);
+	transform_scale(m_scale);
+	transform_end();
 
 	// Setting shaders
 	glUseProgram(effect.program);
@@ -145,44 +145,44 @@ void UserInterface::draw(const mat3& projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 
 	// Setting vertices and indices
-	/*glBindVertexArray(mesh.vao);
+	glBindVertexArray(mesh.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);*/
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
 
 	// Input data location as in the vertex buffer
 	GLint in_position_loc = glGetAttribLocation(effect.program, "in_position");
 	GLint in_texcoord_loc = glGetAttribLocation(effect.program, "in_texcoord");
-	/*glEnableVertexAttribArray(in_position_loc);
+	glEnableVertexAttribArray(in_position_loc);
 	glEnableVertexAttribArray(in_texcoord_loc);
 	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
-	glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));*/
+	glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
 
-	//// Enabling and binding texture to slot 0
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, UserInterface_texture.id);
+	// Enabling and binding texture to slot 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, UserInterface_texture.id);
 
-	//// Setting uniform values to the currently bound program
-	//glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	//float color[] = { 1.f, 1.f, 1.f };
-	//glUniform3fv(color_uloc, 1, color);
-	//glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+	// Setting uniform values to the currently bound program
+	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
+	float color[] = { 1.f, 1.f, 1.f };
+	glUniform3fv(color_uloc, 1, color);
+	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
-	//// Drawing!
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	
+	// Drawing!
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
 
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 
-	/* 
-	HP bar 
+	/*
+	HP bar
 	*/
 	float HP_scale_factor = hp / max_hp; // a value (theoretically) between 0 and 1
-	vec2 hp_scale = { m_scale.x * HP_scale_factor, m_scale.y * 0.5f };
+	vec2 hp_scale = { m_scale.x * HP_scale_factor, m_scale.y * 0.31f };
 	if (HP_scale_factor > 0.f) {
-		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for 
+		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 hp_position = { m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y + 4.f / zoom_factor };
+		vec2 hp_position = { m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y + 1.f / zoom_factor };
 		transform_begin();
 		transform_translate(hp_position);
 		transform_rotate(m_rotation);
@@ -232,11 +232,11 @@ void UserInterface::draw(const mat3& projection)
 	MP bar
 	*/
 	float MP_scale_factor = mp / max_mp; // a value (theoretically) between 0 and 1
-	vec2 mp_scale = { m_scale.x * MP_scale_factor, m_scale.y * 0.5f };
+	vec2 mp_scale = { m_scale.x * MP_scale_factor, m_scale.y * 0.31f };
 	if (MP_scale_factor > 0.f) {
-		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for 
+		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 mp_position = { m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y + 29.f / zoom_factor };
+		vec2 mp_position = { m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y + 18.f / zoom_factor };
 		transform_begin();
 		transform_translate(mp_position);
 		transform_rotate(m_rotation);
@@ -281,7 +281,7 @@ void UserInterface::draw(const mat3& projection)
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	}
-	
+
 }
 
 void UserInterface::set_rotation(float radians)
@@ -315,7 +315,7 @@ void UserInterface::change_mp(float d_mp)
 	mp = std::max(0.5f, mp);
 }
 
-void UserInterface::set_position(vec2 position) 
+void UserInterface::set_position(vec2 position)
 {
 	m_position = { position.x / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
 }
