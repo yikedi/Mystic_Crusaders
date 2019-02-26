@@ -201,7 +201,7 @@ void Hero::update(float ms)
 	else
 	{
 		// If dead we make it face upwards and sink deep down
-        //setTextureLocs(14);
+        setTextureLocs(14);
 		set_rotation(3.1415f);
 		move({ 0.f, step });
 	}
