@@ -5,4 +5,5 @@
 struct SpriteSheet : public Texture {
     int totalTiles;
     float subWidth;
+    float subHeight;
 };

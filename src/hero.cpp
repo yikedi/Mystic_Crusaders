@@ -20,7 +20,8 @@ bool Hero::init(vec2 screen)
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
     hero_texture.totalTiles = 21; // custom to current sprite sheet
-    hero_texture.subWidth = 64; // custom to current sprite sheet
+    hero_texture.subWidth = 64.f; // custom to current sprite sheet
+    hero_texture.subHeight = 64.f; // custom to current sprite sheet
 
 	// Load shared texture
 	if (!hero_texture.is_valid())
@@ -220,7 +221,7 @@ void Hero::update(float ms)
 
 void Hero::setTextureLocs(int index) {
     std::vector<float> texture_locs;
-    for (int i = 0; i <= hero_texture.totalTiles; i++) {
+    for (int i = 0; i < hero_texture.totalTiles; i++) {
         texture_locs.push_back((float)i * hero_texture.subWidth / hero_texture.width);
     }
 

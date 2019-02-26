@@ -9,7 +9,7 @@
 class Enemy_01 : public Renderable, public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
-	static Texture enemy_texture;
+	static SpriteSheet enemy_texture;
 
 public:
 
@@ -27,6 +27,7 @@ public:
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
+    void setTextureLocs(int index);
 
 	bool collide_with(Projectile &projectile);
 
@@ -41,6 +42,10 @@ public:
 	double attackCooldown;
 
 	private:
+    TexturedVertex m_vertices[4];
 	clock_t lastFireProjectileTime;
 	float projectileSpeed;
+    EnemyMoveState m_moveState;
+    float m_animTime = 0.0f;
+    int numTiles;
 };
