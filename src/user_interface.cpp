@@ -274,8 +274,8 @@ void UserInterface::draw(const mat3& projection)
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-		float colorHP[] = { 0.f, 0.f, 1.f };
-		glUniform3fv(color_uloc, 1, colorHP);
+		float colorMP[] = { 0.f, 0.f, 1.f };
+		glUniform3fv(color_uloc, 1, colorMP);
 		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 		// Drawing!
