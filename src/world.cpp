@@ -195,7 +195,7 @@ bool World::update(float elapsed_ms)
 
 		
 		// Initialize UI interface with size
-			if (!m_interface.init({ 300.f, 40.f })) {
+			if (!m_interface.init({ 300.f, 50.f })) {
 			fprintf(stderr, "UI not initialized inside World::update");
 			// in_main_game = false;
 		}
