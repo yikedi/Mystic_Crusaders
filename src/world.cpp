@@ -195,7 +195,7 @@ bool World::update(float elapsed_ms)
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
 
-		if (shootingFireBall && clock() - lastFireProjectileTime > 150) {
+		if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 			m_hero.shoot_projectiles(hero_projectiles);
 			lastFireProjectileTime = clock();
 		}
