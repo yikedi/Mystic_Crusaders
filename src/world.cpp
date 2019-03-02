@@ -144,6 +144,7 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	m_hero.init(screen);
 	m_interface.init({ 300.f, 50.f });
+	shootingFireBall = false;
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -193,6 +194,11 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
+
+		if (shootingFireBall && clock() - lastFireProjectileTime > 150) {
+			m_hero.shoot_projectiles(hero_projectiles);
+			lastFireProjectileTime = clock();
+		}
 
 		// Checking hero - Enemy collisions
 		for (const auto& enemy : m_enemys_02)
@@ -704,8 +710,13 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over)
-		m_hero.shoot_projectiles(hero_projectiles);
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
+		shootingFireBall = true;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
+		shootingFireBall = false;
+	}
+
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
