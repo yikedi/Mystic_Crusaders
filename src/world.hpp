@@ -15,6 +15,7 @@
 #include "map_screen.hpp"
 #include "start_screen.hpp"
 #include "user_interface.hpp"
+#include "skilltree.hpp"
 
 // stlib
 #include <vector>
