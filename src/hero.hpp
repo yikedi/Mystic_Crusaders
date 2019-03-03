@@ -12,7 +12,7 @@
 class Enemy_01;
 class Fish;
 
-enum class HeroMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
+enum class HeroMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, DEAD };
 
 class Hero : public Renderable
 {

@@ -177,7 +177,7 @@ void Hero::update(float ms)
         // setting texture coordinates
         if (m_moveState == HeroMoveState::LEFTMOVING) {
             int currIndex = 15;
-            numTiles = 6;
+            numTiles = 4;
             currIndex += (int)m_animTime % numTiles;
             setTextureLocs(currIndex);
         }
@@ -207,9 +207,13 @@ void Hero::update(float ms)
 	else
 	{
 		// If dead we make it face upwards and sink deep down
-        setTextureLocs(14);
-		set_rotation(3.1415f);
-		move({ 0.f, step });
+        //setTextureLocs(14);
+		//set_rotation(3.1415f);
+		//move({ 0.f, step });
+		int currIndex = 19;
+		numTiles = 2;
+		currIndex += (int)m_animTime % numTiles;
+		setTextureLocs(currIndex);
 	}
 
 
