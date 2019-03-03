@@ -145,7 +145,7 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
-	return start.init(screen) && m_water.init();
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 	//m_hero.init(screen) && m_water.init();
 
 }
