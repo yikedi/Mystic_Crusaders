@@ -72,7 +72,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -688,6 +688,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping
+	} else if (key == GLFW_KEY_ESCAPE) {
+		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
 }
 
