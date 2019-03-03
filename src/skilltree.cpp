@@ -5,6 +5,7 @@
 #include <string.h>
 #include <cassert>
 #include <sstream>
+#include <cmath>
 
 #include <gl3w.h>
 
@@ -84,9 +85,12 @@ bool skilltree::is_paused()
 
 void skilltree::get_points(int usedpoints, int score)
 {
-	
+	// updates global variable on the number of free points a player has
+	points = floor((score - usedpoints * conversion) / (float) conversion);
 }
 
 void skilltree::update_points(int level)
 {
+	points -= level * 5;
+	used_points += level * 5;
 }
