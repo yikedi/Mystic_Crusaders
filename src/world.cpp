@@ -677,8 +677,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_O && start_is_over == true) {
 		zoom_factor -= 0.1f;
-		if ((zoom_factor < 1.f)) {
-			zoom_factor = 1.f;
+		if ((zoom_factor < 1.1f)) {
+			zoom_factor = 1.1f;
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
