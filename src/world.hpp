@@ -54,6 +54,7 @@ private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
 	bool spawn_enemy_02();
+	bool shootingFireBall;
 
 	// Generates a new fish
 	bool spawn_fish();
@@ -110,4 +111,6 @@ private:
 
 	float m_window_width;
 	float m_window_height;
+
+	clock_t lastFireProjectileTime;
 };

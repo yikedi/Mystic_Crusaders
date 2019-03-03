@@ -72,7 +72,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -144,6 +144,7 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	m_hero.init(screen);
 	m_interface.init({ 300.f, 50.f });
+	shootingFireBall = false;
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -193,6 +194,11 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	if (start_is_over) {
 		if (m_hero.is_alive()) {
+
+		if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
+			m_hero.shoot_projectiles(hero_projectiles);
+			lastFireProjectileTime = clock();
+		}
 
 		// Checking hero - Enemy collisions
 		for (const auto& enemy : m_enemys_02)
@@ -663,16 +669,16 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key ==GLFW_KEY_S )) {
 		m_hero.set_direction({cur_direction.x,0.0f});
 	}
-	else if (key == GLFW_KEY_P) {
+	else if (key == GLFW_KEY_P && start_is_over == true) {
 		zoom_factor += 0.1f;
 		if ((zoom_factor > 1.5f)) {
 			zoom_factor = 1.5f;
 		}
 	}
-	else if (key == GLFW_KEY_O) {
+	else if (key == GLFW_KEY_O && start_is_over == true) {
 		zoom_factor -= 0.1f;
-		if ((zoom_factor < 1.f)) {
-			zoom_factor = 1.f;
+		if ((zoom_factor < 1.1f)) {
+			zoom_factor = 1.1f;
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
@@ -682,6 +688,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping
+	} else if (key == GLFW_KEY_ESCAPE) {
+		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
 }
 
@@ -704,8 +712,13 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over)
-		m_hero.shoot_projectiles(hero_projectiles);
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
+		shootingFireBall = true;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
+		shootingFireBall = false;
+	}
+
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
 }
