@@ -669,13 +669,13 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key ==GLFW_KEY_S )) {
 		m_hero.set_direction({cur_direction.x,0.0f});
 	}
-	else if (key == GLFW_KEY_P) {
+	else if (key == GLFW_KEY_P && start_is_over == true) {
 		zoom_factor += 0.1f;
 		if ((zoom_factor > 1.5f)) {
 			zoom_factor = 1.5f;
 		}
 	}
-	else if (key == GLFW_KEY_O) {
+	else if (key == GLFW_KEY_O && start_is_over == true) {
 		zoom_factor -= 0.1f;
 		if ((zoom_factor < 1.f)) {
 			zoom_factor = 1.f;
