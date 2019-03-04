@@ -75,7 +75,7 @@ void skilltree::draw(const mat3 & projection)
 void skilltree::update_skill(std::string element, int level)
 {
 	//upadte which skill has been leveled up, pass it to the other file
-	//level is related to the points 
+	//level is related to the skillpoints 
 }
 
 bool skilltree::is_paused()
@@ -83,14 +83,17 @@ bool skilltree::is_paused()
 	return paused;
 }
 
-void skilltree::get_points(int usedpoints, int score)
+void skilltree::get_skillpoints(int score)
 {
 	// updates global variable on the number of free points a player has
-	points = floor((score - usedpoints * conversion) / (float) conversion);
+	skillpoints = floor((score - used_skillpoints * conversion) / (float) conversion);
 }
 
-void skilltree::update_points(int level)
+void skilltree::update_skillpoints(int level)
 {
-	points -= level * 5;
-	used_points += level * 5;
+	int consumed_skillpoints = 3 + level * 2;
+	fprintf(stderr, "Cost of skillpoints: " + consumed_skillpoints);
+	skillpoints -= consumed_skillpoints;
+	used_skillpoints += consumed_skillpoints;
+	// int consumed_skillpoints = round(pow(level, 2)) * 5;		// deprecated, basically = level^2 * 5
 }

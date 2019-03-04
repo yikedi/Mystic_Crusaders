@@ -31,16 +31,16 @@ public:
 	bool is_paused();
 
 	//take score - 
-	void get_points(int usedpoints, int score);
+	void get_skillpoints(int score);
 
-	void update_points(int level);
+	void update_skillpoints(int level);
 
 private:
 	vec2 mouse_pos;
 	bool paused;
-	int points;
-	int used_points;
-	int conversion;
+	int skillpoints;
+	int used_skillpoints;
+	int conversion = 10;
 
 
 	// incre # of amo
