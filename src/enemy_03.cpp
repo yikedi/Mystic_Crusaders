@@ -1,17 +1,17 @@
 // Header
-#include "enemy_02.hpp"
+#include "enemy_03.hpp"
 
 #include <cmath>
 #include <algorithm>
 
-Texture Enemy_02::enemy_texture;
+Texture Enemy_03::enemy_texture;
 
-bool Enemy_02::init(int level)
+bool Enemy_03::init(int level)
 {
 	// Load shared texture
 	if (!enemy_texture.is_valid())
 	{
-		if (!enemy_texture.load_from_file(textures_path("enemy_02.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_01.png")))
 		{
 			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
@@ -59,34 +59,35 @@ bool Enemy_02::init(int level)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 0.8f;
-	m_scale.y = 0.8f;
+	m_scale.x = 1.5f;
+	m_scale.y = 1.5f;
+	needFireProjectile = false;
 	m_rotation = 0.f;
 	enemyRandMoveAngle = 0.f;
+	lastFireProjectileTime = clock();
 	randMovementTime = clock();
 	m_is_alive = true;
 
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(70.0f + (float)level * 0.8f * randAttributeFactor, 400.0f);
-	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 200.0);
-	hp = 50.f;
+	m_speed = std::min(50.0f + (float)level * 0.6f * randAttributeFactor, 140.0f);
+	attackCooldown = std::max(5000.0 - (double)level * 6.0 * randAttributeFactor, 3000.0);
+	randMovementCooldown = std::max(1000.0 - (double)level * 2.6 * randAttributeFactor, 250.0);
+	m_range = std::min(400.0 + (double)level * 3.0 * randAttributeFactor, 700.0);
+	hp = 70.f;
 	deceleration = 1.0f;
-	momentum_factor = 1.3f;
+	momentum_factor = 1.0f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
 	m_level = level;
-	poweredup = false;
-	variation = 0.f;
-	speedBoost = false;
 
 	return true;
 }
 
 // Call if init() was successful
 // Releases all graphics resources
-void Enemy_02::destroy()
+void Enemy_03::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -95,7 +96,7 @@ void Enemy_02::destroy()
 }
 
 
-void Enemy_02::draw(const mat3& projection)
+void Enemy_03::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -103,9 +104,9 @@ void Enemy_02::draw(const mat3& projection)
 	transform_translate(m_position);
 
 	if(m_face_left_or_right == 1){
-		m_scale.x = 0.8f;
+		m_scale.x = -1.5f;
 	} else {
-		m_scale.x = -0.8f;
+		m_scale.x = 1.5f;
 	}
 
 	transform_scale(m_scale);
@@ -143,24 +144,6 @@ void Enemy_02::draw(const mat3& projection)
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 	float color[] = { 1.f, 1.f, 1.f };
-	if (poweredup){
-		switch (powerupType)
-		{
-			case 0:
-				color[0] = 0.2f;
-				color[2] = 0.2f;
-				break;
-			case 1:
-				color[1] = 0.2f;
-				color[2] = 0.2f;
-				break;
-			case 2:
-				color[0] = 0.8f;
-				color[1] = 0.1f;
-				color[2] = 0.8f;
-				break;
-		}
-	}
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
@@ -168,7 +151,7 @@ void Enemy_02::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Enemy_02::update(float ms, vec2 target_pos)
+void Enemy_03::update(float ms, vec2 target_pos)
 {
 	//momentum first
 	m_position.x += momentum.x;
@@ -194,12 +177,6 @@ void Enemy_02::update(float ms, vec2 target_pos)
 	float y_diff =  m_position.y - target_pos.y;
 	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
 	float enemy_angle = atan2(y_diff, x_diff);
-	float m_speed_rand_LO = m_speed * 0.8f;
-	float m_speed_rand_HI = m_speed * 1.2f;
-	float m_speed_rand = m_speed_rand_LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(m_speed_rand_HI-m_speed_rand_LO)));
-	if (speedBoost) {
-		m_speed_rand = m_speed_rand * 2.f;
-	}
 	int facing = 1;
 	if (x_diff > 0.0) {
 		facing = 0;
@@ -208,33 +185,35 @@ void Enemy_02::update(float ms, vec2 target_pos)
 	set_rotation(enemy_angle);
 	clock_t currentTime = clock();
 	if (distance <= 100.f) {
-		float step = -1.2f * m_speed_rand * (ms / 1000);
+		needFireProjectile = false;
+		float step = m_speed * (ms / 1000);
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
-	} else if (distance <= 500.f) {
-		float step = -m_speed_rand * (ms / 1000);
-		float enemyRandMoveAngle_after_variation = enemyRandMoveAngle + sinf((timePassed - clock()) / 200.f) * variation;
-		m_position.x += cos(enemyRandMoveAngle_after_variation)*step;
-		m_position.y += sin(enemyRandMoveAngle_after_variation)*step;
+	} else if (distance <= m_range && checkIfCanFire(currentTime)) {
+		needFireProjectile = true;
+		setLastFireProjectileTime(currentTime);
+	} else if (distance <= m_range) {
+		needFireProjectile = false;
+		float step = -m_speed * (ms / 1000);
+		m_position.x += cos(enemyRandMoveAngle)*step;
+		m_position.y += sin(enemyRandMoveAngle)*step;
 	} else {
-		float step = -m_speed_rand * (ms / 1000);
+		needFireProjectile = false;
+
+		float step = -m_speed * (ms / 1000);
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
 	}
 	if (checkIfCanChangeDirectionOfMove(currentTime)){
-		float LO = enemy_angle - 0.9f;
-		float HI = enemy_angle + 0.9f;
+		float LO = enemy_angle - 2.0f;
+		float HI = enemy_angle + 2.0f;
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
-		if (powerupType == 2) {
-			speedBoost = !speedBoost;
-		}
 	}
-
 }
 
 
-bool Enemy_02::collide_with(Projectile &projectile)
+bool Enemy_03::collide_with(Projectile &projectile)
 {
 	float dx = m_position.x - projectile.get_position().x;
 	float dy = m_position.y - projectile.get_position().y;
@@ -249,32 +228,15 @@ bool Enemy_02::collide_with(Projectile &projectile)
 
 }
 
-bool Enemy_02::checkIfCanFire(clock_t currentClock)
+bool Enemy_03::checkIfCanFire(clock_t currentClock)
 {
+	if ((double)(currentClock - lastFireProjectileTime) > attackCooldown) {
+		return true;
+	}
 	return false;
 }
 
-void Enemy_02::powerup()
+void Enemy_03::setLastFireProjectileTime(clock_t c)
 {
-	if (!poweredup) {
-		powerupType = 0 + ( std::rand() % ( 2 - 0 + 1 ));
-		float f = (float)rand() / RAND_MAX;
-		float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
-		switch(powerupType){
-			// green
-			case 0:
-				hp = hp * std::min(2.0f + (float)m_level * 0.05f * randAttributeFactor, 6.0f);
-				break;
-			// red
-			case 1:
-				m_speed = m_speed * 2;
-				break;
-			// purple
-			case 2:
-			 	timePassed = clock();
-				variation = std::min(0.4f + (float)m_level * 0.05f * randAttributeFactor, 1.f);
-				break;
-		}
-		poweredup = true;
-	}
+	lastFireProjectileTime = c;
 }

@@ -67,7 +67,14 @@ bool EnemyLaser::init(float radius, float projectileSpeed, float p_damage)
     damage = p_damage;
     velocity.x = initial_speed * -cosf(radius);
     velocity.y = initial_speed * -sinf(radius);
+    timePassed = clock();
+    variation = 0.f;
     return true;
+}
+
+void EnemyLaser::setVariation(float variationf)
+{
+    variation = variationf;
 }
 
 void EnemyLaser::destroy()
@@ -135,3 +142,12 @@ vec2 EnemyLaser::get_bounding_box() const
     return { std::fabs(m_scale.x) * texture.width, std::fabs(m_scale.y) * texture.height };
 }
 
+void EnemyLaser::update(float ms) {
+    m_rotation = m_rotation + sinf((timePassed - clock()) / 200.f) * variation;
+    velocity.x = initial_speed * -cosf(m_rotation);
+    velocity.y = initial_speed * -sinf(m_rotation);
+    float stepx = velocity.x * (ms / 1000);
+    float stepy = velocity.y * (ms / 1000);
+    m_position.x += stepx;
+    m_position.y += stepy;
+}
