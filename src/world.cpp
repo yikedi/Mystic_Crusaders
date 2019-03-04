@@ -147,9 +147,8 @@ bool World::init(vec2 screen)
 	m_window_width = screen.x;
 	m_window_height = screen.y;
 	m_hero.init(screen);
-	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
-	return start.init(screen) && m_water.init();
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 	//m_hero.init(screen) && m_water.init();
 
 }
@@ -710,11 +709,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
+		m_interface.destroy();
 		start.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
@@ -722,7 +722,6 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
-		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
