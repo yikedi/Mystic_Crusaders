@@ -18,21 +18,25 @@ bool Enemy_01::init(int level)
 		}
 	}
 
-    enemy_texture.totalTiles = 16;
-    enemy_texture.subWidth = 64.0f;
-    enemy_texture.subHeight = 64.0f;
+    enemy_texture.totalTiles = 7;
+    enemy_texture.subWidth = 64.f;
+    enemy_texture.subHeight = 64.f;
 
 	// The position corresponds to the center of the texture
 	float wr = enemy_texture.subWidth * 0.5f;
 	float hr = enemy_texture.subHeight * 0.5f;
+
+    for (int i = 0; i <= enemy_texture.totalTiles; i++) {
+        float w = (float)(i % 4) * enemy_texture.subWidth / enemy_texture.width;
+        float h = (float)(i / 4) * enemy_texture.subHeight / enemy_texture.height;
+        texture_locs.push_back(std::make_pair(w, h));
+    }
 
 	m_vertices[0].position = { -wr, +hr, -0.02f };
 	m_vertices[1].position = { +wr, +hr, -0.02f };
 	m_vertices[2].position = { +wr, -hr, -0.02f };
 	m_vertices[3].position = { -wr, -hr, -0.02f };
 
-    glGenBuffers(1, &mesh.vbo);
-    glGenBuffers(1, &mesh.ibo);
     setTextureLocs(4);
 
 	// Vertex Array (Container for Vertex + Index buffer)
@@ -142,26 +146,19 @@ void Enemy_01::draw(const mat3& projection)
 
 void Enemy_01::setTextureLocs(int index) 
 {
-    std::vector<std::pair<float,float>> texture_locs;
-    for (int i = 0; i <= enemy_texture.totalTiles; i++) {
-        int rowLength = enemy_texture.width / enemy_texture.subWidth;
-        int currCol = i % rowLength;
-        int currRow = i / rowLength;
-        float w = (float)currCol * enemy_texture.subWidth;
-        float h = (float)currRow * enemy_texture.subHeight;
-        texture_locs.push_back(std::make_pair(w, h));
-    }
-
-    m_vertices[0].texcoord = { texture_locs[index].first, texture_locs[index + 1].second }; //top left
-    m_vertices[1].texcoord = { texture_locs[index + 1].first, texture_locs[index + 1].second }; //top right
-    m_vertices[2].texcoord = { texture_locs[index + 1].first, texture_locs[index].second }; //bottom right
-    m_vertices[3].texcoord = { texture_locs[index].first, texture_locs[index].second }; //bottom left
+    m_vertices[0].texcoord = { texture_locs[index].first, 1.f }; //top left
+    m_vertices[1].texcoord = { texture_locs[index + 1].first, 1.f }; //top right
+    m_vertices[2].texcoord = { texture_locs[index + 1].first, 0.f }; //bottom right
+    m_vertices[3].texcoord = { texture_locs[index].first, 0.f }; //bottom left
 
     // counterclockwise as it's the default opengl front winding direction
     uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
 
     // Clearing errors
     gl_flush_errors();
+
+    // Clear memory allocation
+    destroy();
 
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
@@ -251,17 +248,16 @@ void Enemy_01::update(float ms, vec2 target_pos)
     }
 
     m_animTime += animSpeed * 2;
+    numTiles = 4;
 
     // setting texture coordinates
     if (m_moveState == EnemyMoveState::LEFTMOVING) {
         int currIndex = 4;
-        numTiles = 4;
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }
     else if (m_moveState == EnemyMoveState::RIGHTMOVING) {
         int currIndex = 8;
-        numTiles = 4;
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }

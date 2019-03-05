@@ -32,4 +32,7 @@ public:
 
 	bool checkIfCanFire(clock_t currentClock);
 
+private:
+    TexturedVertex texVertices[4];
+    std::vector<float> texture_locs;
 };

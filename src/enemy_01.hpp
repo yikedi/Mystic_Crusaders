@@ -42,6 +42,7 @@ public:
 	double attackCooldown;
 
 	private:
+    std::vector<std::pair<float, float>> texture_locs;
     TexturedVertex m_vertices[4];
 	clock_t lastFireProjectileTime;
 	float projectileSpeed;
