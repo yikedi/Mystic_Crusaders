@@ -76,7 +76,7 @@ bool Enemy_01::init(int level)
 	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 250.0);
 	projectileSpeed = std::min(150.0 + (double)level * 1.0 * randAttributeFactor, 450.0);
 	m_range = 50.0 * randAttributeFactor + 475.f;
-	hp = 30.f;
+	hp = std::min(30.0f + (float)level * 0.2f * randAttributeFactor, 50.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
@@ -161,6 +161,10 @@ void Enemy_01::draw(const mat3& projection)
 				color[0] = 0.8f;
 				color[1] = 0.1f;
 				color[2] = 0.8f;
+				break;
+			case 3:
+				color[0] = 0.2f;
+				color[1] = 0.2f;
 				break;
 		}
 	}
@@ -254,8 +258,13 @@ bool Enemy_01::collide_with(Projectile &projectile)
 bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)
 {
 	EnemyLaser enemyLaser;
-	float LO = m_rotation - 0.15f * (float) log((m_level/2) + 1);
-	float HI = m_rotation + 0.15f * (float) log((m_level/2) + 1);
+	float LO = m_rotation - 0.15f * (float) log((m_level/5) + 1);
+	float HI = m_rotation + 0.15f * (float) log((m_level/5) + 1);
+	if (powerupType == 3) {
+		LO = m_rotation - 0.05f * (float) log((m_level/5) + 1);
+		HI = m_rotation + 0.05f * (float) log((m_level/5) + 1);
+
+	}
 	float fireDir = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 	float variation = 0.f;
 	if (powerupType == 2) {
@@ -289,22 +298,26 @@ void Enemy_01::setLastFireProjectileTime(clock_t c)
 void Enemy_01::powerup()
 {
 	if (!poweredup) {
-		powerupType = 0 + ( std::rand() % ( 2 - 0 + 1 ));
+		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
 		float f = (float)rand() / RAND_MAX;
 		float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 		switch(powerupType){
 			// green
 			case 0:
-				hp = hp * std::min(2.0f + (float)m_level * 0.05f * randAttributeFactor, 6.0f);
+				hp = hp * std::min(1.5f + (float)m_level * 0.05f * randAttributeFactor, 3.5f);
 				break;
 			// red
 			case 1:
+				m_speed = m_speed * 1.5f;
 				attackCooldown = attackCooldown / 2;
 				break;
 			// purple
 			case 2:
-				projectileSpeed = projectileSpeed * 1.2f;
 				break;
+			// blue
+			case 3:
+				m_range = m_range * 1.3f;
+				projectileSpeed = projectileSpeed * 1.5f;
 		}
 		poweredup = true;
 	}

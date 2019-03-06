@@ -71,7 +71,7 @@ bool Enemy_02::init(int level)
 
 	m_speed = std::min(70.0f + (float)level * 0.8f * randAttributeFactor, 400.0f);
 	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 200.0);
-	hp = 50.f;
+	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.3f;
 	momentum.x = 0.f;
@@ -155,9 +155,14 @@ void Enemy_02::draw(const mat3& projection)
 				color[2] = 0.2f;
 				break;
 			case 2:
-				color[0] = 0.8f;
-				color[1] = 0.1f;
-				color[2] = 0.8f;
+				color[0] = 1.f;
+				color[1] = 0.f;
+				color[2] = 1.f;
+				break;
+			case 3:
+				color[0] = 0.f;
+				color[1] = 0.f;
+				color[2] = 1.f;
 				break;
 		}
 	}
@@ -226,7 +231,7 @@ void Enemy_02::update(float ms, vec2 target_pos)
 		float HI = enemy_angle + 0.9f;
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
-		if (powerupType == 2) {
+		if (powerupType == 2 || powerupType == 3) {
 			speedBoost = !speedBoost;
 		}
 	}
@@ -257,23 +262,28 @@ bool Enemy_02::checkIfCanFire(clock_t currentClock)
 void Enemy_02::powerup()
 {
 	if (!poweredup) {
-		powerupType = 0 + ( std::rand() % ( 2 - 0 + 1 ));
+		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
 		float f = (float)rand() / RAND_MAX;
 		float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 		switch(powerupType){
 			// green
 			case 0:
-				hp = hp * std::min(2.0f + (float)m_level * 0.05f * randAttributeFactor, 6.0f);
+				hp = hp * std::min(1.5f + (float)m_level * 0.05f * randAttributeFactor, 3.5f);
 				break;
 			// red
 			case 1:
-				m_speed = m_speed * 2;
+				m_speed = m_speed * 2.f;
 				break;
 			// purple
 			case 2:
 			 	timePassed = clock();
 				variation = std::min(0.4f + (float)m_level * 0.05f * randAttributeFactor, 1.f);
 				break;
+			// blue
+			case 3:
+				m_speed = m_speed * 1.2f;
+				randMovementCooldown = randMovementCooldown / 2;
+				deceleration = deceleration / 2;
 		}
 		poweredup = true;
 	}
