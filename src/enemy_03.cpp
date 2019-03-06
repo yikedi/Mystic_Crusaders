@@ -11,7 +11,7 @@ bool Enemy_03::init(int level)
 	// Load shared texture
 	if (!enemy_texture.is_valid())
 	{
-		if (!enemy_texture.load_from_file(textures_path("enemy_01.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_03.png")))
 		{
 			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
