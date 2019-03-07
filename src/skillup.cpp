@@ -17,7 +17,7 @@ bool Skillup::init(vec2 screen)
 	float h = level_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 956.f;
+	float width = 400.f;
 
 	vertices[0].position = { -width / 2, +hr, 0.f };
 	vertices[1].position = { +width / 2, +hr, 0.f };
@@ -117,9 +117,9 @@ void Skillup::update_leveltex(bool paused, int freepoints)
 
 void Skillup::get_texture(int loc)
 {
-	float h = 956.f;
-	float w = 3827.f;
-	float texture_locs[] = { 0.f, h / w, 2*h/w, 1.f};
+	float h = 400.f;
+	float w = 800.f;
+	float texture_locs[] = { 0.f, h / w, 1.f};
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
