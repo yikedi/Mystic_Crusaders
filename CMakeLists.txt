@@ -51,6 +51,8 @@ set(SOURCE_FILES
     src/Ice_arrow.cpp
     src/Ice_arrow_skill.cpp
 	src/skilltree.cpp
+	src/ice_skill.cpp
+	src/skillup.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -73,6 +75,8 @@ set(SOURCE_FILES
     src/Ice_arrow.h
     src/Ice_arrow_skill.h
 	src/skilltree.hpp
+	src/ice_skill.hpp
+	src/skillup.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

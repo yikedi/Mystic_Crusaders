@@ -72,7 +72,8 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -140,14 +141,16 @@ bool World::init(vec2 screen)
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
+	m_level = 0;
+	game_is_paused = false;
+	skill_element = stree.get_element();
 	m_window_width = screen.x;
 	m_window_height = screen.y;
+	stree.init(screen);
 	m_hero.init(screen);
 	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
 	return start.init(screen) && m_water.init();
-	//m_hero.init(screen) && m_water.init();
-
 }
 
 // Releases all the associated resources
@@ -189,10 +192,14 @@ bool World::update(float elapsed_ms)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-
+	//temp
+	vec3 s = { 1.f,0.f,0.f };
+	//int used = 0;
 
 	start.update(start_is_over);
-	if (start_is_over) {
+	stree.update_skill(game_is_paused, 1, 0,s);
+
+	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
 		if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -254,6 +261,7 @@ bool World::update(float elapsed_ms)
 		{
 			previous_point = m_points;
 			m_hero.level_up();
+			m_level++;
 		}
 		}
 
@@ -429,7 +437,6 @@ bool World::update(float elapsed_ms)
 		m_enemys_02.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
-		// in_main_game = false;
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
@@ -457,7 +464,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp();
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_level;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -533,11 +540,13 @@ void World::draw()
 		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
 
-	// Testing TODO
 	if (start_is_over) {
 		m_interface.draw(projection_2D);
 	}
 
+	if (game_is_paused){
+		stree.draw(projection_2D);
+	}
 	/////////////////////
 	// Truely render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -626,6 +635,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_level = 0;
 		map.set_is_over(true);
 		start_is_over = false;
 	}
@@ -691,6 +701,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	} else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
+	else if (key == GLFW_KEY_SPACE) {
+		//game_is_paused = !game_is_paused;
+		game_is_paused = true;
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -712,15 +726,17 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
-		shootingFireBall = true;
-	}
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
-		shootingFireBall = false;
-	}
+	//if (!paused) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
+			shootingFireBall = true;
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
+			shootingFireBall = false;
+		}
 
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
-		m_hero.use_ice_arrow_skill(hero_projectiles);
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
+			m_hero.use_ice_arrow_skill(hero_projectiles);
+	//}
 }
 
 vec2 World::getScreenSize()

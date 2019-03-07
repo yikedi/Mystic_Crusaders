@@ -1,4 +1,4 @@
-#include "skilltree.hpp"
+#include "ice_skill.hpp"
 
 #include <iostream>
 
@@ -8,40 +8,24 @@
 #include <cmath>
 
 #include <gl3w.h>
-Texture Skilltree::screen_texture;
+Texture Iceskill::ice_texture;
 
-bool Skilltree::init(vec2 screen)
+bool Iceskill::init(vec2 screen)
 {
-	screen_texture.load_from_file(textures_path("skill_tree.png"));
-	float w = screen_texture.width;
-	float h = screen_texture.height;
+	ice_texture.load_from_file(textures_path("ice_skill_texture.png"));
+	float w = ice_texture.width;
+	float h = ice_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
+	float width = 217.f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, 0.f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, 0.f };
-	vertices[1].texcoord = { 1.f, 1.f };
-	vertices[2].position = { +wr, -hr, 0.f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, 0.f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	vertices[0].position = { -width/2, +hr, 0.f };
+	vertices[1].position = { +width/2, +hr, 0.f };
+	vertices[2].position = { +width/2, -hr, 0.f };
+	vertices[3].position = { -width/2, -hr, 0.f };
 
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
-
-	gl_flush_errors();
-
-	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
@@ -52,16 +36,13 @@ bool Skilltree::init(vec2 screen)
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	//m_scale = set_scale(w, h, screen);
-	m_scale = set_scale(1.1*w, 1.1*h, screen);
-	m_position.x = screen.x/2;
-	m_position.y = screen.y/2;
-	ices.init(screen);
-	skillup.init(screen);
+	m_scale = { 1.0f,1.1f };
+	m_position.x = 0.71*screen.x;
+	m_position.y = 0.54*screen.y;
 	return true;
 }
 
-void Skilltree::destroy()
+void Iceskill::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -70,11 +51,9 @@ void Skilltree::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-	ices.destroy();
-	skillup.destroy();
 }
 
-void Skilltree::draw(const mat3 & projection)
+void Iceskill::draw(const mat3 & projection)
 {
 		gl_flush_errors();
 
@@ -109,7 +88,7 @@ void Skilltree::draw(const mat3 & projection)
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, screen_texture.id);
+		glBindTexture(GL_TEXTURE_2D, ice_texture.id);
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -119,32 +98,58 @@ void Skilltree::draw(const mat3 & projection)
 
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-
-		ices.draw(projection);
-		skillup.draw(projection);
 }
 
-void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num)
+void Iceskill::update_ice(bool paused, vec3 ice_num)
 {
-	//level0: only basic skill
-	//level1: one element is chose by the player, degree will all be 0
-	//level2: degree can be 1 2 3
+	float skill1 = ice_num.x;
+	float skill2 = ice_num.y;
+	float skill3 = ice_num.z;
+
 	if (paused) {
-		ices.update_ice(paused, ice_num);
-		skillup.update_leveltex(paused, total - used);
+		//fprintf(stderr, "Failed to load enemy texture!");
+		if (skill1 ==0.f && skill2 ==0.f && skill3==0.f) {
+			fprintf(stderr, "texture!");
+			get_texture(0);
+		}else if (skill1 == 1.f && skill2 == 0.f && skill3 == 0.f) {
+			get_texture(1);
+		}else if (skill1 == 2.f && skill2 == 0.f && skill3 == 0.f) {
+			get_texture(2);
+		}else if (skill1 == 3.f && skill2 == 0.f && skill3 == 0.f) {
+			get_texture(3);
+		}
 	}
 }
 
-std::string Skilltree::get_element()
+void Iceskill::get_texture(int loc)
 {
-	return element;
+	//height/width
+	float h = 217.f;
+	float w = 1095.f;
+	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w };
+
+	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
+	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
+	vertices[2].texcoord = { texture_locs[loc + 1], 0.f };//bottom right
+	vertices[3].texcoord = { texture_locs[loc], 0.f };//bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Vertex Buffer creation
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-vec2 Skilltree::set_scale(float w, float h, vec2 screen)
+vec2 Iceskill::set_scale(float w, float h, vec2 screen)
 {
-	// temp code, will change after get window is possible
-	float xscale = screen.x / w;
-	float yscale = screen.y / h;
-	//return{ 1.f,1.f };
-	return { xscale, yscale };
+	return vec2();
 }
+
