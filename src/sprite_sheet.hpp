@@ -4,6 +4,6 @@
 
 struct SpriteSheet : public Texture {
     int totalTiles;
-    float subWidth;
-    float subHeight;
+    int subWidth;
+    int subHeight;
 };
