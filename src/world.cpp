@@ -142,6 +142,8 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
+	used_skillpoints = 0;
+	ice_skill_set = { 0.f,0.f,0.f };
 	game_is_paused = false;
 	skill_element = stree.get_element();
 	m_window_width = screen.x;
@@ -193,11 +195,10 @@ bool World::update(float elapsed_ms)
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 	//temp
-	vec3 s = { 1.f,0.f,0.f };
-	//int used = 0;
+	vec3 s = { 0.f,0.f,0.f };
 
 	start.update(start_is_over);
-	stree.update_skill(game_is_paused, 1, 0,s);
+	stree.update_skill(game_is_paused, 1, 0,ice_skill_set);
 
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
@@ -443,6 +444,10 @@ bool World::update(float elapsed_ms)
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_level = 0;
+		used_skillpoints = 0;
+		ice_skill_set = { 0.f,0.f,0.f };
+		game_is_paused = false;
 		map.set_is_over(true);
 		start_is_over = false;
 	}
@@ -636,8 +641,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		zoom_factor = 1.f;
 		m_points = 0;
 		m_level = 0;
+		used_skillpoints = 0;
+		ice_skill_set = { 0.f,0.f,0.f };
 		map.set_is_over(true);
 		start_is_over = false;
+		game_is_paused = false;
 	}
 
 	// Control the current speed with `<` `>`
@@ -714,7 +722,7 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if (start_is_over) {
+	if (start_is_over && !game_is_paused) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
 		if (xpos - salmon_position.x != 0)
@@ -722,11 +730,17 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 		m_hero.set_rotation(angle);
 	}
+	else {
+		mouse_pos = { (float)xpos,(float)ypos };
+	}
 }
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	//if (!paused) {
+	int w, h;
+	glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
+	if (!game_is_paused) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
 			shootingFireBall = true;
 		}
@@ -736,7 +750,14 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 			m_hero.use_ice_arrow_skill(hero_projectiles);
-	//}
+	}
+	else {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && stree.in_position(mouse_pos,screen, used_skillpoints)) {
+			used_skillpoints ++;
+			ice_skill_set.x = ice_skill_set.x +1.f;
+		}
+
+	}
 }
 
 vec2 World::getScreenSize()

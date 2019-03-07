@@ -148,3 +148,14 @@ vec2 Skilltree::set_scale(float w, float h, vec2 screen)
 	//return{ 1.f,1.f };
 	return { xscale, yscale };
 }
+
+bool Skilltree::in_position(vec2 mouse_pos, vec2 screen, int used)
+{
+	float xpos = mouse_pos.x;
+	float ypos = mouse_pos.y;
+	if (xpos < 0.75*screen.x && ypos <0.56*screen.y && xpos > 0.68*screen.x && ypos > 0.49*screen.y) {
+		used++;
+		return true;
+	}
+	return false; 
+}

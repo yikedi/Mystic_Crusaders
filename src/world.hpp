@@ -96,6 +96,9 @@ private:
 	bool start_is_over;
 
 	bool game_is_paused;
+	vec2 mouse_pos;
+	int used_skillpoints;
+	vec3 ice_skill_set;
 	std::string skill_element;
 
 	// Game entities

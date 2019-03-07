@@ -38,6 +38,8 @@ public:
 
 	vec2 set_scale(float w, float h, vec2 screen);
 
+	bool in_position(vec2 mouse_pos, vec2 screen, int used);
+
 	void reset();
 
 private:

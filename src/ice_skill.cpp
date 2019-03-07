@@ -148,8 +148,11 @@ void Iceskill::get_texture(int loc)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-vec2 Iceskill::set_scale(float w, float h, vec2 screen)
-{
-	return vec2();
-}
-
+//bool Iceskill::in_position(vec2 mouse_pos, vec2 screen, int used)
+//{
+//	double xpos = mouse_pos.x;
+//	double ypos = mouse_pos.y;
+//	if (xpos < 0.75*screen.x && ypos <0.56*screen.y && xpos > 0.68*screen.x && ypos > 0.49*screen.y) {
+//		used++;
+//	}
+//}
