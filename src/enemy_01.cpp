@@ -42,8 +42,6 @@ bool Enemy_01::init(int level)
 	m_vertices[2].position = { +wr, -hr, -0.02f };
 	m_vertices[3].position = { -wr, -hr, -0.02f };
 
-    glGenBuffers(1, &mesh.vbo);
-    glGenBuffers(1, &mesh.ibo);
     setTextureLocs(4);
 
 	// Vertex Array (Container for Vertex + Index buffer)
@@ -228,17 +226,16 @@ void Enemy_01::update(float ms, vec2 target_pos)
     }
 
     m_animTime += animSpeed * 2;
+    numTiles = 4;
 
     // setting texture coordinates
     if (m_moveState == EnemyMoveState::LEFTMOVING) {
         int currIndex = 4;
-        numTiles = 4;
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }
     else if (m_moveState == EnemyMoveState::RIGHTMOVING) {
         int currIndex = 8;
-        numTiles = 4;
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }
