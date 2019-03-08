@@ -84,6 +84,7 @@ bool Hero::init(vec2 screen)
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
+	level = 0;
 	return true;
 }
 
@@ -245,7 +246,7 @@ void Hero::setTextureLocs(int index) {
     if (m_is_alive) {
         destroy();
     }
-    
+
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
@@ -278,6 +279,7 @@ void Hero::draw(const mat3& projection)
 	GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
+	GLint light_up_uloc = glGetUniformLocation(effect.program, "light_up");
 
 	// Setting vertices and indices
 	glBindVertexArray(mesh.vao);
@@ -301,6 +303,8 @@ void Hero::draw(const mat3& projection)
 	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+	glUniform1iv(light_up_uloc, 1, &m_light_up);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -577,6 +581,9 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 void Hero::level_up()
 {
     ice_arrow_skill.level_up();
+	light_up();
+	hp = std::min(max_hp, hp + 10.f);
+	level ++;
 }
 
 void Hero::apply_momentum(vec2 f)

@@ -69,14 +69,17 @@ bool Enemy_02::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(120.0f + (float)level * 1.6f * randAttributeFactor, 400.0f);
-	randMovementCooldown = std::max(800.0 - (double)level * 5.0 * randAttributeFactor, 200.0);
-	hp = 50.f;
+	m_speed = std::min(70.0f + (float)level * 0.8f * randAttributeFactor, 400.0f);
+	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 200.0);
+	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.3f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
 	m_level = level;
+	poweredup = false;
+	variation = 0.f;
+	speedBoost = false;
 
 	return true;
 }
@@ -140,6 +143,29 @@ void Enemy_02::draw(const mat3& projection)
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 	float color[] = { 1.f, 1.f, 1.f };
+	if (poweredup){
+		switch (powerupType)
+		{
+			case 0:
+				color[0] = 0.2f;
+				color[2] = 0.2f;
+				break;
+			case 1:
+				color[1] = 0.2f;
+				color[2] = 0.2f;
+				break;
+			case 2:
+				color[0] = 1.f;
+				color[1] = 0.f;
+				color[2] = 1.f;
+				break;
+			case 3:
+				color[0] = 0.f;
+				color[1] = 0.f;
+				color[2] = 1.f;
+				break;
+		}
+	}
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
@@ -176,7 +202,9 @@ void Enemy_02::update(float ms, vec2 target_pos)
 	float m_speed_rand_LO = m_speed * 0.8f;
 	float m_speed_rand_HI = m_speed * 1.2f;
 	float m_speed_rand = m_speed_rand_LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(m_speed_rand_HI-m_speed_rand_LO)));
-
+	if (speedBoost) {
+		m_speed_rand = m_speed_rand * 2.f;
+	}
 	int facing = 1;
 	if (x_diff > 0.0) {
 		facing = 0;
@@ -190,19 +218,24 @@ void Enemy_02::update(float ms, vec2 target_pos)
 		m_position.y += sin(enemy_angle)*step;
 	} else if (distance <= 500.f) {
 		float step = -m_speed_rand * (ms / 1000);
-		m_position.x += cos(enemyRandMoveAngle)*step;
-		m_position.y += sin(enemyRandMoveAngle)*step;
+		float enemyRandMoveAngle_after_variation = enemyRandMoveAngle + sinf((timePassed - clock()) / 200.f) * variation;
+		m_position.x += cos(enemyRandMoveAngle_after_variation)*step;
+		m_position.y += sin(enemyRandMoveAngle_after_variation)*step;
 	} else {
 		float step = -m_speed_rand * (ms / 1000);
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
 	}
 	if (checkIfCanChangeDirectionOfMove(currentTime)){
-		float LO = enemy_angle - 1.1f;
-		float HI = enemy_angle + 1.1f;
+		float LO = enemy_angle - 0.9f;
+		float HI = enemy_angle + 0.9f;
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
+		if (powerupType == 2 || powerupType == 3) {
+			speedBoost = !speedBoost;
+		}
 	}
+
 }
 
 
@@ -224,4 +257,34 @@ bool Enemy_02::collide_with(Projectile &projectile)
 bool Enemy_02::checkIfCanFire(clock_t currentClock)
 {
 	return false;
+}
+
+void Enemy_02::powerup()
+{
+	if (!poweredup) {
+		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
+		float f = (float)rand() / RAND_MAX;
+		float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
+		switch(powerupType){
+			// green
+			case 0:
+				hp = hp * std::min(1.5f + (float)m_level * 0.05f * randAttributeFactor, 3.5f);
+				break;
+			// red
+			case 1:
+				m_speed = m_speed * 2.f;
+				break;
+			// purple
+			case 2:
+			 	timePassed = clock();
+				variation = std::min(0.4f + (float)m_level * 0.05f * randAttributeFactor, 1.f);
+				break;
+			// blue
+			case 3:
+				m_speed = m_speed * 1.2f;
+				randMovementCooldown = randMovementCooldown / 2;
+				deceleration = deceleration / 2;
+		}
+		poweredup = true;
+	}
 }

@@ -4,10 +4,9 @@
 #include "enemies.hpp"
 #include "enemy_laser.h"
 #include "projectile.h"
-#include "time.h"
 
 // Salmon enemy
-class Enemy_02 : public Renderable, public Enemies
+class Enemy_03 : public Renderable, public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
 	static Texture enemy_texture;
@@ -31,18 +30,15 @@ public:
 
 	bool collide_with(Projectile &projectile);
 
+	bool needFireProjectile;
+
+	void setLastFireProjectileTime(clock_t c);
+
 	bool checkIfCanFire(clock_t currentClock);
 
-	void powerup();
-
-	bool poweredup;
-
-	bool speedBoost;
+	double attackCooldown;
 
 	private:
-	int powerupType;
-
-	clock_t timePassed;
-
-	float variation;
+	float m_range;
+	clock_t lastFireProjectileTime;
 };

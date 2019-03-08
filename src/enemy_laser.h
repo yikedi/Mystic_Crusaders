@@ -7,6 +7,7 @@
 
 
 #include "projectile.h"
+#include "time.h"
 
 class EnemyLaser: public Projectile
 {
@@ -18,13 +19,21 @@ public :
     // Releases all the associated resources
     void destroy();
 
+    void setVariation(float variationf);
+
     // Renders the fish
     // projection is the 2D orthographic projection matrix
     void draw(const mat3& projection) override;
 
+    void update(float ms) override;
+
     // Returns the fish' bounding box for collision detection, called by collides_with()
     vec2 get_bounding_box()const;
 
+    private:
+
+    float variation;
+    clock_t timePassed;
 };
 
 
