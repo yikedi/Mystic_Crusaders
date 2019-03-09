@@ -17,7 +17,7 @@ bool Skillup::init(vec2 screen)
 	float h = level_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 400.f;
+	float width = 385.f;
 
 	vertices[0].position = { -width / 2, +hr, 0.f };
 	vertices[1].position = { +width / 2, +hr, 0.f };
@@ -36,9 +36,9 @@ bool Skillup::init(vec2 screen)
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	m_scale = {5.f,5.f};
-	m_position.x = screen.x / 2;
-	m_position.y = screen.y / 2;
+	m_scale = {1.f,1.f};
+	m_position.x = 0.6*screen.x;
+	m_position.y = 0.75*screen.y;
 	return true;
 }
 
@@ -117,9 +117,9 @@ void Skillup::update_leveltex(bool paused, int freepoints)
 
 void Skillup::get_texture(int loc)
 {
-	float h = 400.f;
-	float w = 800.f;
-	float texture_locs[] = { 0.f, h / w, 1.f};
+	float h = 385.f;
+	float w = 770.f;
+	float texture_locs[] = {0.f, h/w,1.f};
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
@@ -140,13 +140,9 @@ void Skillup::get_texture(int loc)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
-bool Skillup::in_position(vec2 mouse_pos,vec2 screen, int used)
+
+
+vec2 Skillup::get_position()const
 {
-	double xpos = mouse_pos.x;
-	double ypos = mouse_pos.y;
-	if (xpos < 0.75*screen.x && ypos <0.56*screen.y && xpos > 0.68*screen.x && ypos > 0.49*screen.y) {
-		used++;
-		return true;
-	}
-	return false;
+	return m_position;
 }

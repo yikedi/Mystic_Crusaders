@@ -56,8 +56,11 @@ bool Skilltree::init(vec2 screen)
 	m_scale = set_scale(1.1*w, 1.1*h, screen);
 	m_position.x = screen.x/2;
 	m_position.y = screen.y/2;
-	ices.init(screen);
+	ices1.init(screen, 1);
+	ices2.init(screen, 2);
+	ices3.init(screen, 3);
 	skillup.init(screen);
+
 	return true;
 }
 
@@ -70,7 +73,9 @@ void Skilltree::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-	ices.destroy();
+	ices1.destroy();
+	ices2.destroy();
+	ices3.destroy();
 	skillup.destroy();
 }
 
@@ -120,7 +125,9 @@ void Skilltree::draw(const mat3 & projection)
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-		ices.draw(projection);
+		ices1.draw(projection);
+		ices2.draw(projection);
+		ices3.draw(projection);
 		skillup.draw(projection);
 }
 
@@ -130,7 +137,9 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num)
 	//level1: one element is chose by the player, degree will all be 0
 	//level2: degree can be 1 2 3
 	if (paused) {
-		ices.update_ice(paused, ice_num);
+		ices1.update_ice(paused, ice_num.x);
+		ices2.update_ice(paused, ice_num.y);
+		ices3.update_ice(paused, ice_num.z);
 		skillup.update_leveltex(paused, total - used);
 	}
 }
@@ -149,13 +158,31 @@ vec2 Skilltree::set_scale(float w, float h, vec2 screen)
 	return { xscale, yscale };
 }
 
-bool Skilltree::in_position(vec2 mouse_pos, vec2 screen, int used)
+bool Skilltree::inside(vec2 h, vec2 w,vec2 pos) 
 {
-	float xpos = mouse_pos.x;
-	float ypos = mouse_pos.y;
-	if (xpos < 0.75*screen.x && ypos <0.56*screen.y && xpos > 0.68*screen.x && ypos > 0.49*screen.y) {
-		used++;
+	float x = pos.x;
+	float y = pos.y;
+	if (x<w.x && y<h.x && x>w.y && y>h.y) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool Skilltree::level_position(vec2 mouse_pos, int used)
+{
+	float lxpos = skillup.get_position().x;
+	float lypos = skillup.get_position().y;
+	vec2 height = { lypos + 40.f,lypos-40.f };
+	vec2 width = { lxpos + 192.5f, lxpos -192.5f};
+	if (inside(height,width,mouse_pos)) {
 		return true;
 	}
 	return false; 
+}
+
+bool Skilltree::ice_position(vec2 mouse_pos, int used)
+{
+	return false;
 }

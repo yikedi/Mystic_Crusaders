@@ -709,9 +709,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	} else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
-	else if (key == GLFW_KEY_SPACE) {
-		//game_is_paused = !game_is_paused;
-		game_is_paused = true;
+	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
+		game_is_paused = !game_is_paused;
 	}
 }
 
@@ -752,9 +751,12 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			m_hero.use_ice_arrow_skill(hero_projectiles);
 	}
 	else {
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && stree.in_position(mouse_pos,screen, used_skillpoints)) {
-			used_skillpoints ++;
-			ice_skill_set.x = ice_skill_set.x +1.f;
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && stree.level_position(mouse_pos, used_skillpoints)) {
+			//if (m_level > used_skillpoints) {
+				used_skillpoints++;
+				//change after to different skill
+				ice_skill_set.x = ice_skill_set.x + 1.f;
+			//}
 		}
 
 	}

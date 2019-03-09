@@ -8,16 +8,34 @@
 #include <cmath>
 
 #include <gl3w.h>
-Texture Iceskill::ice_texture;
 
-bool Iceskill::init(vec2 screen)
+bool Iceskill::init(vec2 screen, int skill_num)	//, std::string filename
 {
-	ice_texture.load_from_file(textures_path("ice_skill_texture.png"));
+	//std::string fullpath(data_path "/textures/");
+	//fullpath = fullpath + filename;
+	//std::string a(data_path + tex_name.c_str());
+	switch (skill_num) {
+		case 1:
+			ice_texture.load_from_file(ice_skill1());  //fullpath.c_str()
+			m_position.x = 0.71*screen.x;
+			m_position.y = 0.42*screen.y;
+			break;
+		case 2:
+			ice_texture.load_from_file(ice_skill2());
+			m_position.x = 0.76*screen.x;
+			m_position.y = 0.52*screen.y;
+			break;
+		case 3:
+			ice_texture.load_from_file(ice_skill3());
+			m_position.x = 0.71*screen.x;
+			m_position.y = 0.62*screen.y;
+			break;
+	}
 	float w = ice_texture.width;
 	float h = ice_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 217.f;
+	float width = 120.f;
 
 	vertices[0].position = { -width/2, +hr, 0.f };
 	vertices[1].position = { +width/2, +hr, 0.f };
@@ -26,7 +44,7 @@ bool Iceskill::init(vec2 screen)
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
-
+	
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -36,9 +54,8 @@ bool Iceskill::init(vec2 screen)
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	m_scale = { 1.0f,1.1f };
-	m_position.x = 0.71*screen.x;
-	m_position.y = 0.54*screen.y;
+	m_scale = { 1.0f,1.0f };
+
 	return true;
 }
 
@@ -100,23 +117,30 @@ void Iceskill::draw(const mat3 & projection)
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Iceskill::update_ice(bool paused, vec3 ice_num)
+void Iceskill::update_ice(bool paused, float degree)
 {
-	float skill1 = ice_num.x;
-	float skill2 = ice_num.y;
-	float skill3 = ice_num.z;
-
 	if (paused) {
 		//fprintf(stderr, "Failed to load enemy texture!");
-		if (skill1 ==0.f && skill2 ==0.f && skill3==0.f) {
-			fprintf(stderr, "texture!");
+		if (degree ==0.f) {
+			fprintf(stderr, "texture1");
 			get_texture(0);
-		}else if (skill1 == 1.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 1.f) {
+			fprintf(stderr, "texture2");
 			get_texture(1);
-		}else if (skill1 == 2.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 2.f) {
+			fprintf(stderr, "texture3");
 			get_texture(2);
-		}else if (skill1 == 3.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 3.f) {
 			get_texture(3);
+		}
+		else if (degree == 4.f) {
+			get_texture(4);
+		}
+		else if (degree == 5.f) {
+			get_texture(5);
 		}
 	}
 }
@@ -124,9 +148,9 @@ void Iceskill::update_ice(bool paused, vec3 ice_num)
 void Iceskill::get_texture(int loc)
 {
 	//height/width
-	float h = 217.f;
-	float w = 1095.f;
-	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w };
+	float h = 120.f;
+	float w = 720.f;
+	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
@@ -148,11 +172,7 @@ void Iceskill::get_texture(int loc)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-//bool Iceskill::in_position(vec2 mouse_pos, vec2 screen, int used)
-//{
-//	double xpos = mouse_pos.x;
-//	double ypos = mouse_pos.y;
-//	if (xpos < 0.75*screen.x && ypos <0.56*screen.y && xpos > 0.68*screen.x && ypos > 0.49*screen.y) {
-//		used++;
-//	}
-//}
+vec2 Iceskill::get_position()const
+{
+	return m_position;
+}

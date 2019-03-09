@@ -28,22 +28,22 @@ public:
 
 	void update_skill(bool paused, int total, int used, vec3 ice_num); //call on world
 
-	void get_texture(int loc);
-
 	std::string get_element();
-
-	int get_skillpoints(int m_points);
-
-	void update_skillpoints(int level);
 
 	vec2 set_scale(float w, float h, vec2 screen);
 
-	bool in_position(vec2 mouse_pos, vec2 screen, int used);
+	bool inside(vec2 h, vec2 w, vec2 pos);
+
+	bool level_position(vec2 mouse_pos, int used);
+
+	bool ice_position(vec2 mouse_pos, int used);
 
 	void reset();
 
 private:
-	Iceskill ices;
+	Iceskill ices1;
+	Iceskill ices2;
+	Iceskill ices3;
 	Skillup skillup;
 	vec2 m_scale;
 	vec2 m_position;

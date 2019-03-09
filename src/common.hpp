@@ -19,6 +19,9 @@
 
 #define data_path PROJECT_SOURCE_DIR "./data"
 #define textures_path(name)  data_path "/textures/" name
+#define ice_skill1() textures_path("ice_skill1.png")
+#define ice_skill2() textures_path("ice_skill2.png")
+#define ice_skill3() textures_path("ice_skill3.png")
 #define audio_path(name) data_path  "/audio/" name
 #define mesh_path(name) data_path  "/meshes/" name
 
