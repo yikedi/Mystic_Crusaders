@@ -16,6 +16,7 @@
 #include "map_screen.hpp"
 #include "start_screen.hpp"
 #include "user_interface.hpp"
+#include "treetrunk.hpp"
 
 // stlib
 #include <vector>
@@ -98,6 +99,7 @@ private:
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	UserInterface m_interface;
+	Treetrunk m_treetrunk;
 
 	float m_current_speed;
 	float m_next_enemy1_spawn;
