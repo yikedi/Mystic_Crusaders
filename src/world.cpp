@@ -76,6 +76,9 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	//For small window
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
+	//For full screen
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	if (m_window == nullptr)
 		return false;
@@ -150,10 +153,11 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	m_hero.init(screen);
 	shootingFireBall = false;
-	return start.init(screen) 
-		&& m_water.init() 
-		&& m_interface.init({ 300.f, 50.f }) 
-		&& m_treetrunk.init(screen);
+	return start.init(screen)
+		&& m_water.init()
+		&& m_interface.init({ 300.f, 50.f })
+		&& m_treetrunk.init(screen)
+		&& m_tree.init(screen);
 	//m_hero.init(screen) && m_water.init();
 
 }
@@ -190,6 +194,7 @@ void World::destroy()
 	// in_main_game = false;
 	m_interface.destroy();
 	m_treetrunk.destroy();
+	m_tree.destroy();
 	start.destroy();
 	glfwDestroyWindow(m_window);
 }
@@ -529,6 +534,8 @@ bool World::update(float elapsed_ms)
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.destroy();
 		m_treetrunk.init(screen);
+		m_tree.destroy();
+		m_tree.init(screen);
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -632,11 +639,13 @@ void World::draw()
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
 	m_hero.draw(projection_2D);
-	m_treetrunk.draw(projection_2D);
+
 
 	// Testing TODO
 	if (start_is_over) {
 		m_interface.draw(projection_2D);
+		m_treetrunk.draw(projection_2D);
+		m_tree.draw(projection_2D);
 	}
 
 	/////////////////////
@@ -727,6 +736,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_hero.destroy();
 		m_interface.destroy();
 		m_treetrunk.destroy();
+		m_tree.destroy();
 		start.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
@@ -735,6 +745,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		m_interface.init({ 300.f, 50.f });
+		m_treetrunk.init(screen);
+		m_tree.init(screen);
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;
