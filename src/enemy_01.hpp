@@ -27,9 +27,6 @@ public:
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
-
-	bool collide_with(Projectile &projectile);
-
 	bool shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles);
 
 	bool needFireProjectile;

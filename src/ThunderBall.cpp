@@ -1,4 +1,5 @@
 #include "ThunderBall.h"
+#include "algorithm"
 
 Texture ThunderBall::texture;
 bool ThunderBall::init(vec2 position,vec2 scale)
@@ -82,6 +83,16 @@ void ThunderBall::destroy()
 void ThunderBall::update(float ms) 
 {
 	//animation
+}
+
+vec2 ThunderBall::get_bounding_box()
+{
+	return { std::fabs(m_scale.x) * texture.width, std::fabs(m_scale.y) * texture.height };
+}
+
+float ThunderBall::get_radius()
+{
+	return std::max(get_bounding_box().x, get_bounding_box().y);
 }
 
 void ThunderBall::draw(const mat3 &projection)

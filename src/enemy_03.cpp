@@ -214,21 +214,6 @@ void Enemy_03::update(float ms, vec2 target_pos)
 }
 
 
-bool Enemy_03::collide_with(Projectile &projectile)
-{
-	float dx = m_position.x - projectile.get_position().x;
-	float dy = m_position.y - projectile.get_position().y;
-	float d_sq = dx * dx + dy * dy;
-	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
-	float r = std::max(other_r, my_r);
-	r *= 1.f;
-	if (d_sq < r * r)
-			return true;
-	return false;
-
-}
-
 bool Enemy_03::checkIfCanFire(clock_t currentClock)
 {
 	if ((double)(currentClock - lastFireProjectileTime) > attackCooldown) {

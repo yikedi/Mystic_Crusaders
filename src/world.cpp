@@ -285,7 +285,7 @@ bool World::update(float elapsed_ms)
 			e_proj.update(elapsed_ms * m_current_speed);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 
 		//remove out of screen fireball
 
@@ -384,6 +384,66 @@ bool World::update(float elapsed_ms)
 				}
 			}
 			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0){
+				break;
+			}
+			++enemy2;
+		}
+
+
+		enemy = m_enemys_01.begin();
+
+		while (enemy != m_enemys_01.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy->collide_with(*t))
+				{
+					t->apply_effect(*enemy);
+					
+					if (!enemy->is_alive()) {
+						//enemy->destroy();
+						enemy = m_enemys_01.erase(enemy);
+						++m_points;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
+				break;
+			}
+			++enemy;
+		}
+
+
+		enemy2 = m_enemys_02.begin();
+
+		while (enemy2 != m_enemys_02.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy2->collide_with(*t))
+				{
+					t->apply_effect(*enemy2);
+
+					if (!enemy->is_alive()) {
+						//enemy->destroy();
+						enemy2 = m_enemys_02.erase(enemy2);
+						++m_points;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
 				break;
 			}
 			++enemy2;

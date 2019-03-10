@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "ThunderString.h"
 #include "ThunderBall.h"
+#include "enemies.hpp"
 
 class Thunder: public Renderable
 {
@@ -27,7 +28,11 @@ public:
 
 	void destroy();
 
+	float get_radius();
+
 	bool can_remove();
+
+	void apply_effect(Enemies & e);
 
 	~Thunder() 
 	{
@@ -40,5 +45,6 @@ protected:
 	float elapsedTime;
 	float impactTime;
 	vec2 m_position;
+	float m_damage;
 };
 

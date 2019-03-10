@@ -1,8 +1,8 @@
 #pragma once
-
+class Thunder;
 #include "common.hpp"
 #include "time.h"
-
+#include "projectile.h"
 // general enemies
 class Enemies
 {
@@ -31,9 +31,13 @@ public:
 
     void take_damage(float damage, vec2 direction);
 
+	void take_damage(float damage);
+
     bool is_alive()const;
 
     void set_speed(float speed);
+
+	float get_speed();
 
     void apply_momentum(vec2 momentum);
 
@@ -42,6 +46,10 @@ public:
     void setRandMovementTime(clock_t c);
 
 	bool checkIfCanChangeDirectionOfMove(clock_t currentClock);
+
+	virtual bool collide_with(Projectile &projectile);
+
+	virtual bool collide_with(Thunder & thunder);
 
 public:
 	vec2 m_position; // Window coordinates
