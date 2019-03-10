@@ -57,6 +57,7 @@ bool Enemy_01::init(int level)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
+	m_is_alive = true;
 	m_scale.x = 1.0f;
 	m_scale.y = 1.0f;
 	needFireProjectile = false;
@@ -64,7 +65,6 @@ bool Enemy_01::init(int level)
 	enemyRandMoveAngle = 0.f;
 	lastFireProjectileTime = clock();
 	randMovementTime = clock();
-	m_is_alive = true;
 
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
@@ -89,7 +89,6 @@ void Enemy_01::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
-    glDeleteBuffers(1, &mesh.vao);
 
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
@@ -110,7 +109,7 @@ void Enemy_01::draw(const mat3& projection)
 		m_scale.x = 1.0f;
 	}
     */
-	
+
 
 	transform_scale(m_scale);
 	transform_end();
@@ -262,12 +261,10 @@ void Enemy_01::setTextureLocs(int index)
     gl_flush_errors();
 
     // Clear memory
-    /*
     if (m_is_alive) {
         destroy();
     }
-    */
-    
+
 
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);

@@ -79,7 +79,6 @@ void Enemy_02::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
-    glDeleteBuffers(1, &mesh.vao);
 
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
@@ -206,7 +205,7 @@ void Enemy_02::update(float ms, vec2 target_pos)
     int currIndex = 0;
     currIndex += (int)m_animTime % numTiles;
     setTextureLocs(currIndex);
-    
+
 }
 
 void Enemy_02::setTextureLocs(int index) {
@@ -223,12 +222,10 @@ void Enemy_02::setTextureLocs(int index) {
     gl_flush_errors();
 
     // Clear Memory
-    /*
+
     if (m_is_alive) {
         destroy();
     }
-    */
-    
 
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
