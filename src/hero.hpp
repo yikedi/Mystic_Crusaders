@@ -100,7 +100,7 @@ public:
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
 	bool use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position);
 	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position);
-    void level_up();
+    void level_up(int select);
 	void set_active_skill(int active);
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	int level;

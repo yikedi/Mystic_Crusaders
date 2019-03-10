@@ -53,6 +53,9 @@ void Enemies::take_damage(float damage, vec2 direction){
 
 void Enemies::take_damage(float damage) {
 	hp = hp - 1.f * damage;
+	if (hp <= 0.5f) {
+		m_is_alive = false;
+	}
 }
 
 bool Enemies::is_alive()const
@@ -82,6 +85,7 @@ bool Enemies::collide_with(Thunder &thunder)
 	float other_r = thunder.get_radius();
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
+	r *= 0.6f;
 	if (d_sq < r * r)
 		return true;
 	return false;

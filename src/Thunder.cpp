@@ -66,5 +66,5 @@ float Thunder::get_radius()
 void Thunder::apply_effect(Enemies & e)
 {
 	e.take_damage(m_damage);
-	e.set_speed(e.get_speed());
+	e.set_speed(e.get_speed() * 0.5);
 }

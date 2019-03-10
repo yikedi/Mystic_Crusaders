@@ -100,7 +100,6 @@ void Hero::destroy()
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 
-
 }
 
 // Called on each frame by World::update()
@@ -576,16 +575,17 @@ bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 {
 	if (mp > thunder_skill.get_mpcost()) 
 	{
-		thunder_skill.drop_thunder(thunders, position);
+		float mp_cost = thunder_skill.drop_thunder(thunders, position);
+		change_mp(-1 * mp_cost);
 		return true;
 	}
 	return false;
 	
 }
 
-void Hero::level_up()
+void Hero::level_up(int select)
 {
-    ice_arrow_skill.level_up();
+    ice_arrow_skill.level_up(select);
 }
 
 void Hero::apply_momentum(vec2 f)

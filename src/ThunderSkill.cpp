@@ -4,27 +4,45 @@ void ThunderSkill::init()
 {
 	mp_cost = 10;
 	damage = 10;
-	level = 0;
+	damage_level = 0;
+	effect_level = 0;
+	mp_cost_level = 0;
 	impactTime = 3000;
 	scale = { 0.3f,0.3f };
 }
-void ThunderSkill::level_up(int select)
+bool ThunderSkill::level_up(int select)
 {
-	level += 1;
+	bool success = false;
 	switch (select) 
 	{
-		case 0: // increase damage
-			damage = damage + 10;
+		case LEVEL_UP_DAMAGE: // increase damage
+			if (damage_level < 4) 
+			{
+				damage += 10;
+				mp_cost += 2;
+				success = true;
+			}
 			break;
-		case 1: // 
-			scale = { scale.x * 1.1f + scale.y * 1.1f };
+		case LEVEL_UP_EFFECT: // 
+			if (effect_level < 4)
+			{
+				scale = { scale.x * 1.1f + scale.y * 1.1f };
+				mp_cost += 2;
+				success = true;
+			}
+			
 			break;
-		case 2:
-			impactTime += 1000;
+		case LEVEL_UP_MANA_COST:
+			if (mp_cost_level < 4)
+			{
+				mp_cost *= 0.8;
+				success = true;
+			}
 			break;
 		default:
 			break;
 	}
+	return success;
 
 }
 

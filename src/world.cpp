@@ -76,7 +76,9 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+
 	if (m_window == nullptr)
 		return false;
 
@@ -265,7 +267,7 @@ bool World::update(float elapsed_ms)
 			if (m_points - previous_point > 20 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
-				m_hero.level_up();
+				m_hero.level_up(0); // use 0 for now
 				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
 		}
