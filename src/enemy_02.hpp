@@ -4,6 +4,7 @@
 #include "enemies.hpp"
 #include "enemy_laser.h"
 #include "projectile.h"
+#include "time.h"
 
 // Salmon enemy
 class Enemy_02 : public Renderable, public Enemies
@@ -34,10 +35,27 @@ public:
 
     void setTextureLocs(int index);
 
-private:
+	void powerup();
+
+	bool poweredup;
+
+	bool speedBoost;
+
+	private:
+	int powerupType;
+
+	clock_t timePassed;
+
+	float variation;
+
     TexturedVertex texVertices[4];
+
     std::vector<float> texture_locs;
+
     EnemyMoveState m_moveState;
+
     float m_animTime = 0.0f;
+
     int numTiles;
+
 };

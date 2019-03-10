@@ -6,10 +6,10 @@
 #include "projectile.h"
 
 // Salmon enemy
-class Enemy_01 : public Renderable, public Enemies
+class Enemy_03 : public Renderable, public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
-	static SpriteSheet enemy_texture;
+	static Texture enemy_texture;
 
 public:
 
@@ -27,11 +27,8 @@ public:
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
-    void setTextureLocs(int index);
 
 	bool collide_with(Projectile &projectile);
-
-	bool shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles);
 
 	bool needFireProjectile;
 
@@ -41,19 +38,7 @@ public:
 
 	double attackCooldown;
 
-	void powerup();
-
-	bool poweredup;
-
 	private:
-    std::vector<float> texture_rows;
-    std::vector<float> texture_cols;
-    TexturedVertex texVertices[4];
-	clock_t lastFireProjectileTime;
-	float projectileSpeed;
-    EnemyMoveState m_moveState;
-    float m_animTime = 0.0f;
-    int numTiles;
 	float m_range;
-	int powerupType;
+	clock_t lastFireProjectileTime;
 };
