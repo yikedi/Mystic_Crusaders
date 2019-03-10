@@ -17,7 +17,7 @@
 class Enemy_01;
 class Fish;
 
-enum class HeroMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
+enum class HeroMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, DEAD };
 
 class Hero : public Renderable
 {
@@ -103,6 +103,7 @@ public:
     void level_up();
 	void set_active_skill(int active);
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+	int level;
 private:
     TexturedVertex texVertices[4];
     std::vector<float> texture_locs;

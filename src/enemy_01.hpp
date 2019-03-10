@@ -40,7 +40,13 @@ public:
 
 	double attackCooldown;
 
+	void powerup();
+
+	bool poweredup;
+
 	private:
 	clock_t lastFireProjectileTime;
 	float projectileSpeed;
+	float m_range;
+	int powerupType;
 };
