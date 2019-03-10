@@ -37,11 +37,13 @@ bool Enemy_01::init(int level)
         texture_rows.push_back(h);
     }
 
-	m_vertices[0].position = { -wr, +hr, -0.02f };
-	m_vertices[1].position = { +wr, +hr, -0.02f };
-	m_vertices[2].position = { +wr, -hr, -0.02f };
-	m_vertices[3].position = { -wr, -hr, -0.02f };
+	texVertices[0].position = { -wr, +hr, -0.02f };
+	texVertices[1].position = { +wr, +hr, -0.02f };
+	texVertices[2].position = { +wr, -hr, -0.02f };
+	texVertices[3].position = { -wr, -hr, -0.02f };
 
+    glGenBuffers(1, &mesh.vbo);
+    glGenBuffers(1, &mesh.ibo);
     setTextureLocs(4);
 
 	// Vertex Array (Container for Vertex + Index buffer)
@@ -85,10 +87,13 @@ bool Enemy_01::init(int level)
 // Releases all graphics resources
 void Enemy_01::destroy()
 {
-	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+    glDeleteBuffers(1, &mesh.vbo);
+    glDeleteBuffers(1, &mesh.ibo);
+    glDeleteBuffers(1, &mesh.vao);
+
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 
@@ -151,7 +156,7 @@ void Enemy_01::draw(const mat3& projection)
 
 void Enemy_01::update(float ms, vec2 target_pos)
 {
-    float animSpeed = 0.025f;
+    float animSpeed = 0.05f;
 
 	//momentum first
 	m_position.x += momentum.x;
@@ -245,10 +250,10 @@ void Enemy_01::setTextureLocs(int index)
 {
     int colPos = index / 4;
     int rowPos = index % 4;
-    m_vertices[0].texcoord = { texture_cols[rowPos], texture_rows[colPos + 1] }; //top left
-    m_vertices[1].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos + 1] }; //top right
-    m_vertices[2].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos] }; //bottom right
-    m_vertices[3].texcoord = { texture_cols[rowPos], texture_rows[colPos] }; //bottom left
+    texVertices[0].texcoord = { texture_cols[rowPos], texture_rows[colPos + 1] }; //top left
+    texVertices[1].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos + 1] }; //top right
+    texVertices[2].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos] }; //bottom right
+    texVertices[3].texcoord = { texture_cols[rowPos], texture_rows[colPos] }; //bottom left
 
     // counterclockwise as it's the default opengl front winding direction
     uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -256,13 +261,18 @@ void Enemy_01::setTextureLocs(int index)
     // Clearing errors
     gl_flush_errors();
 
-    // TODO: Clear memory
+    // Clear memory
+    /*
+    if (m_is_alive) {
+        destroy();
+    }
+    */
     
 
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, m_vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
 
     // Index Buffer creation
     glGenBuffers(1, &mesh.ibo);

@@ -44,7 +44,7 @@ public:
 	private:
     std::vector<float> texture_rows;
     std::vector<float> texture_cols;
-    TexturedVertex m_vertices[4];
+    TexturedVertex texVertices[4];
 	clock_t lastFireProjectileTime;
 	float projectileSpeed;
     EnemyMoveState m_moveState;
