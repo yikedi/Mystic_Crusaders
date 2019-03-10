@@ -10,7 +10,7 @@
 Texture Mapscreen::map_screen;
 
 bool Mapscreen::init(vec2 screen) {
-	map_screen.load_from_file(textures_path("grass2.png"));
+	map_screen.load_from_file(textures_path("grass3.png"));
 	float w = map_screen.width;
 	float h = map_screen.height;
 	float wr = w * 0.5f;
