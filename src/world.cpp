@@ -151,7 +151,7 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	shootingFireBall = false;
 	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
-	//m_hero.init(screen) && m_water.init();
+	mouse_position = { 0.f,0.f };
 
 }
 
@@ -180,6 +180,9 @@ void World::destroy()
 		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
+	for (auto& thunder : thunders)
+		thunder->destroy();
+
 	m_enemys_01.clear();
 	m_enemys_02.clear();
 	hero_projectiles.clear();
@@ -323,6 +326,8 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		for (auto& thunder : thunders)
+			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 
 		//remove out of screen fireball
@@ -355,6 +360,20 @@ bool World::update(float elapsed_ms)
 			++e_proj;
 		}
 
+		//remove overtime thunder
+		len = (int)thunders.size() - 1;
+		for (int i = len; i >= 0; i--)
+		{
+			Thunder* t = thunders.at(i);
+
+			if (t->can_remove())
+			{
+				t->destroy();
+				thunders.erase(thunders.begin() + i);
+				continue;
+			}
+		}
+
 		auto enemy = m_enemys_01.begin();
 
 		while (enemy != m_enemys_01.end())
@@ -373,6 +392,35 @@ bool World::update(float elapsed_ms)
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 17);
+					}
+					break;
+				}
+
+			}
+
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
+				break;
+			}
+			++enemy;
+		}
+
+		enemy = m_enemys_01.begin();
+
+		while (enemy != m_enemys_01.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy->collide_with(*t))
+				{
+					t->apply_effect(*enemy);
+
+					if (!enemy->is_alive()) {
+						//enemy->destroy();
+						enemy = m_enemys_01.erase(enemy);
+						++m_points;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
 					}
 					break;
 				}
@@ -413,6 +461,35 @@ bool World::update(float elapsed_ms)
 			++enemy2;
 		}
 
+		enemy2 = m_enemys_02.begin();
+
+		while (enemy2 != m_enemys_02.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy2->collide_with(*t))
+				{
+					t->apply_effect(*enemy2);
+
+					if (!enemy2->is_alive()) {
+						//enemy->destroy();
+						enemy2 = m_enemys_02.erase(enemy2);
+						++m_points;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
+				break;
+			}
+			++enemy2;
+		}
+
 		auto enemy3 = m_enemys_03.begin();
 
 		while (enemy3 != m_enemys_03.end())
@@ -435,6 +512,35 @@ bool World::update(float elapsed_ms)
 					break;
 				}
 			}
+			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0) {
+				break;
+			}
+			++enemy3;
+		}
+
+		enemy3 = m_enemys_03.begin();
+
+		while (enemy3 != m_enemys_03.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy3->collide_with(*t))
+				{
+					t->apply_effect(*enemy3);
+
+					if (!enemy3->is_alive()) {
+						//enemy->destroy();
+						enemy3 = m_enemys_03.erase(enemy3);
+						++m_points;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
 			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0) {
 				break;
 			}
@@ -630,6 +736,8 @@ void World::draw()
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
+	for (auto& thunder : thunders)
+		thunder->draw(projection_2D);
 	m_hero.draw(projection_2D);
 
 	// Testing TODO
@@ -807,6 +915,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
+	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(0);
+	}
+	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(1);
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -823,6 +937,8 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 			angle = atan2((ypos - salmon_position.y), (xpos - salmon_position.x));
 
 		m_hero.set_rotation(angle);
+		mouse_position.x = float(xpos);
+		mouse_position.y = float(ypos);
 	}
 }
 
@@ -834,9 +950,9 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
 		shootingFireBall = false;
 	}
-
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
-		m_hero.use_ice_arrow_skill(hero_projectiles);
+		//m_hero.use_ice_arrow_skill(hero_projectiles);
+		m_hero.use_skill(hero_projectiles, thunders, mouse_position);
 }
 
 vec2 World::getScreenSize()
@@ -845,4 +961,3 @@ vec2 World::getScreenSize()
 	glfwGetFramebufferSize(m_window, &w, &h);
 	return { (float)w, (float)h };
 }
-
