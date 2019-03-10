@@ -15,6 +15,7 @@
 #include "map_screen.hpp"
 #include "start_screen.hpp"
 #include "user_interface.hpp"
+#include "Thunder.h"
 
 // stlib
 #include <vector>
@@ -94,6 +95,7 @@ private:
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
 
 	float m_current_speed;
@@ -111,6 +113,8 @@ private:
 
 	float m_window_width;
 	float m_window_height;
+
+	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;
 };

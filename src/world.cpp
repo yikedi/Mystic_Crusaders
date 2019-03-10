@@ -21,6 +21,7 @@ namespace
 	float screen_bottom = 100.f;	// called screen_bottom to avoid ambiguity
 	float our_x = 0.f;
 	float our_y = 0.f;
+	
 	// bool in_main_game = false;
 	//int stage = 0;
 
@@ -72,7 +73,9 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+
 	if (m_window == nullptr)
 		return false;
 
@@ -147,6 +150,7 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
+	mouse_position = { 0.f,0.f };
 
 }
 
@@ -279,6 +283,8 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		for (auto& thunder : thunders)
+			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
 
 		//remove out of screen fireball
@@ -309,6 +315,20 @@ bool World::update(float elapsed_ms)
 			}
 
 			++e_proj;
+		}
+
+		//remove overtime thunder
+		len = (int)thunders.size() - 1;
+		for (int i = len; i >= 0; i--)
+		{
+			Thunder* t = thunders.at(i);
+			
+			if (t->can_remove())
+			{
+				t->destroy();
+				thunders.erase(thunders.begin() + i);
+				continue;
+			}
 		}
 
 		auto enemy = m_enemys_01.begin();
@@ -531,6 +551,8 @@ void World::draw()
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
+	for (auto& thunder : thunders)
+		thunder->draw(projection_2D);
 	m_hero.draw(projection_2D);
 
 	// Testing TODO
@@ -691,6 +713,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	} else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
+	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(0);
+	}
+	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(1);
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -707,6 +735,8 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 			angle = atan2((ypos - salmon_position.y), (xpos - salmon_position.x));
 
 		m_hero.set_rotation(angle);
+		mouse_position.x = float(xpos);
+		mouse_position.y = float(ypos);
 	}
 }
 
@@ -720,7 +750,8 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
-		m_hero.use_ice_arrow_skill(hero_projectiles);
+		//m_hero.use_ice_arrow_skill(hero_projectiles);
+		m_hero.use_skill(hero_projectiles,thunders, mouse_position);
 }
 
 vec2 World::getScreenSize()

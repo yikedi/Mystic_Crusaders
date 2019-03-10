@@ -50,6 +50,10 @@ set(SOURCE_FILES
 	src/map_screen.cpp
     src/Ice_arrow.cpp
     src/Ice_arrow_skill.cpp
+	src/ThunderSKill.cpp
+	src/Thunder.cpp
+	src/ThunderString.cpp
+	src/ThunderBall.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -71,6 +75,10 @@ set(SOURCE_FILES
 	src/map_screen.hpp
     src/Ice_arrow.h
     src/Ice_arrow_skill.h
+	src/ThunderSKill.h
+	src/Thunder.h
+	src/ThunderString.h
+	src/ThunderBall.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

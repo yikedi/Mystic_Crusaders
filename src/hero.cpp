@@ -80,10 +80,12 @@ bool Hero::init(vec2 screen)
 	hp = max_hp;
 	mp = max_mp;
     ice_arrow_skill.init();
+	thunder_skill.init();
 	deceleration = 1.0f;
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
+	activeSkill = 0;
 	return true;
 }
 
@@ -570,6 +572,17 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 
 }
 
+bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
+{
+	if (mp > thunder_skill.get_mpcost()) 
+	{
+		thunder_skill.drop_thunder(thunders, position);
+		return true;
+	}
+	return false;
+	
+}
+
 void Hero::level_up()
 {
     ice_arrow_skill.level_up();
@@ -581,3 +594,25 @@ void Hero::apply_momentum(vec2 f)
 	momentum.y += f.y;
 }
 
+bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position)
+{
+	bool success;
+	switch (activeSkill)
+	{
+	case ICE_SKILL:
+		success = use_ice_arrow_skill(hero_projectiles);
+		break;
+	case THUNDER_SKILL:
+		success = use_thunder_skill(thunders, position);
+		break;
+	default:
+		success = false;
+		break;
+	}
+	return success;
+}
+
+void Hero::set_active_skill(int active)
+{
+	activeSkill = active;
+}
