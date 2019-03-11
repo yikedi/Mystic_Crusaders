@@ -1,7 +1,10 @@
 #pragma once
 
 #include "common.hpp"
+#include "sprite_sheet.hpp"
 #include "time.h"
+
+enum class EnemyMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
 
 // general enemies
 class Enemies
