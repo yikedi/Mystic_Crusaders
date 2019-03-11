@@ -120,7 +120,7 @@ void Iceskilltex::draw(const mat3 & projection)
 void Iceskilltex::update_ice(bool paused, float degree)
 {
 	if (paused) {
-		if (degree ==0.f) {
+		if (degree == 0.f) {
 			get_texture(0);
 		}
 		else if (degree == 1.f) {

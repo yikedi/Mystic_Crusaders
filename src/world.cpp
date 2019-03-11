@@ -76,8 +76,8 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -159,8 +159,6 @@ bool World::init(vec2 screen)
 	m_window_width = screen.x;
 	m_window_height = screen.y;
 	stree.init(screen, 1);
-	//stree.init(screen, 2);
-	//stree.init(screen, 3);
 	m_hero.init(screen);
 	shootingFireBall = false;
 	mouse_position = { 0.f,0.f };
@@ -273,7 +271,7 @@ bool World::update(float elapsed_ms)
 				vec2 force = { 10.f, 0.f };
 				m_hero.apply_momentum(force);
 			}
-			if (m_points - previous_point > 1 + (m_hero.level * 5))		//temp change
+			if (m_points - previous_point > 20 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
 				m_hero.levelup(); // use 0 for now
