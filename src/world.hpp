@@ -17,7 +17,7 @@
 #include "start_screen.hpp"
 #include "user_interface.hpp"
 #include "skilltree.hpp"
-#include "ice_skill.hpp"
+#include "ice_skill_tex.hpp"
 
 // stlib
 #include <vector>
@@ -76,7 +76,7 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
-	Iceskill ices;
+	Iceskilltex ices;
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -101,6 +101,8 @@ private:
 	vec2 mouse_pos;
 	int used_skillpoints;
 	vec3 ice_skill_set;
+	vec3 thunder_skill_set;
+	int skill_num;
 	std::string skill_element;
 
 	// Game entities

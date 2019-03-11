@@ -580,7 +580,7 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 
 void Hero::level_up()
 {
-    ice_arrow_skill.level_up();
+    //ice_arrow_skill.level_up();
 	light_up();
 	hp = std::min(max_hp, hp + 10.f);
 	level ++;
@@ -592,3 +592,7 @@ void Hero::apply_momentum(vec2 f)
 	momentum.y += f.y;
 }
 
+void Hero::ice_arrow_level_up()
+{
+	ice_arrow_skill.level_up();
+}

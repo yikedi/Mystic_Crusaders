@@ -94,6 +94,7 @@ public:
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void level_up();
+	void ice_arrow_level_up();
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	int level;
 private:

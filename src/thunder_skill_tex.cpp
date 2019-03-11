@@ -1,4 +1,4 @@
-#include "ice_skill.hpp"
+#include "thunder_skill_tex.hpp"
 
 #include <iostream>
 
@@ -8,16 +8,34 @@
 #include <cmath>
 
 #include <gl3w.h>
-Texture Iceskill::ice_texture;
 
-bool Iceskill::init(vec2 screen)
+bool Thunderskilltex::init(vec2 screen, int skill_num)	//, std::string filename
 {
-	ice_texture.load_from_file(textures_path("ice_skill_texture.png"));
-	float w = ice_texture.width;
-	float h = ice_texture.height;
+	//std::string fullpath(data_path "/textures/");
+	//fullpath = fullpath + filename;
+	//std::string a(data_path + tex_name.c_str());
+	switch (skill_num) {
+		case 1:
+			thunder_texture.load_from_file(thunder_skill1());  //fullpath.c_str()
+			m_position.x = 0.71*screen.x;
+			m_position.y = 0.42*screen.y;
+			break;
+		case 2:
+			thunder_texture.load_from_file(thunder_skill2());
+			m_position.x = 0.76*screen.x;
+			m_position.y = 0.52*screen.y;
+			break;
+		case 3:
+			thunder_texture.load_from_file(thunder_skill3());
+			m_position.x = 0.71*screen.x;
+			m_position.y = 0.62*screen.y;
+			break;
+	}
+	float w = thunder_texture.width;
+	float h = thunder_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 217.f;
+	float width = 120.f;
 
 	vertices[0].position = { -width/2, +hr, 0.f };
 	vertices[1].position = { +width/2, +hr, 0.f };
@@ -26,7 +44,7 @@ bool Iceskill::init(vec2 screen)
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
-
+	
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -37,12 +55,12 @@ bool Iceskill::init(vec2 screen)
 		return false;
 
 	m_scale = { 1.0f,1.0f };
-	m_position.x = screen.x / 2;
-	m_position.y = screen.y / 2;
+
+	m_light_up = 0;
 	return true;
 }
 
-void Iceskill::destroy()
+void Thunderskilltex::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -53,7 +71,7 @@ void Iceskill::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Iceskill::draw(const mat3 & projection)
+void Thunderskilltex::draw(const mat3 & projection)
 {
 		gl_flush_errors();
 
@@ -72,6 +90,7 @@ void Iceskill::draw(const mat3 & projection)
 		GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 		GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 		GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
+		GLint light_up_uloc = glGetUniformLocation(effect.program, "light_up");
 
 		// Setting vertices and indices
 		glBindVertexArray(mesh.vao);
@@ -88,7 +107,7 @@ void Iceskill::draw(const mat3 & projection)
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, ice_texture.id);
+		glBindTexture(GL_TEXTURE_2D, thunder_texture.id);
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -96,37 +115,45 @@ void Iceskill::draw(const mat3 & projection)
 		glUniform3fv(color_uloc, 1, color);
 		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
+		glUniform1iv(light_up_uloc, 1, &m_light_up);
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Iceskill::update_ice(bool paused, vec3 ice_num)
+void Thunderskilltex::update_ice(bool paused, float degree)
 {
-	float skill1 = ice_num.x;
-	float skill2 = ice_num.y;
-	float skill3 = ice_num.z;
-
 	if (paused) {
 		//fprintf(stderr, "Failed to load enemy texture!");
-		if (skill1 ==0.f && skill2 ==0.f && skill3==0.f) {
-			fprintf(stderr, "texture!");
+		if (degree ==0.f) {
+			//fprintf(stderr, "texture1");
 			get_texture(0);
-		}else if (skill1 == 1.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 1.f) {
+			//fprintf(stderr, "texture2");
 			get_texture(1);
-		}else if (skill1 == 2.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 2.f) {
+			//fprintf(stderr, "texture3");
 			get_texture(2);
-		}else if (skill1 == 3.f && skill2 == 0.f && skill3 == 0.f) {
+		}
+		else if (degree == 3.f) {
 			get_texture(3);
+		}
+		else if (degree == 4.f) {
+			get_texture(4);
+		}
+		else if (degree == 5.f) {
+			get_texture(5);
 		}
 	}
 }
 
-void Iceskill::get_texture(int loc)
+void Thunderskilltex::get_texture(int loc)
 {
 	//height/width
-	float h = 217.f;
-	float w = 1095.f;
-	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w };
+	float h = 120.f;
+	float w = 720.f;
+	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
@@ -148,8 +175,15 @@ void Iceskill::get_texture(int loc)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-vec2 Iceskill::set_scale(float w, float h, vec2 screen)
+vec2 Thunderskilltex::get_position()const
 {
-	return vec2();
+	return m_position;
 }
 
+void Thunderskilltex::light_up() {
+	m_light_up = 1;
+}
+
+void Thunderskilltex::blue_up() {
+	m_light_up = 0;
+}

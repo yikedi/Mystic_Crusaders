@@ -149,12 +149,16 @@ bool World::init(vec2 screen)
 	start_is_over = start.is_over();
 	m_level = 0;
 	used_skillpoints = 0;
+	skill_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
+	thunder_skill_set = { 0.f,0.f,0.f };
 	game_is_paused = false;
-	skill_element = stree.get_element();
+	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
-	stree.init(screen);
+	stree.init(screen, 1);
+	//stree.init(screen, 2);
+	//stree.init(screen, 3);
 	m_hero.init(screen);
 	shootingFireBall = false;
 	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
@@ -201,12 +205,9 @@ bool World::update(float elapsed_ms)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	//temp
-	vec3 s = { 0.f,0.f,0.f };
-
+	
 	start.update(start_is_over);
-	stree.update_skill(game_is_paused, 1, 0,ice_skill_set);
-
+	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
@@ -265,7 +266,7 @@ bool World::update(float elapsed_ms)
 			m_hero.apply_momentum(force);
 		}
 
-		if (m_points - previous_point > 20 + (m_hero.level * 5))
+		if (m_points - previous_point > 1 + (m_hero.level * 5))	//20
 		{
 			previous_point = m_points;
 			m_hero.level_up();
@@ -537,7 +538,9 @@ bool World::update(float elapsed_ms)
 		m_points = 0;
 		m_level = 0;
 		used_skillpoints = 0;
+		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
+		thunder_skill_set = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
 		map.set_is_over(true);
@@ -751,7 +754,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_points = 0;
 		m_level = 0;
 		used_skillpoints = 0;
+		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
+		thunder_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
@@ -820,6 +825,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
 	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
+		if (game_is_paused) {
+			zoom_factor = 1.1f;
+		}
+		else {
+			zoom_factor = 1.f;
+		}
 		game_is_paused = !game_is_paused;
 	}
 }
@@ -861,14 +872,82 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			m_hero.use_ice_arrow_skill(hero_projectiles);
 	}
 	else {
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && stree.level_position(mouse_pos, used_skillpoints)) {
-			//if (m_level > used_skillpoints) {
-				used_skillpoints++;
-				//change after to different skill
-				ice_skill_set.x = ice_skill_set.x + 1.f;
-			//}
+		//std::string click_element = stree.element_position(mouse_pos);
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
+			skill_element = stree.element_position(mouse_pos);
+			if (skill_element == "ice") {
+				stree.init(screen, 1);
+			}
+			else if (skill_element == "thunder") {
+				stree.init(screen, 2);
+			}
+			else if (skill_element == "fire") {
+				stree.init(screen, 1);   // if it is fire screen, it won't change to other screens
+			}
 		}
-
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
+				skill_num = stree.ice_position(mouse_pos, skill_element);
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.x = ice_skill_set.x + 1.f;
+					m_hero.ice_arrow_level_up();
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.x = thunder_skill_set.x + 1.f;
+					//thunder skill 1 level up
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.ice_position(mouse_pos, skill_element);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 2) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.y = ice_skill_set.y + 1.f;
+					m_hero.ice_arrow_level_up();
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.y = thunder_skill_set.y + 1.f;
+					//thunder skill 2 level up
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.ice_position(mouse_pos, skill_element);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 3) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.z = ice_skill_set.z + 1.f;
+					m_hero.ice_arrow_level_up();
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.y = thunder_skill_set.y + 1.f;
+					//thunder skill 3 level up
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.ice_position(mouse_pos, skill_element);
+			}
+		}
 	}
 }
 

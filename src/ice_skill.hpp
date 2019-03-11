@@ -10,24 +10,22 @@
 
 class Iceskill : public Renderable
 {
-	Texture ice_texture;
+	static Texture ice_texture;
 public:
 
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen, int skill_num);  //,std::string filename
+	bool init(vec2 screen);
 
 	// Releases all the associated resources
 	void destroy();
 
 	void draw(const mat3& projection)override;
 
-	void update_ice(bool paused, float degree); //call on world
+	void update_ice(bool paused, vec3 ice_num); //call on world
 
 	void get_texture(int loc);
 
-	vec2 get_position() const;
-
-	bool in_position(vec2 mouse_pos, vec2 screen, int used);
+	vec2 set_scale(float w, float h, vec2 screen);
 
 	void reset();
 
