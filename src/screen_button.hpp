@@ -10,6 +10,7 @@
 // actual used includes
 #include <cmath>
 #include <string>
+#include <functional>
 
 
 class Button : public Renderable
@@ -20,9 +21,11 @@ class Button : public Renderable
 public:
 	
 	typedef void(*ClickCallback)();
+	using ClickCallbackSTD = std::function<void()>;
+	Button(){}
 
 	// Gets the top-left corner coordinates, width, height, and message for the button, and returns a button
-	Button(int x, int y, int w, int h, std::string path, std::string type, ClickCallback onClick);
+	Button(int x, int y, int w, int h, std::string path, std::string type, ClickCallbackSTD onClick);
 
 	// Destructor
 	~Button();
@@ -31,11 +34,13 @@ public:
 
 	// bool init(double x, double y, double w, double h, std::string text);
 
-	bool init(double x, double y, double w, double h, std::string path, std::string type, ClickCallback onClick);
+	bool init(double x, double y, double w, double h, std::string path, std::string type, ClickCallbackSTD onClick);
 
 	void CheckClick(double x, double y);
 
 	void set_color(vec3 color);
+
+	void draw(const mat3 &projection);
 
 
 	/*
@@ -55,8 +60,9 @@ public:
 	bool is_within_range();
 	*/
 
-	ClickCallback onClick;
+	ClickCallbackSTD onClick;
 	float m_color[3];
+	
 
 private:
 	double width;

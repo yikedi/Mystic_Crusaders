@@ -65,6 +65,8 @@ private:
 	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
 	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
 
+	void startGame();
+
 
 private:
 	// Window handle
@@ -114,4 +116,5 @@ private:
 	float m_window_height;
 
 	clock_t lastFireProjectileTime;
+	Button testButton;
 };

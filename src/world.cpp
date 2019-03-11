@@ -21,6 +21,7 @@ namespace
 	float screen_bottom = 100.f;	// called screen_bottom to avoid ambiguity
 	float our_x = 0.f;
 	float our_y = 0.f;
+	// Button testButton;
 	// bool in_main_game = false;
 	//int stage = 0;
 
@@ -72,7 +73,8 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	// m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -145,6 +147,8 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
+	// std::function<void> f1 = &World::startGame;
+	testButton.init(300, 300, 100, 50, "thingy.png", "Start", (std::bind(&World::startGame, this)));
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -180,6 +184,7 @@ void World::destroy()
 	// in_main_game = false;
 	m_interface.destroy();
 	start.destroy();
+	testButton.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -521,6 +526,7 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
+	testButton.draw(projection_2D);
 	// Drawing entities
 	map.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
@@ -728,5 +734,24 @@ vec2 World::getScreenSize()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	return { (float)w, (float)h };
+}
+
+void World::startGame()
+{
+	// grab screen size first
+	int w, h;
+	glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
+	
+	// input code from key input, "G"
+	if (start_is_over == false) {
+		map.init(screen);
+		start_is_over = true;
+		zoom_factor = 1.1f;
+	}
+	else {
+		fprintf(stderr, "WORLD::STARTGAME CALLED WHEN start_is_over IS NOT FALSE!");
+	}
+	return;
 }
 
