@@ -510,6 +510,11 @@ bool Hero::mesh_collision(vec3 ptest,std::vector<vec3> &cur_vertices)
     return false;
 }
 
+int Hero::get_active_skill()
+{
+	return activeSkill;
+}
+
 void Hero::set_color(vec3 in_color)
 {
 	float color[3] = {in_color.x,in_color.y,in_color.z};
@@ -582,9 +587,12 @@ bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 	
 }
 
-void Hero::level_up(int select)
+void Hero::level_up(int select_skill,int select_upgrade)
 {
-    ice_arrow_skill.level_up(select);
+	if (select_skill == 0)
+		ice_arrow_skill.level_up(select_upgrade);
+	else if (select_skill == 1)
+		thunder_skill.level_up(select_upgrade);
 }
 
 void Hero::apply_momentum(vec2 f)

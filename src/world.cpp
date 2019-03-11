@@ -96,10 +96,12 @@ bool World::init(vec2 screen)
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2); };
+	auto mouse_wheel_callback = [](GLFWwindow* wnd, double _0, double _1) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_wheel(wnd, _0, _1); };
 
 	glfwSetKeyCallback(m_window, key_redirect);
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+	glfwSetScrollCallback(m_window, mouse_wheel_callback);
 
 	//glutReshapeFunc(reshape);
 
@@ -267,7 +269,7 @@ bool World::update(float elapsed_ms)
 			if (m_points - previous_point > 20 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
-				m_hero.level_up(0); // use 0 for now
+				m_hero.level_up(0,0); // use 0 for now
 				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
 		}
@@ -955,6 +957,20 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		//m_hero.use_ice_arrow_skill(hero_projectiles);
 		m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+}
+
+void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (yoffset < -0.01f)
+	{
+		int level_up_skill = (m_hero.get_active_skill() - 1 + 2) % 2;
+		m_hero.set_active_skill(level_up_skill);
+	}
+	else if (yoffset > 0.01f)
+	{
+		int level_up_skill = (m_hero.get_active_skill() + 1) % 2;
+		m_hero.set_active_skill(level_up_skill);
+	}
 }
 
 vec2 World::getScreenSize()
