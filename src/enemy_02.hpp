@@ -30,8 +30,6 @@ public:
 
 	bool checkIfCanFire(clock_t currentClock);
 
-    bool collide_with(Projectile &projectile);
-
     void setTextureLocs(int index);
 
 	void powerup();

@@ -29,8 +29,6 @@ public:
 
     void setTextureLocs(int index);
 
-	bool collide_with(Projectile &projectile);
-
 	bool shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles);
 
 	bool needFireProjectile;
