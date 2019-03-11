@@ -478,13 +478,13 @@ void Hero::transform_current_vertex(std::vector<vec3> &cur_vertices)
     }
 }
 
+vec2 Hero::get_bounding_box()
+{	
+	return { std::fabs(m_scale.x) * hero_texture.subWidth, std::fabs(m_scale.y) * hero_texture.height };	
+}
+
 bool Hero::mesh_collision(vec3 ptest,std::vector<vec3> &cur_vertices)
 {
-    //mat3 A = mul(m_projection,transform);
-//    for (size_t i = 0; i < vertices.size(); ++i) {
-//        vec3 cur_position= mul_vec(transform, vertices.at(i).position);
-//        cur_vertices.push_back(cur_position);
-//    }
 
     for (size_t i = 0; i < indices.size(); i+=3) {
 
@@ -556,6 +556,16 @@ float Hero::get_mp()
     return mp;
 }
 
+void Hero::set_position(vec2 position)
+{
+	m_position = position;
+}
+
+vec2 Hero::get_position()
+{
+	return m_position;
+}
+
 bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
 	//Fish fish;
@@ -591,4 +601,6 @@ void Hero::apply_momentum(vec2 f)
 	momentum.x += f.x;
 	momentum.y += f.y;
 }
+
+
 

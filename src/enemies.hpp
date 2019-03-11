@@ -4,7 +4,7 @@
 #include "time.h"
 
 // general enemies
-class Enemies
+class Enemies : public Renderable
 {
 	// Shared between all enemys, no need to load one for each instance
 	static Texture enemy_texture;

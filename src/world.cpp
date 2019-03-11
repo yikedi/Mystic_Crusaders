@@ -79,7 +79,8 @@ bool World::init(vec2 screen)
 	//For small window
 	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
 	//For full screen
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -305,8 +306,6 @@ bool World::update(float elapsed_ms)
 		}
 		}
 
-
-
 		for (Enemy_01 enemy : m_enemys_01)
 		{
 			if (enemy.needFireProjectile == true)
@@ -347,6 +346,59 @@ bool World::update(float elapsed_ms)
 
 		// Updating all entities, making the enemy and fish
 		// faster based on current
+
+		//check treetrunk collision
+		//some bugs in collision detection need to be fixed latter, but it is not related to here
+		for (auto &treeTruck : m_treetrunk)
+		{
+			if (treeTruck.collide_with(m_hero)) {
+				vec2 cur_direction = m_hero.get_direction();
+				vec2 cur_position = m_hero.get_position();
+				vec2 new_position = { cur_position.x + cur_direction.x * -20.f, cur_position.y + cur_direction.y * -20.f };
+				m_hero.set_position(new_position);
+			}
+
+			// if hero projectile hit the tree trunck then destroy it
+			int p_len = (int)hero_projectiles.size() - 1;
+			for (int i = p_len; i >= 0; i--)
+			{
+				Projectile* h_proj = hero_projectiles.at(i);
+				if (treeTruck.collide_with(*h_proj))
+				{
+					h_proj->destroy();
+					hero_projectiles.erase(hero_projectiles.begin() + i);
+				}
+			}
+
+			//same for enemy projectile
+			int l_len = (int)enemy_projectiles.size() - 1;
+			for (int i = l_len; i >= 0; i--)
+			{
+				EnemyLaser laser = enemy_projectiles.at(i);
+				if (treeTruck.collide_with(laser))
+				{
+					laser.destroy();
+					enemy_projectiles.erase(enemy_projectiles.begin() + i);
+				}
+			}
+
+			//not sure what to do for enemies, tree trunk collision now
+			//for (auto &e1 : m_enemys_01)
+			//{
+
+			//}
+
+			//for (auto &e2 : m_enemys_02)
+			//{
+
+			//}
+
+			//for (auto &e3 : m_enemys_03)
+			//{
+
+			//}
+		}
+
 		m_hero.update(elapsed_ms);
 		for (auto& enemy : m_enemys_01)
 			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
@@ -358,6 +410,7 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 
 		//remove out of screen fireball

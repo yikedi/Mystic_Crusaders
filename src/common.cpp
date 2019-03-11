@@ -304,3 +304,46 @@ void Renderable::transform_end()
 {
 	//
 }
+
+void Renderable::transform_current_vertex(std::vector<vec3> &cur_vertices)
+{
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		vec3 old_position = { vertices.at(i).position.x, vertices.at(i).position.y,1 };
+		vec3 cur_position = mul_vec(transform, old_position);
+		cur_vertices.push_back(cur_position);
+	}
+}
+
+bool Renderable::mesh_collision(vec3 ptest, std::vector<vec3> &cur_vertices)
+{
+
+	for (size_t i = 0; i < indices.size(); i += 3) {
+
+		//three vertices of a triangle
+		vec3 point1 = cur_vertices.at(indices[i]);
+		vec3 point2 = cur_vertices.at(indices[i + 1]);
+		vec3 point3 = cur_vertices.at(indices[i + 2]);
+
+		vec2 p1 = { point1.x, point1.y };
+		vec2 p1_p2 = { point2.x - point1.x,point2.y - point1.y };
+		vec2 p1_p3 = { point3.x - point1.x,point3.y - point1.y };
+		vec2 ptest2d = { ptest.x,ptest.y };
+
+		float a, b = 0.f;
+		float detv12 = det(p1_p2, p1_p3); //This should not be 0;
+		if (detv12 == 0)
+			return false;
+		float detvv2 = det(ptest2d, p1_p2);
+		float detvv3 = det(ptest2d, p1_p3);
+		float detv1v2 = det(p1, p1_p2);
+		float detv1v3 = det(p1, p1_p3);
+		a = (detvv2 - detv1v2) / detv12;
+		b = -1.f* (detvv3 - detv1v3) / detv12;
+
+		if (a > 0 && b > 0 && a + b < 1.f) {
+			return true;
+		}
+	}
+
+	return false;
+}

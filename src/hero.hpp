@@ -77,8 +77,13 @@ public:
 
     void set_moveState(HeroMoveState state);
 
+	void set_position(vec2 position);
+
+	vec2 get_position();
+
     HeroMoveState get_moveState();
 
+	vec2 get_bounding_box();
     bool mesh_collision(vec3 point, std::vector<vec3> &cur_vertices);
     void transform_current_vertex(std::vector<vec3> &cur_vertices);
 	void set_color(vec3 color);
@@ -90,7 +95,7 @@ public:
 	float get_hp();
     float get_mp();
 	void apply_momentum(vec2 f);
-	void set_speed(vec2 speed);
+
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void level_up();

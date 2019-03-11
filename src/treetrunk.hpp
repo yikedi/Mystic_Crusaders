@@ -38,6 +38,13 @@ public:
 
 	void set_position(vec2 position);
 
+	bool collide_with(Hero &hero);
+
+	bool collide_with(Projectile &projectile);
+
+	bool collide_with(Enemies &e);
+
+
 private:
 	double w;
 	double h;

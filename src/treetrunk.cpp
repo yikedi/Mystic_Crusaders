@@ -15,8 +15,6 @@
 
 bool Treetrunk::init(vec2 screen)
 {
-	std::vector<Vertex> vertices;
-	std::vector<uint16_t> indices;
 
 	// Reads the salmon mesh from a file, which contains a list of vertices and indices
 	FILE* mesh_file = fopen(mesh_path("treetrunk.mesh"), "r");
@@ -171,4 +169,110 @@ vec2 Treetrunk::get_position()const
 void Treetrunk::set_position(vec2 position)
 {
 	m_position = position;
+}
+
+bool Treetrunk::collide_with(Hero &hero)
+{
+	float dx = m_position.x - hero.get_position().x;
+	float dy = m_position.y - hero.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(hero.get_bounding_box().x, hero.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+
+	r *= 1.0f;
+	float top, bottom, left, right;
+	float scale_back = 1.0f;
+	top = -1.f * hero.get_bounding_box().y / scale_back;
+	bottom = hero.get_bounding_box().y / scale_back;
+	left = -1.f * hero.get_bounding_box().x / scale_back;
+	right = hero.get_bounding_box().x / scale_back;
+	//points before transform
+	vec3 p_top, p_left, p_right, p_bottom;
+
+	//could add a list of points to test for our game
+	p_top = mul_vec(hero.transform, { 0,top,1 });
+	p_bottom = mul_vec(hero.transform, { 0,bottom,1 });
+	p_left = mul_vec(hero.transform, { left,0,1 });
+	p_right = mul_vec(hero.transform, { right,0,1 });
+
+	std::vector<vec3> cur_vertices;
+	transform_current_vertex(cur_vertices);
+	if (d_sq < r * r) {
+		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
+			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+	}
+
+	return false;
+}
+
+
+bool Treetrunk::collide_with(Projectile &p)
+{
+	float dx = m_position.x - p.get_position().x;
+	float dy = m_position.y - p.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(p.get_bounding_box().x, p.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+
+	r *= 1.0f;
+	float top, bottom, left, right;
+	float scale_back = 1.0f;
+	top = -1.f * p.get_bounding_box().y / scale_back;
+	bottom = p.get_bounding_box().y / scale_back;
+	left = -1.f * p.get_bounding_box().x / scale_back;
+	right = p.get_bounding_box().x / scale_back;
+	//points before transform
+	vec3 p_top, p_left, p_right, p_bottom;
+
+	//could add a list of points to test for our game
+	p_top = mul_vec(p.transform, { 0,top,1 });
+	p_bottom = mul_vec(p.transform, { 0,bottom,1 });
+	p_left = mul_vec(p.transform, { left,0,1 });
+	p_right = mul_vec(p.transform, { right,0,1 });
+
+	std::vector<vec3> cur_vertices;
+	transform_current_vertex(cur_vertices);
+	if (d_sq < r * r) {
+		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
+			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+	}
+
+	return false;
+}
+
+bool Treetrunk::collide_with(Enemies &e)
+{
+	float dx = m_position.x - e.get_position().x;
+	float dy = m_position.y - e.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(e.get_bounding_box().x, e.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+
+	r *= 1.0f;
+	float top, bottom, left, right;
+	float scale_back = 1.0f;
+	top = -1.f * e.get_bounding_box().y / scale_back;
+	bottom = e.get_bounding_box().y / scale_back;
+	left = -1.f * e.get_bounding_box().x / scale_back;
+	right = e.get_bounding_box().x / scale_back;
+	//points before transform
+	vec3 p_top, p_left, p_right, p_bottom;
+
+	//could add a list of points to test for our game
+	p_top = mul_vec(e.transform, { 0,top,1 });
+	p_bottom = mul_vec(e.transform, { 0,bottom,1 });
+	p_left = mul_vec(e.transform, { left,0,1 });
+	p_right = mul_vec(e.transform, { right,0,1 });
+
+	std::vector<vec3> cur_vertices;
+	transform_current_vertex(cur_vertices);
+	if (d_sq < r * r) {
+		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
+			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+	}
+
+	return false;
 }
