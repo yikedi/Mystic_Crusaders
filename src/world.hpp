@@ -6,6 +6,7 @@
 #include "turtle.hpp"
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
+#include "enemy_03.hpp"
 #include "fish.hpp"
 #include "water.hpp"
 #include "hero.hpp"
@@ -52,6 +53,7 @@ private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
 	bool spawn_enemy_02();
+	bool spawn_enemy_03();
 	bool shootingFireBall;
 
 	// Generates a new fish
@@ -92,6 +94,7 @@ private:
 	Hero m_hero;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
+	std::vector<Enemy_03> m_enemys_03;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	UserInterface m_interface;
@@ -99,11 +102,13 @@ private:
 	float m_current_speed;
 	float m_next_enemy1_spawn;
 	float m_next_enemy2_spawn;
+	float m_next_enemy3_spawn;
 	float m_next_fish_spawn;
 
 	Mix_Music* m_background_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
+	Mix_Chunk* m_levelup_sound;
 
 	// C++ rng
 	std::default_random_engine m_rng;

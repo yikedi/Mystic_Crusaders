@@ -4,49 +4,47 @@
 #include <cmath>
 #include <algorithm>
 
-Texture Enemy_01::enemy_texture;
+SpriteSheet Enemy_01::enemy_texture;
 
 bool Enemy_01::init(int level)
 {
 	// Load shared texture
 	if (!enemy_texture.is_valid())
 	{
-		if (!enemy_texture.load_from_file(textures_path("enemy_01.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_01_animation.png")))
 		{
 			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
 		}
 	}
 
+    enemy_texture.totalTiles = 16;
+    enemy_texture.subWidth = 64;
+    enemy_texture.subHeight = 64;
+    m_is_alive = false;
+
 	// The position corresponds to the center of the texture
-	float wr = enemy_texture.width * 0.5f;
-	float hr = enemy_texture.height * 0.5f;
+	float wr = enemy_texture.subWidth * 0.5f;
+	float hr = enemy_texture.subHeight * 0.5f;
+    int rowLength = enemy_texture.width / enemy_texture.subWidth;
+    int colLength = enemy_texture.height / enemy_texture.subHeight;
+    for (int i = 0; i <= rowLength; i++) {
+        float w = (float)i * enemy_texture.subWidth / enemy_texture.width;
+        texture_cols.push_back(w);
+    }
+    for (int j = 0; j <= colLength; j++) {
+        float h = (float)j * enemy_texture.subHeight / enemy_texture.height;
+        texture_rows.push_back(h);
+    }
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.02f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.02f };
-	vertices[1].texcoord = { 1.f, 1.f };
-	vertices[2].position = { +wr, -hr, -0.02f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.02f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.02f };
+	texVertices[1].position = { +wr, +hr, -0.02f };
+	texVertices[2].position = { +wr, -hr, -0.02f };
+	texVertices[3].position = { -wr, -hr, -0.02f };
 
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
-
-	// Clearing errors
-	gl_flush_errors();
-
-	// Vertex Buffer creation
-	glGenBuffers(1, &mesh.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
-	glGenBuffers(1, &mesh.ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+    glGenBuffers(1, &mesh.vbo);
+    glGenBuffers(1, &mesh.ibo);
+    setTextureLocs(4);
 
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
@@ -59,6 +57,7 @@ bool Enemy_01::init(int level)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
+	m_is_alive = true;
 	m_scale.x = 1.0f;
 	m_scale.y = 1.0f;
 	needFireProjectile = false;
@@ -66,21 +65,22 @@ bool Enemy_01::init(int level)
 	enemyRandMoveAngle = 0.f;
 	lastFireProjectileTime = clock();
 	randMovementTime = clock();
-	m_is_alive = true;
 
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(80.0f + (float)level * 1.0f * randAttributeFactor, 200.0f);
-	attackCooldown = std::max(2000.0 - (double)level * 10.0 * randAttributeFactor, 200.0);
-	randMovementCooldown = std::max(1000.0 - (double)level * 5.0 * randAttributeFactor, 250.0);
-	projectileSpeed = std::min(200.0 + (double)level * 2.0 * randAttributeFactor, 450.0);
-	hp = 30.f;
+	m_speed = std::min(40.0f + (float)level * 0.5f * randAttributeFactor, 200.0f);
+	attackCooldown = std::max(2300.0 - (double)level * 5.0 * randAttributeFactor, 200.0);
+	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 250.0);
+	projectileSpeed = std::min(150.0 + (double)level * 1.0 * randAttributeFactor, 450.0);
+	m_range = 50.0 * randAttributeFactor + 475.f;
+	hp = std::min(30.0f + (float)level * 0.2f * randAttributeFactor, 50.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
 	m_level = level;
+	poweredup = false;
 
 	return true;
 }
@@ -89,10 +89,12 @@ bool Enemy_01::init(int level)
 // Releases all graphics resources
 void Enemy_01::destroy()
 {
-	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+    glDeleteBuffers(1, &mesh.vbo);
+    glDeleteBuffers(1, &mesh.ibo);
+
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 
@@ -102,12 +104,14 @@ void Enemy_01::draw(const mat3& projection)
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(m_position);
-
-	if(m_face_left_or_right == 1){
+    /*
+    if(m_face_left_or_right == 1){
 		m_scale.x = -1.0f;
 	} else {
 		m_scale.x = 1.0f;
 	}
+    */
+
 
 	transform_scale(m_scale);
 	transform_end();
@@ -144,6 +148,28 @@ void Enemy_01::draw(const mat3& projection)
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 	float color[] = { 1.f, 1.f, 1.f };
+	if (poweredup){
+		switch (powerupType)
+		{
+			case 0:
+				color[0] = 0.2f;
+				color[2] = 0.2f;
+				break;
+			case 1:
+				color[1] = 0.2f;
+				color[2] = 0.2f;
+				break;
+			case 2:
+				color[0] = 0.8f;
+				color[1] = 0.1f;
+				color[2] = 0.8f;
+				break;
+			case 3:
+				color[0] = 0.2f;
+				color[1] = 0.2f;
+				break;
+		}
+	}
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
@@ -153,6 +179,8 @@ void Enemy_01::draw(const mat3& projection)
 
 void Enemy_01::update(float ms, vec2 target_pos)
 {
+    float animSpeed = 0.05f;
+
 	//momentum first
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;
@@ -189,10 +217,13 @@ void Enemy_01::update(float ms, vec2 target_pos)
 		float step = m_speed * (ms / 1000);
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
-	} else if (distance <= 500.f && checkIfCanFire(currentTime)) {
+	} else if (distance <= m_range && checkIfCanFire(currentTime)) {
 		needFireProjectile = true;
 		setLastFireProjectileTime(currentTime);
-	} else if (distance <= 500.f) {
+		float f = (float)rand() / RAND_MAX;
+    	float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
+		m_range = 50.0 * randAttributeFactor + 475.f;
+	} else if (distance <= m_range) {
 		needFireProjectile = false;
 		float step = -m_speed * (ms / 1000);
 		m_position.x += cos(enemyRandMoveAngle)*step;
@@ -210,6 +241,67 @@ void Enemy_01::update(float ms, vec2 target_pos)
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 	}
+
+    // setting enemy movement state
+    if (facing == 1) {
+        if (m_moveState != EnemyMoveState::RIGHTMOVING) {
+            m_moveState = EnemyMoveState::RIGHTMOVING;
+            m_animTime = 0.0f;
+        }
+    }
+    else {
+        if (m_moveState != EnemyMoveState::LEFTMOVING) {
+            m_moveState = EnemyMoveState::LEFTMOVING;
+            m_animTime = 0.0f;
+        }
+    }
+
+    m_animTime += animSpeed * 2;
+    numTiles = 4;
+
+    // setting texture coordinates
+    if (m_moveState == EnemyMoveState::LEFTMOVING) {
+        int currIndex = 4;
+        currIndex += (int)m_animTime % numTiles;
+        setTextureLocs(currIndex);
+    }
+    else if (m_moveState == EnemyMoveState::RIGHTMOVING) {
+        int currIndex = 8;
+        currIndex += (int)m_animTime % numTiles;
+        setTextureLocs(currIndex);
+    }
+}
+
+void Enemy_01::setTextureLocs(int index)
+{
+    int colPos = index / 4;
+    int rowPos = index % 4;
+    texVertices[0].texcoord = { texture_cols[rowPos], texture_rows[colPos + 1] }; //top left
+    texVertices[1].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos + 1] }; //top right
+    texVertices[2].texcoord = { texture_cols[rowPos + 1], texture_rows[colPos] }; //bottom right
+    texVertices[3].texcoord = { texture_cols[rowPos], texture_rows[colPos] }; //bottom left
+
+    // counterclockwise as it's the default opengl front winding direction
+    uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+    // Clearing errors
+    gl_flush_errors();
+
+    // Clear memory
+    if (m_is_alive) {
+        destroy();
+    }
+
+
+    // Vertex Buffer creation
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+    // Index Buffer creation
+    glGenBuffers(1, &mesh.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
 
@@ -231,12 +323,22 @@ bool Enemy_01::collide_with(Projectile &projectile)
 bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)
 {
 	EnemyLaser enemyLaser;
-	float LO = m_rotation - 0.15f * (float) log((m_level/2) + 1);
-	float HI = m_rotation + 0.15f * (float) log((m_level/2) + 1);
+	float LO = m_rotation - 0.15f * (float) log((m_level/5) + 1);
+	float HI = m_rotation + 0.15f * (float) log((m_level/5) + 1);
+	if (powerupType == 3) {
+		LO = m_rotation - 0.05f * (float) log((m_level/5) + 1);
+		HI = m_rotation + 0.05f * (float) log((m_level/5) + 1);
+
+	}
 	float fireDir = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+	float variation = 0.f;
+	if (powerupType == 2) {
+		variation = 0.03f;
+	}
 	if (enemyLaser.init(fireDir, projectileSpeed, 10.0f))
 	{
 		enemyLaser.set_position(m_position);
+		enemyLaser.setVariation(variation);
 		enemy_projectiles.emplace_back(enemyLaser);
 		return true;
 	}
@@ -256,4 +358,32 @@ bool Enemy_01::checkIfCanFire(clock_t currentClock)
 void Enemy_01::setLastFireProjectileTime(clock_t c)
 {
 	lastFireProjectileTime = c;
+}
+
+void Enemy_01::powerup()
+{
+	if (!poweredup) {
+		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
+		float f = (float)rand() / RAND_MAX;
+		float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
+		switch(powerupType){
+			// green
+			case 0:
+				hp = hp * std::min(1.5f + (float)m_level * 0.05f * randAttributeFactor, 3.5f);
+				break;
+			// red
+			case 1:
+				m_speed = m_speed * 1.5f;
+				attackCooldown = attackCooldown / 2;
+				break;
+			// purple
+			case 2:
+				break;
+			// blue
+			case 3:
+				m_range = m_range * 1.3f;
+				projectileSpeed = projectileSpeed * 1.5f;
+		}
+		poweredup = true;
+	}
 }

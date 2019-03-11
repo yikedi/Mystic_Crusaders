@@ -4,12 +4,13 @@
 #include "enemies.hpp"
 #include "enemy_laser.h"
 #include "projectile.h"
+#include "time.h"
 
 // Salmon enemy
 class Enemy_02 : public Renderable, public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
-	static Texture enemy_texture;
+	static SpriteSheet enemy_texture;
 
 public:
 
@@ -31,5 +32,30 @@ public:
 	bool collide_with(Projectile &projectile);
 
 	bool checkIfCanFire(clock_t currentClock);
+
+    void setTextureLocs(int index);
+
+	void powerup();
+
+	bool poweredup;
+
+	bool speedBoost;
+
+	private:
+	int powerupType;
+
+	clock_t timePassed;
+
+	float variation;
+
+    TexturedVertex texVertices[4];
+
+    std::vector<float> texture_locs;
+
+    EnemyMoveState m_moveState;
+
+    float m_animTime = 0.0f;
+
+    int numTiles;
 
 };

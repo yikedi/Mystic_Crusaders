@@ -1,0 +1,17 @@
+TEAM 7-- Mystic Crusaders (shoot enemies until you die)
+
+===================================================================
+OVERALL GRADING (87.5)
+
+* Core part :
+  - Decision tree for enemy behaviour is hardcoded (-5)
+  - Gameplay is still basic (-2.5).
+  - Help window is included.
+  - Game executes and terminates smoothly. Game resets smoothly.
+* Creative Part (20/25):
+  - Enemies level up over time (+5)
+  - Physics based impulses after enemies are shot (+5)
+  - Added sprites and animation to the hero (+5)
+  - Added HUDs for health and mana of hero (+5)
+
+Creative got score from last time: hero centered camera

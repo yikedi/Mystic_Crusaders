@@ -92,6 +92,8 @@ bool UserInterface::init(vec2 size)
 	max_mp = 100.f;
 	hp = max_hp;
 	mp = max_mp;
+	max_exp = 20;
+	cur_exp = 0;
 	return true;
 }
 
@@ -110,10 +112,14 @@ void UserInterface::destroy()
 }
 
 // Called on each frame by World::update()
-void UserInterface::update(vec2 hp_mp, float zoom)
+void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom)
 {
 	hp = hp_mp.x;
 	mp = hp_mp.y;
+	cur_exp = exp.x;
+	max_exp = exp.y;
+	if (max_exp == 0)
+		max_exp = 20;
 	zoom_factor = zoom;
 	m_scale = { 1.f / zoom, 1.f / zoom };
 
@@ -129,7 +135,9 @@ void UserInterface::draw(const mat3& projection)
 	transform_begin();
 	transform_translate(m_position);
 	transform_rotate(m_rotation);
-	transform_scale(m_scale);
+	vec2 whiteBarScale = m_scale;
+	whiteBarScale.y = whiteBarScale.y * 1.7f;
+	transform_scale(whiteBarScale);
 	transform_end();
 
 	// Setting shaders
@@ -276,6 +284,60 @@ void UserInterface::draw(const mat3& projection)
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 		float colorMP[] = { 0.f, 0.f, 1.f };
 		glUniform3fv(color_uloc, 1, colorMP);
+		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+		// Drawing!
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	}
+
+	float EXP_scale_factor = (float)cur_exp / (float)max_exp;
+	vec2 exp_scale = { m_scale.x * EXP_scale_factor, m_scale.y * 0.31f };
+	/*
+	EXP bar
+	*/
+	if (EXP_scale_factor > 0.f) {
+		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
+		// finding how far it goes. zoom_factor is for making sure it fits on screen.
+		vec2 exp_position = { m_position.x - 0.5f * w * (1.f - EXP_scale_factor) / zoom_factor, m_position.y + 35.f / zoom_factor };
+		transform_begin();
+		transform_translate(exp_position);
+		transform_rotate(m_rotation);
+		transform_scale(exp_scale);
+		transform_end();
+
+		// Setting shaders
+		glUseProgram(effect.program);
+
+		// Enabling alpha channel for textures
+		glEnable(GL_BLEND); glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST);
+
+		// Getting uniform locations for glUniform* calls
+		transform_uloc = glGetUniformLocation(effect.program, "transform");
+		color_uloc = glGetUniformLocation(effect.program, "fcolor");
+		projection_uloc = glGetUniformLocation(effect.program, "projection");
+
+		// Setting vertices and indices
+		glBindVertexArray(mesh.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+
+		// Input data location as in the vertex buffer
+		in_position_loc = glGetAttribLocation(effect.program, "in_position");
+		in_texcoord_loc = glGetAttribLocation(effect.program, "in_texcoord");
+		glEnableVertexAttribArray(in_position_loc);
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, UserInterface_texture.id);
+
+		// Setting uniform values to the currently bound program
+		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
+		float colorEXP[] = { 1.f, 1.f, 0.f };
+		glUniform3fv(color_uloc, 1, colorEXP);
 		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 		// Drawing!

@@ -11,10 +11,13 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const int INIT_MAX_ENEMIES = 3;
+	const int INIT_MAX_ENEMIES = 2;
+	const int INIT_MAX_ENEMY_03 = 1;
 	size_t MAX_ENEMIES_01 = INIT_MAX_ENEMIES;
 	size_t MAX_ENEMIES_02 = INIT_MAX_ENEMIES;
-	const size_t ENEMY_DELAY_MS = 2000;
+	size_t MAX_ENEMIES_03 = INIT_MAX_ENEMY_03;
+	const size_t ENEMY_DELAY_MS = 6000;
+	const size_t ENEMY_03_DELAY_MS = 10000;
 	float screen_left = 0.f;
 	float screen_right = 100.f;
 	float screen_top = 0.f;
@@ -39,6 +42,7 @@ World::World() :
 	previous_point(0),
 	m_next_enemy1_spawn(0.f),
 	m_next_enemy2_spawn(1.f),
+	m_next_enemy3_spawn(2.f),
 	m_next_fish_spawn(0.f)
 {
 	// Seeding rng with random device
@@ -124,13 +128,15 @@ bool World::init(vec2 screen)
 	m_background_music = Mix_LoadMUS(audio_path("music.wav"));
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
+	m_levelup_sound = Mix_LoadWAV(audio_path("level_up.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr)
+	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav"),
 			audio_path("salmon_dead.wav"),
-			audio_path("salmon_eat.wav"));
+			audio_path("salmon_eat.wav"),
+			audio_path("level_up.wav"));
 		return false;
 	}
 
@@ -145,11 +151,10 @@ bool World::init(vec2 screen)
 	m_window_width = screen.x;
 	m_window_height = screen.y;
 	m_hero.init(screen);
-	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
 	// std::function<void> f1 = &World::startGame;
 	testButton.init(500, 400, 200, 50, "button.png", "Start", (std::bind(&World::startGame, this)) );
-	return start.init(screen) && m_water.init();
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 	//m_hero.init(screen) && m_water.init();
 
 }
@@ -172,6 +177,8 @@ void World::destroy()
 	for (auto& enemy : m_enemys_01)
 		enemy.destroy();
 	for (auto& enemy : m_enemys_02)
+		enemy.destroy();
+	for (auto& enemy : m_enemys_03)
 		enemy.destroy();
 	for (auto& h_proj : hero_projectiles)
 		h_proj->destroy();
@@ -255,10 +262,11 @@ bool World::update(float elapsed_ms)
 			m_hero.apply_momentum(force);
 		}
 
-		if (m_points - previous_point > 20)
+		if (m_points - previous_point > 20 + (m_hero.level * 5))
 		{
 			previous_point = m_points;
 			m_hero.level_up();
+			Mix_PlayChannel(-1, m_levelup_sound, 0);
 		}
 		}
 
@@ -272,6 +280,35 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
+		for (Enemy_03 enemy : m_enemys_03)
+		{
+			if (enemy.needFireProjectile == true)
+			{
+				int rand_factor = 0 + ( std::rand() % ( 1 - 0 + 1 ) );
+				if (rand_factor == 0)
+				{
+					if (m_enemys_01.size() > 0) {
+						int factor = m_enemys_01.size();
+						if (factor == 0) {
+							m_enemys_01[0].powerup();
+						} else {
+							rand_factor = std::rand() % factor + 0;
+							m_enemys_01[rand_factor].powerup();
+						}
+					}
+				} else {
+					if (m_enemys_02.size() > 0) {
+						int factor = m_enemys_02.size();
+						if (factor == 0) {
+							m_enemys_02[0].powerup();
+						} else {
+							rand_factor = std::rand() % factor + 0;
+							m_enemys_02[rand_factor].powerup();
+						}
+					}
+				}
+			}
+		}
 
 		// Updating all entities, making the enemy and fish
 		// faster based on current
@@ -280,11 +317,13 @@ bool World::update(float elapsed_ms)
 			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 		for (auto& enemy : m_enemys_02)
 			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& enemy : m_enemys_03)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
 		for (auto& h_proj : hero_projectiles)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, zoom_factor);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 
 		//remove out of screen fireball
 
@@ -333,7 +372,7 @@ bool World::update(float elapsed_ms)
                         //enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
-						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 17);
 					}
 					break;
 				}
@@ -363,7 +402,7 @@ bool World::update(float elapsed_ms)
                         //enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
-						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 13);
 					}
 					break;
 				}
@@ -374,10 +413,38 @@ bool World::update(float elapsed_ms)
 			++enemy2;
 		}
 
+		auto enemy3 = m_enemys_03.begin();
+
+		while (enemy3 != m_enemys_03.end())
+		{
+			int len = (int) hero_projectiles.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Projectile* h_proj= hero_projectiles.at(i);
+				if (enemy3->collide_with(*h_proj))
+				{
+					enemy3->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+                    //h_proj->destroy();
+					hero_projectiles.erase(hero_projectiles.begin() + i);
+					if(!enemy3->is_alive()) {
+                        //enemy2->destroy();
+						enemy3 = m_enemys_03.erase(enemy3);
+						++m_points;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMY_03 + (m_points / 41);
+					}
+					break;
+				}
+			}
+			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0){
+				break;
+			}
+			++enemy3;
+		}
+
 
 		// Spawning new enemys
 		m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
-		if (m_enemys_01.size() <= MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
+		if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
 		{
 			if (!spawn_enemy_01())
 				return false;
@@ -396,10 +463,10 @@ bool World::update(float elapsed_ms)
 			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 			// Next spawn
-			m_next_enemy1_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
+			m_next_enemy1_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 300;
 		}
 		m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
-		if (m_enemys_02.size() <= MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
+		if (m_enemys_02.size() < MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
 		{
 			if (!spawn_enemy_02())
 				return false;
@@ -418,7 +485,30 @@ bool World::update(float elapsed_ms)
 			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 			// Next spawn
-			m_next_enemy2_spawn = (ENEMY_DELAY_MS) + m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 200;
+			m_next_enemy2_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 300;
+		}
+
+		m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
+		if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f && m_points > 20)
+		{
+			if (!spawn_enemy_03())
+				return false;
+
+			Enemy_03& new_enemy = m_enemys_03.back();
+
+			int left_or_right_spawn = rand() % 2;
+
+			float screen_x = 0;
+
+			if(left_or_right_spawn == 0){
+				screen_x = screen.x + 150.f;
+			}
+
+			// Setting random initial position
+			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+			// Next spawn
+			m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS) - log(m_points + 1) * 300;
 		}
 	}
 
@@ -432,6 +522,7 @@ bool World::update(float elapsed_ms)
 		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
+		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		// in_main_game = false;
@@ -441,6 +532,7 @@ bool World::update(float elapsed_ms)
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
 	}
@@ -533,6 +625,8 @@ void World::draw()
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
 		enemy.draw(projection_2D);
+	for (auto& enemy : m_enemys_03)
+		enemy.draw(projection_2D);
 	for (auto& h_proj : hero_projectiles)
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
@@ -598,6 +692,20 @@ bool World::spawn_enemy_02()
 	return false;
 }
 
+
+// Creates a new enemy and if successfull adds it to the list of enemys
+bool World::spawn_enemy_03()
+{
+	Enemy_03 enemy;
+	if (enemy.init(m_points))
+	{
+		m_enemys_03.emplace_back(enemy);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn enemy 03");
+	return false;
+}
+
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 {
@@ -611,18 +719,19 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
+		m_interface.destroy();
 		start.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
+		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
-		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -632,6 +741,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
+		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
 	}
