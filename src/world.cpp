@@ -156,10 +156,10 @@ bool World::init(vec2 screen)
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ screen.x / 3 - 120.f, screen.y / 3  });
-	m_treetrunk_position.push_back({ screen.x / 3 - 90.f , screen.y / 3 });
-	m_treetrunk_position.push_back({ screen.x / 3 - 60.f , screen.y / 3 });
-	m_treetrunk_position.push_back({ screen.x / 3 - 30.f , screen.y / 3 });
-	m_treetrunk_position.push_back({ screen.x / 3 , screen.y / 3  });
+	m_treetrunk_position.push_back({ screen.x / 3 - 50.f , screen.y / 3 });
+	m_treetrunk_position.push_back({ screen.x / 2 , screen.y / 4 });
+	m_treetrunk_position.push_back({ screen.x / 2 - 70.f , screen.y / 4 });
+	m_treetrunk_position.push_back({ screen.x * 2 / 3 , screen.y *3/ 4  });
 
 
 	initTrees();
@@ -658,6 +658,10 @@ void World::draw()
 	start.draw(projection_2D);
 	// Drawing entities
 	map.draw(projection_2D);
+	if (start_is_over) {
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.draw(projection_2D);
+	}
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -668,16 +672,14 @@ void World::draw()
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
-	m_hero.draw(projection_2D);
 
+	m_hero.draw(projection_2D);
 
 	// Testing TODO
 	if (start_is_over) {
-		m_interface.draw(projection_2D);
-		for (auto& treetrunk : m_treetrunk)
-			treetrunk.draw(projection_2D);
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
+		m_interface.draw(projection_2D);
 	}
 
 	/////////////////////
