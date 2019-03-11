@@ -36,11 +36,13 @@ public:
 
 	bool init(double x, double y, double w, double h, std::string path, std::string type, ClickCallbackSTD onClick);
 
-	void CheckClick(double x, double y);
+	void CheckClick(vec2 mouse_position);
 
 	void set_color(vec3 color);
 
 	void draw(const mat3 &projection);
+
+	void set_position(vec2 position);
 
 
 	/*

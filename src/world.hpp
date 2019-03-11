@@ -48,9 +48,6 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
-	// Returns the size of our game screen
-	vec2 getScreenSize();
-
 private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
@@ -117,4 +114,5 @@ private:
 
 	clock_t lastFireProjectileTime;
 	Button testButton;
+	vec2 mouse_pos;
 };

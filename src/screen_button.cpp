@@ -28,12 +28,12 @@ Button::Button(int x, int y, int w, int h, std::string path, std::string type, C
 	if (path == "") {
 		// empty string for path, therefore no path; regular button with only a type, and a white color probably
 		// init((double)x, (double)y, (double)w, (double)h, type);
-		fprintf(stderr, "CANNOT FIND BUTTON AT POSITION X= %d , Y= %d \n", x, y);
+		fprintf(stderr, "CANNOT FIND BUTTON AT POSITION X= %i , Y= %i \n", x, y);
 	}
 	else {
 		// we wouldn't care what the text says, unless we come back and decide we do.
 		if (type == "") {
-			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %d , Y= %d \n", x, y);
+			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %i , Y= %i \n", x, y);
 		}
 		else {
 			init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
@@ -60,8 +60,14 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 	// Load shared texture
 	if (!button_texture.is_valid())
 	{
-		if (!button_texture.load_from_file(textures_path("button.png")))
-		// TODO: Change static path to "path" variable! After first successful testing
+		/*
+		  CONVERSION FROM STATIC PATH TO DYNAMIC ONE
+		  First convert the textures_path() to string, add it with std::string, 
+		  and then convert it back to const char-star
+		*/
+		string s = string(textures_path()) + path;
+		fprintf(stderr, "PATH: %s", s);
+		if (!button_texture.load_from_file(s.c_str()))
 		{
 			fprintf(stderr, "Failed to load button texture! pathname: %s", path);
 			return false;
@@ -110,9 +116,10 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 		return false;
 
 	// Setting initial values
+	zoom_factor = 1.f;
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
-	m_position = { (float)w / 2.f, (float)h * 3.5f };
+	set_position({ (float) x, (float) y });
 	m_rotation = 0.f;
 
 	// Setting initial values, scale is negative to make it face the opposite way
@@ -138,7 +145,9 @@ void Button::destroy() {
 	glDeleteShader(effect.program);
 }
 
-void Button::CheckClick(double mouse_x, double mouse_y) {
+void Button::CheckClick(vec2 mouse_position) {
+	float mouse_x = mouse_position.x;
+	float mouse_y = mouse_position.y;
 	if (mouse_x >= left_corner && mouse_x <= left_corner + width &&
 		mouse_y >= top_corner && mouse_y <= top_corner + height) {
 		onClick();
@@ -197,6 +206,11 @@ void Button::set_color(vec3 in_color)
 {
 	float color[3] = { in_color.x,in_color.y,in_color.z };
 	memcpy(m_color, color, sizeof(color));
+}
+
+void Button::set_position(vec2 position)
+{
+	m_position = { position.x / zoom_factor + (float)width / (2.f * zoom_factor), position.y / zoom_factor + (float)height / (2.f * zoom_factor) };
 }
 
 /*

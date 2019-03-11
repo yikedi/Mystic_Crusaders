@@ -148,7 +148,7 @@ bool World::init(vec2 screen)
 	m_interface.init({ 300.f, 50.f });
 	shootingFireBall = false;
 	// std::function<void> f1 = &World::startGame;
-	testButton.init(300, 300, 100, 50, "thingy.png", "Start", (std::bind(&World::startGame, this)));
+	testButton.init(500, 400, 200, 50, "button.png", "Start", (std::bind(&World::startGame, this)) );
 	return start.init(screen) && m_water.init();
 	//m_hero.init(screen) && m_water.init();
 
@@ -714,6 +714,8 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 
 		m_hero.set_rotation(angle);
 	}
+
+	mouse_pos = { (float)xpos,(float)ypos };
 }
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
@@ -725,15 +727,12 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		shootingFireBall = false;
 	}
 
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over) {
+		testButton.CheckClick(mouse_pos);
+	}
+
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
 		m_hero.use_ice_arrow_skill(hero_projectiles);
-}
-
-vec2 World::getScreenSize()
-{
-	int w, h;
-	glfwGetFramebufferSize(m_window, &w, &h);
-	return { (float)w, (float)h };
 }
 
 void World::startGame()
