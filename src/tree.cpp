@@ -71,7 +71,7 @@ bool Tree::init(vec2 screen)
 	m_scale.x = 0.5f;
 	m_scale.y = 0.5f;
 	m_rotation = 0.f;
-	m_position = { screen.x / 3 , screen.y / 3 - 120.f };
+	//m_position = { screen.x / 3 , screen.y / 3 - 120.f };
 	return true;
 }
 
@@ -116,6 +116,8 @@ void Tree::draw(const mat3& projection)
 	GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
+	GLint species_uloc = glGetUniformLocation(effect.program, "light_up");
+
 
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
@@ -159,5 +161,5 @@ vec2 Tree::get_position()const
 
 void Tree::set_position(vec2 position)
 {
-	m_position = { position.x / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
+	m_position = position;
 }

@@ -80,7 +80,7 @@ bool Treetrunk::init(vec2 screen)
 	m_scale.y = 35.f;
 	
 	m_num_indices = indices.size();
-	m_position = { screen.x / 3, screen.y / 3 };
+	//m_position = { screen.x / 3, screen.y / 3 };
 	m_rotation = 0.f;
 	m_color = { 1.f, 1.f, 1.f };
 
@@ -149,7 +149,7 @@ void Treetrunk::draw(const mat3& projection)
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 
-	// !!! Salmon Color
+	// Tree trunk color
 	float color[] = { m_color.x, m_color.y, m_color.z };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
@@ -157,6 +157,7 @@ void Treetrunk::draw(const mat3& projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, (GLsizei)m_num_indices, GL_UNSIGNED_SHORT, nullptr);
+
 }
 
 
@@ -169,5 +170,5 @@ vec2 Treetrunk::get_position()const
 
 void Treetrunk::set_position(vec2 position)
 {
-	m_position = { position.x / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
+	m_position = position;
 }

@@ -58,6 +58,9 @@ private:
 	bool spawn_enemy_01();
 	bool spawn_enemy_02();
 	bool spawn_enemy_03();
+	bool spawn_treetrunk();
+	bool spawn_tree();
+
 	bool shootingFireBall;
 
 	// Generates a new fish
@@ -97,11 +100,13 @@ private:
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Enemy_03> m_enemys_03;
+	std::vector<Treetrunk> m_treetrunk;
+	std::vector<Tree> m_tree;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	UserInterface m_interface;
-	Treetrunk m_treetrunk;
-	Tree m_tree;
+	//Treetrunk m_treetrunk;
+	//Tree m_tree;
 
 	float m_current_speed;
 	float m_next_enemy1_spawn;
@@ -120,6 +125,9 @@ private:
 
 	float m_window_width;
 	float m_window_height;
+
+	int m_tree_number;
+	std::vector<vec2> m_treetrunk_position;
 
 	clock_t lastFireProjectileTime;
 };

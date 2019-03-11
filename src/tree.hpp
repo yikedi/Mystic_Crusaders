@@ -45,6 +45,7 @@ private:
 	float zoom_factor;
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+	vec2 m_tree2_scale;
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
 
