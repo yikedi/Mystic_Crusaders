@@ -21,7 +21,6 @@ bool Hero::init(vec2 screen)
 	//std::vector<uint16_t> indices;
     hero_texture.totalTiles = 21; // custom to current sprite sheet
     hero_texture.subWidth = 64; // custom to current sprite sheet
-    hero_texture.subHeight = 64; // custom to current sprite sheet
     m_is_alive = false;
 
 	// Load shared texture
