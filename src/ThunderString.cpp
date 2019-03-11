@@ -124,7 +124,7 @@ void ThunderString::setTextureLocs(int index)
 void ThunderString::update(float ms)
 {
 	float stepy = velocity.y * (ms / 1000);	
-	float animation_speed = 1.5f;
+	float animation_speed = 1.f;
 	animation_time += animation_speed * 2;
 	int curidx = 0;
 	curidx += (int)animation_time % texture.totalTiles;

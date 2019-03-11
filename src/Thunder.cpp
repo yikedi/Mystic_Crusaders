@@ -1,6 +1,6 @@
 #include "Thunder.h"
 
-float string_time = 500.f;
+float string_time = 300.f;
 bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale)
 {
 	// Load shared texture
