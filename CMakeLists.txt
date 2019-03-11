@@ -55,6 +55,7 @@ set(SOURCE_FILES
 	src/Thunder.cpp
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
+	src/Skill.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -81,6 +82,7 @@ set(SOURCE_FILES
 	src/Thunder.h
 	src/ThunderString.h
 	src/ThunderBall.h
+	src/Skill.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
