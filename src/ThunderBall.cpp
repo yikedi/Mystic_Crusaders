@@ -16,7 +16,7 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 
 	// The position corresponds to the center of the texture
 	texture.totalTiles = 15; // custom to current sprite sheet
-	texture.subWidth = 64; // custom to current sprite sheet
+	texture.subWidth = 128; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
 	float wr = texture.subWidth * 0.5f;

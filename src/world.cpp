@@ -635,6 +635,7 @@ bool World::update(float elapsed_ms)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		thunders.clear();
 		// in_main_game = false;
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
@@ -843,6 +844,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -961,12 +963,12 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 {
-	if (yoffset < -0.01f)
+	if (yoffset < -0.f)
 	{
 		int level_up_skill = (m_hero.get_active_skill() - 1 + 2) % 2;
 		m_hero.set_active_skill(level_up_skill);
 	}
-	else if (yoffset > 0.01f)
+	else if (yoffset > 0.f)
 	{
 		int level_up_skill = (m_hero.get_active_skill() + 1) % 2;
 		m_hero.set_active_skill(level_up_skill);
