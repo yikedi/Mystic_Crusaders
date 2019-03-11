@@ -88,7 +88,10 @@ bool Skilltree::init(vec2 screen, int element)
 		thunder3.init(screen, 3);
 	}
 	else if (front_element == "fire") {
-		//fire
+		fprintf(stderr, "init!");
+		fire1.init(screen, 1);
+		fire2.init(screen, 2);
+		fire3.init(screen, 3);
 	}
 	skillup.init(screen);
 	return true;
@@ -106,6 +109,12 @@ void Skilltree::destroy()
 	ices1.destroy();
 	ices2.destroy();
 	ices3.destroy();
+	thunder1.destroy();
+	thunder2.destroy();
+	thunder3.destroy();
+	fire1.destroy();
+	fire2.destroy();
+	fire3.destroy();
 	skillup.destroy();
 }
 
@@ -166,7 +175,9 @@ void Skilltree::draw(const mat3 & projection)
 			thunder3.draw(projection);
 		}
 		else if (front_element == "fire") {
-			//fire
+			fire1.draw(projection);
+			fire2.draw(projection);
+			fire3.draw(projection);
 		}
 		skillup.draw(projection);
 }
@@ -188,19 +199,23 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec
 			thunder2.update_ice(paused, thunder_num.y);
 			thunder3.update_ice(paused, thunder_num.z);
 		}
+		else if (front_element == "fire") {
+			fire1.update_ice(paused, ice_num.x);
+			fire2.update_ice(paused, ice_num.y);
+			fire3.update_ice(paused, ice_num.z);
+		}
 		skillup.update_leveltex(paused, total - used, skill_num);
 	}
 	else {
-		if (front_element == "ice") {
-			ices1.blue_up();
-			ices2.blue_up();
-			ices3.blue_up();
-		}
-		else if (front_element == "thunder") {
-			thunder1.blue_up();
-			thunder2.blue_up();
-			thunder3.blue_up();
-		}
+		ices1.blue_up();
+		ices2.blue_up();
+		ices3.blue_up();
+		thunder1.blue_up();
+		thunder2.blue_up();
+		thunder3.blue_up();
+		fire1.blue_up();
+		fire2.blue_up();
+		fire3.blue_up();
 	}
 }
 
@@ -243,6 +258,9 @@ bool Skilltree::level_position(vec2 mouse_pos)
 		thunder1.blue_up();
 		thunder2.blue_up();
 		thunder3.blue_up();
+		fire1.blue_up();
+		fire2.blue_up();
+		fire3.blue_up();
 		return true;
 	}
 	else {
@@ -252,6 +270,9 @@ bool Skilltree::level_position(vec2 mouse_pos)
 		thunder1.blue_up();
 		thunder2.blue_up();
 		thunder3.blue_up();
+		fire1.blue_up();
+		fire2.blue_up();
+		fire3.blue_up();
 		return false;
 	}
  
@@ -325,6 +346,32 @@ int Skilltree::ice_position(vec2 mouse_pos, std::string element)
 			thunder1.blue_up();
 			thunder2.blue_up();
 			thunder3.blue_up();
+			return 0;
+		}
+	}
+	else if (element == "fire") {
+		if (inside(height1, width1, mouse_pos)) {
+			fire1.light_up();
+			fire2.blue_up();
+			fire3.blue_up();
+			return 1;
+		}
+		else if (inside(height2, width2, mouse_pos)) {
+			fire1.blue_up();
+			fire2.light_up();
+			fire3.blue_up();
+			return 2;
+		}
+		else if (inside(height3, width3, mouse_pos)) {
+			fire1.blue_up();
+			fire2.blue_up();
+			fire3.light_up();
+			return 3;
+		}
+		else {
+			fire1.blue_up();
+			fire2.blue_up();
+			fire3.blue_up();
 			return 0;
 		}
 	}

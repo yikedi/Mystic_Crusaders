@@ -9,6 +9,7 @@
 #include "common.hpp"
 #include "ice_skill_tex.hpp"
 #include "thunder_skill_tex.hpp"
+#include "fire_skill_tex.hpp"
 #include "skillup.hpp"
 
 class Skilltree : public Renderable
@@ -57,6 +58,10 @@ private:
 	Thunderskilltex thunder1;
 	Thunderskilltex thunder2;
 	Thunderskilltex thunder3;
+
+	Fireskilltex fire1;
+	Fireskilltex fire2;
+	Fireskilltex fire3;
 
 	Skillup skillup;
 	vec2 m_scale;

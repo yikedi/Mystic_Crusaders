@@ -55,6 +55,7 @@ set(SOURCE_FILES
 	src/ice_skill_tex.cpp
 	src/skillup.cpp
 	src/thunder_skill_tex.cpp
+	src/fire_skill_tex.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -81,6 +82,7 @@ set(SOURCE_FILES
 	src/ice_skill_tex.hpp
 	src/skillup.hpp
 	src/thunder_skill_tex.hpp
+	src/fire_skill_tex.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

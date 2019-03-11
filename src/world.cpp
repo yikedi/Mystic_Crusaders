@@ -824,7 +824,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	} else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
-	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
+	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE && start_is_over) {
 		if (game_is_paused) {
 			zoom_factor = 1.1f;
 		}
@@ -860,19 +860,19 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (!game_is_paused) {
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
+	if (!game_is_paused && start_is_over) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
 		}
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 			shootingFireBall = false;
 		}
 
-		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 			m_hero.use_ice_arrow_skill(hero_projectiles);
 	}
-	else {
-		//std::string click_element = stree.element_position(mouse_pos);
+	else if (game_is_paused && start_is_over) {
+
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
 			skill_element = stree.element_position(mouse_pos);
 			if (skill_element == "ice") {
@@ -882,7 +882,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				stree.init(screen, 2);
 			}
 			else if (skill_element == "fire") {
-				stree.init(screen, 1);   // if it is fire screen, it won't change to other screens
+				stree.init(screen, 3);   // if it is fire screen, it won't change to other screens
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
