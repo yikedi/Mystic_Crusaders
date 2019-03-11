@@ -18,6 +18,7 @@
 #include "user_interface.hpp"
 #include "skilltree.hpp"
 #include "ice_skill_tex.hpp"
+#include "Thunder.h"
 
 // stlib
 #include <vector>
@@ -67,6 +68,7 @@ private:
 	void on_key(GLFWwindow*, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
 	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
+	void on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset);
 
 
 private:
@@ -112,6 +114,7 @@ private:
 	std::vector<Enemy_03> m_enemys_03;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
 
 	float m_current_speed;
@@ -131,6 +134,8 @@ private:
 
 	float m_window_width;
 	float m_window_height;
+
+	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;
 };

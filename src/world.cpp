@@ -94,11 +94,13 @@ bool World::init(vec2 screen)
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
-	auto mouse_button_callback =[](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2);};
+	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2); };
+	auto mouse_wheel_callback = [](GLFWwindow* wnd, double _0, double _1) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_wheel(wnd, _0, _1); };
 
 	glfwSetKeyCallback(m_window, key_redirect);
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+	glfwSetScrollCallback(m_window, mouse_wheel_callback);
 
 	//glutReshapeFunc(reshape);
 
@@ -161,6 +163,7 @@ bool World::init(vec2 screen)
 	//stree.init(screen, 3);
 	m_hero.init(screen);
 	shootingFireBall = false;
+	mouse_position = { 0.f,0.f };
 	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 }
 
@@ -189,6 +192,9 @@ void World::destroy()
 		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
+	for (auto& thunder : thunders)
+		thunder->destroy();
+
 	m_enemys_01.clear();
 	m_enemys_02.clear();
 	hero_projectiles.clear();
@@ -203,7 +209,7 @@ void World::destroy()
 bool World::update(float elapsed_ms)
 {
 	int w, h;
-        glfwGetFramebufferSize(m_window, &w, &h);
+	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 	
 	start.update(start_is_over);
@@ -211,68 +217,69 @@ bool World::update(float elapsed_ms)
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
-		if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
-			m_hero.shoot_projectiles(hero_projectiles);
-			lastFireProjectileTime = clock();
-		}
+			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
+				m_hero.shoot_projectiles(hero_projectiles);
+				lastFireProjectileTime = clock();
+			}
 
-		// Checking hero - Enemy collisions
-		for (const auto& enemy : m_enemys_02)
-		{
-			if (m_hero.collides_with(enemy))
+			// Checking hero - Enemy collisions
+			for (const auto& enemy : m_enemys_02)
 			{
-				if (!m_hero.is_alive()) {
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-					m_water.set_salmon_dead();
-					m_hero.kill();
+				if (m_hero.collides_with(enemy))
+				{
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+						break;
+					}
+				}
+			}
+
+			// Checking hero - Enemy collisions
+			auto e_proj = enemy_projectiles.begin();
+			while (e_proj != enemy_projectiles.end())
+			{
+				if (m_hero.collides_with(*e_proj))
+				{
+					m_hero.take_damage(e_proj->get_damage());
+					//comment back later
+					//e_proj->destroy();
+					e_proj = enemy_projectiles.erase(e_proj);
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+					}
 					break;
 				}
+				++e_proj;
 			}
-		}
 
-		// Checking hero - Enemy collisions
-		auto e_proj = enemy_projectiles.begin();
-		while (e_proj != enemy_projectiles.end())
-		{
-			if (m_hero.collides_with(*e_proj))
+			if (m_hero.get_position().y > m_window_height - m_hero.m_scale.y * 2) {
+				vec2 force = { 0.f, -10.f };
+				m_hero.apply_momentum(force);
+			}
+			else if (m_hero.get_position().y < m_hero.m_scale.y * 2) {
+				vec2 force = { 0.f, 10.f };
+				m_hero.apply_momentum(force);
+			}
+
+			if (m_hero.get_position().x > m_window_width - m_hero.m_scale.x * 2) {
+				vec2 force = { -10.f, 0.f };
+				m_hero.apply_momentum(force);
+			}
+			else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
+				vec2 force = { 10.f, 0.f };
+				m_hero.apply_momentum(force);
+			}
+			if (m_points - previous_point > 1 + (m_hero.level * 5))		//temp change
 			{
-				m_hero.take_damage(e_proj->get_damage());
-                //comment back later
-				//e_proj->destroy();
-				e_proj = enemy_projectiles.erase(e_proj);
-				if (!m_hero.is_alive()) {
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
-					m_water.set_salmon_dead();
-					m_hero.kill();
-				}
-				break;
+				previous_point = m_points;
+				m_hero.levelup(); // use 0 for now
+				m_level++;
+				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
-			++e_proj;
-		}
-
-		if (m_hero.get_position().y > m_window_height - m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, -10.f};
-			m_hero.apply_momentum(force);
-		} else if (m_hero.get_position().y < m_hero.m_scale.y * 2) {
-			vec2 force = {0.f, 10.f};
-			m_hero.apply_momentum(force);
-		}
-
-		if (m_hero.get_position().x > m_window_width - m_hero.m_scale.x * 2) {
-			vec2 force = {-10.f, 0.f};
-			m_hero.apply_momentum(force);
-		} else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
-			vec2 force = {10.f, 0.f};
-			m_hero.apply_momentum(force);
-		}
-
-		if (m_points - previous_point > 1 + (m_hero.level * 5))	//20
-		{
-			previous_point = m_points;
-			m_hero.level_up();
-			m_level++;
-			Mix_PlayChannel(-1, m_levelup_sound, 0);
-		}
 		}
 
 
@@ -289,24 +296,27 @@ bool World::update(float elapsed_ms)
 		{
 			if (enemy.needFireProjectile == true)
 			{
-				int rand_factor = 0 + ( std::rand() % ( 1 - 0 + 1 ) );
+				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
 				if (rand_factor == 0)
 				{
 					if (m_enemys_01.size() > 0) {
 						int factor = m_enemys_01.size();
 						if (factor == 0) {
 							m_enemys_01[0].powerup();
-						} else {
+						}
+						else {
 							rand_factor = std::rand() % factor + 0;
 							m_enemys_01[rand_factor].powerup();
 						}
 					}
-				} else {
+				}
+				else {
 					if (m_enemys_02.size() > 0) {
 						int factor = m_enemys_02.size();
 						if (factor == 0) {
 							m_enemys_02[0].powerup();
-						} else {
+						}
+						else {
 							rand_factor = std::rand() % factor + 0;
 							m_enemys_02[rand_factor].powerup();
 						}
@@ -328,18 +338,20 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
+		for (auto& thunder : thunders)
+			thunder->update(elapsed_ms);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 
 		//remove out of screen fireball
 
-		int len = (int) hero_projectiles.size() - 1;
+		int len = (int)hero_projectiles.size() - 1;
 		for (int i = len; i >= 0; i--)
 		{
-			Projectile* h_proj= hero_projectiles.at(i);
+			Projectile* h_proj = hero_projectiles.at(i);
 			float w = h_proj->get_bounding_box().x / 2;
 			if (h_proj->get_position().x + w < 0.f)
 			{
-                //h_proj->destroy();
+				//h_proj->destroy();
 				hero_projectiles.erase(hero_projectiles.begin() + i);
 				continue;
 			}
@@ -352,7 +364,7 @@ bool World::update(float elapsed_ms)
 			float w = e_proj->get_bounding_box().x / 2;
 			if (e_proj->get_position().x + w < 0.f)
 			{
-                //e_proj->destroy();
+				//e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
 				continue;
 			}
@@ -360,21 +372,35 @@ bool World::update(float elapsed_ms)
 			++e_proj;
 		}
 
+		//remove overtime thunder
+		len = (int)thunders.size() - 1;
+		for (int i = len; i >= 0; i--)
+		{
+			Thunder* t = thunders.at(i);
+
+			if (t->can_remove())
+			{
+				t->destroy();
+				thunders.erase(thunders.begin() + i);
+				continue;
+			}
+		}
+
 		auto enemy = m_enemys_01.begin();
 
 		while (enemy != m_enemys_01.end())
 		{
-			int len = (int) hero_projectiles.size() - 1;
+			int len = (int)hero_projectiles.size() - 1;
 			for (int i = len; i >= 0; i--)
 			{
-				Projectile* h_proj= hero_projectiles.at(i);
+				Projectile* h_proj = hero_projectiles.at(i);
 				if (enemy->collide_with(*h_proj))
 				{
 					enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
 					//h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
-					if(!enemy->is_alive()) {
-                        //enemy->destroy();
+					if (!enemy->is_alive()) {
+						//enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 17);
@@ -384,7 +410,36 @@ bool World::update(float elapsed_ms)
 
 			}
 
-			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0){
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
+				break;
+			}
+			++enemy;
+		}
+
+		enemy = m_enemys_01.begin();
+
+		while (enemy != m_enemys_01.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy->collide_with(*t))
+				{
+					t->apply_effect(*enemy);
+
+					if (!enemy->is_alive()) {
+						//enemy->destroy();
+						enemy = m_enemys_01.erase(enemy);
+						++m_points;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
 				break;
 			}
 			++enemy;
@@ -394,17 +449,17 @@ bool World::update(float elapsed_ms)
 
 		while (enemy2 != m_enemys_02.end())
 		{
-			int len = (int) hero_projectiles.size() - 1;
+			int len = (int)hero_projectiles.size() - 1;
 			for (int i = len; i >= 0; i--)
 			{
-				Projectile* h_proj= hero_projectiles.at(i);
+				Projectile* h_proj = hero_projectiles.at(i);
 				if (enemy2->collide_with(*h_proj))
 				{
 					enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
-                    //h_proj->destroy();
+					//h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
-					if(!enemy2->is_alive()) {
-                        //enemy2->destroy();
+					if (!enemy2->is_alive()) {
+						//enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 13);
@@ -412,7 +467,36 @@ bool World::update(float elapsed_ms)
 					break;
 				}
 			}
-			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0){
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
+				break;
+			}
+			++enemy2;
+		}
+
+		enemy2 = m_enemys_02.begin();
+
+		while (enemy2 != m_enemys_02.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy2->collide_with(*t))
+				{
+					t->apply_effect(*enemy2);
+
+					if (!enemy2->is_alive()) {
+						//enemy->destroy();
+						enemy2 = m_enemys_02.erase(enemy2);
+						++m_points;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
 				break;
 			}
 			++enemy2;
@@ -422,17 +506,17 @@ bool World::update(float elapsed_ms)
 
 		while (enemy3 != m_enemys_03.end())
 		{
-			int len = (int) hero_projectiles.size() - 1;
+			int len = (int)hero_projectiles.size() - 1;
 			for (int i = len; i >= 0; i--)
 			{
-				Projectile* h_proj= hero_projectiles.at(i);
+				Projectile* h_proj = hero_projectiles.at(i);
 				if (enemy3->collide_with(*h_proj))
 				{
 					enemy3->take_damage(h_proj->get_damage(), h_proj->get_velocity());
-                    //h_proj->destroy();
+					//h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
-					if(!enemy3->is_alive()) {
-                        //enemy2->destroy();
+					if (!enemy3->is_alive()) {
+						//enemy2->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
 						MAX_ENEMIES_03 = INIT_MAX_ENEMY_03 + (m_points / 41);
@@ -440,7 +524,36 @@ bool World::update(float elapsed_ms)
 					break;
 				}
 			}
-			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0){
+			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0) {
+				break;
+			}
+			++enemy3;
+		}
+
+		enemy3 = m_enemys_03.begin();
+
+		while (enemy3 != m_enemys_03.end())
+		{
+			int len = (int)thunders.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				Thunder* t = thunders.at(i);
+				if (enemy3->collide_with(*t))
+				{
+					t->apply_effect(*enemy3);
+
+					if (!enemy3->is_alive()) {
+						//enemy->destroy();
+						enemy3 = m_enemys_03.erase(enemy3);
+						++m_points;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 10;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0) {
 				break;
 			}
 			++enemy3;
@@ -460,7 +573,7 @@ bool World::update(float elapsed_ms)
 
 			float screen_x = 0;
 
-			if(left_or_right_spawn == 0){
+			if (left_or_right_spawn == 0) {
 				screen_x = screen.x + 150.f;
 			}
 
@@ -468,7 +581,7 @@ bool World::update(float elapsed_ms)
 			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 			// Next spawn
-			m_next_enemy1_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 300;
+			m_next_enemy1_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
 		}
 		m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
 		if (m_enemys_02.size() < MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
@@ -482,7 +595,7 @@ bool World::update(float elapsed_ms)
 
 			float screen_x = 0;
 
-			if(left_or_right_spawn == 0){
+			if (left_or_right_spawn == 0) {
 				screen_x = screen.x + 150.f;
 			}
 
@@ -490,7 +603,7 @@ bool World::update(float elapsed_ms)
 			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 			// Next spawn
-			m_next_enemy2_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS) - log(m_points + 1) * 300;
+			m_next_enemy2_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
 		}
 
 		m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
@@ -505,7 +618,7 @@ bool World::update(float elapsed_ms)
 
 			float screen_x = 0;
 
-			if(left_or_right_spawn == 0){
+			if (left_or_right_spawn == 0) {
 				screen_x = screen.x + 150.f;
 			}
 
@@ -513,7 +626,7 @@ bool World::update(float elapsed_ms)
 			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
 
 			// Next spawn
-			m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS) - log(m_points + 1) * 300;
+			m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS)-log(m_points + 1) * 300;
 		}
 	}
 
@@ -530,6 +643,7 @@ bool World::update(float elapsed_ms)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
@@ -560,7 +674,7 @@ void World::draw()
 
 	// Getting size of window
 	int w, h;
-    glfwGetFramebufferSize(m_window, &w, &h);
+	glfwGetFramebufferSize(m_window, &w, &h);
 
 	// Updating window title with points
 	std::stringstream title_ss;
@@ -640,6 +754,8 @@ void World::draw()
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.draw(projection_2D);
+	for (auto& thunder : thunders)
+		thunder->draw(projection_2D);
 	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
@@ -728,7 +844,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 	// Resetting game
 	int w, h;
-        glfwGetFramebufferSize(m_window, &w, &h);
+	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true)
 	{
@@ -743,6 +859,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
+		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -764,18 +881,18 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 
 	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&  key == GLFW_KEY_COMMA)
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
 		m_current_speed -= 0.1f;
 	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
 		m_current_speed += 0.1f;
 
-    //add toggle
-    if (action == GLFW_RELEASE && key == GLFW_KEY_1) {
-        m_hero.advanced = true;
-    }
-    if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
-        m_hero.advanced = false;
-    }
+	//add toggle
+	if (action == GLFW_RELEASE && key == GLFW_KEY_1) {
+		m_hero.advanced = true;
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
+		m_hero.advanced = false;
+	}
 
 	m_current_speed = fmax(0.f, m_current_speed);
 
@@ -783,24 +900,24 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	vec2 cur_direction = m_hero.get_direction();
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-		m_hero.set_direction({1.0f,cur_direction.y});
+		m_hero.set_direction({ 1.0f,cur_direction.y });
 	}
 
 	else if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-		m_hero.set_direction({-1.0f,cur_direction.y});
+		m_hero.set_direction({ -1.0f,cur_direction.y });
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_A || key ==GLFW_KEY_D )) {
-		m_hero.set_direction({0.0f,cur_direction.y});
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_A || key == GLFW_KEY_D)) {
+		m_hero.set_direction({ 0.0f,cur_direction.y });
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-		m_hero.set_direction({cur_direction.x,-1.0f});
+		m_hero.set_direction({ cur_direction.x,-1.0f });
 	}
 	else if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-		m_hero.set_direction({cur_direction.x,1.0f});
+		m_hero.set_direction({ cur_direction.x,1.0f });
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key ==GLFW_KEY_S )) {
-		m_hero.set_direction({cur_direction.x,0.0f});
+	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_S)) {
+		m_hero.set_direction({ cur_direction.x,0.0f });
 	}
 	else if (key == GLFW_KEY_P && start_is_over == true) {
 		zoom_factor += 0.1f;
@@ -821,7 +938,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	}
 	else if (key == GLFW_KEY_H) {
 		//shopping
-	} else if (key == GLFW_KEY_ESCAPE) {
+	}
+	else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
 	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE && start_is_over) {
@@ -832,6 +950,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			zoom_factor = 1.f;
 		}
 		game_is_paused = !game_is_paused;
+	}
+	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(0);
+	}
+	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(1);
 	}
 }
 
@@ -849,6 +973,8 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 			angle = atan2((ypos - salmon_position.y), (xpos - salmon_position.x));
 
 		m_hero.set_rotation(angle);
+		mouse_position.x = float(xpos);
+		mouse_position.y = float(ypos);
 	}
 	else {
 		mouse_pos = { (float)xpos,(float)ypos };
@@ -869,7 +995,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-			m_hero.use_ice_arrow_skill(hero_projectiles);
+			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
 	}
 	else if (game_is_paused && start_is_over) {
 
@@ -882,23 +1008,25 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				stree.init(screen, 2);
 			}
 			else if (skill_element == "fire") {
-				stree.init(screen, 3); 
+				stree.init(screen, 3);
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
-				skill_num = stree.icon_position(mouse_pos, skill_element);
+			skill_num = stree.icon_position(mouse_pos, skill_element);
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
 			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
+					// increase # of arrows
 					ice_skill_set.x = ice_skill_set.x + 1.f;
-					m_hero.ice_arrow_level_up();
+					m_hero.level_up(0, 1);
 				}
 				else if (skill_element == "thunder") {
+					//increase damage
 					thunder_skill_set.x = thunder_skill_set.x + 1.f;
-					//thunder skill 1 level up
+					m_hero.level_up(1, 0);
 				}
 				else if (skill_element == "fire") {
 					//fire
@@ -913,12 +1041,14 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
+					//decrease mana cost
 					ice_skill_set.y = ice_skill_set.y + 1.f;
-					m_hero.ice_arrow_level_up();
+					m_hero.level_up(0, 2);
 				}
 				else if (skill_element == "thunder") {
+					//increase area
 					thunder_skill_set.y = thunder_skill_set.y + 1.f;
-					//thunder skill 2 level up
+					m_hero.level_up(1, 1);
 				}
 				else if (skill_element == "fire") {
 					//fire
@@ -933,12 +1063,14 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
+					// increase damage
 					ice_skill_set.z = ice_skill_set.z + 1.f;
-					m_hero.ice_arrow_level_up();
+					m_hero.level_up(0, 0);
 				}
 				else if (skill_element == "thunder") {
-					thunder_skill_set.y = thunder_skill_set.y + 1.f;
-					//thunder skill 3 level up
+					//decrease mana cost
+					thunder_skill_set.z = thunder_skill_set.z + 1.f;
+					m_hero.level_up(1, 2);
 				}
 				else if (skill_element == "fire") {
 					//fire
@@ -948,6 +1080,24 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
+			//m_hero.use_ice_arrow_skill(hero_projectiles);
+			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+		}
+	}
+}
+
+void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (yoffset < -0.f)
+	{
+		int level_up_skill = (m_hero.get_active_skill() - 1 + 2) % 2;
+		m_hero.set_active_skill(level_up_skill);
+	}
+	else if (yoffset > 0.f)
+	{
+		int level_up_skill = (m_hero.get_active_skill() + 1) % 2;
+		m_hero.set_active_skill(level_up_skill);
 	}
 }
 
@@ -957,4 +1107,3 @@ vec2 World::getScreenSize()
 	glfwGetFramebufferSize(m_window, &w, &h);
 	return { (float)w, (float)h };
 }
-
