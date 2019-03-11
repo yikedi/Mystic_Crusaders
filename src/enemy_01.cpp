@@ -182,6 +182,9 @@ void Enemy_01::update(float ms, vec2 target_pos)
     float animSpeed = 0.05f;
 
 	//momentum first
+	if (stunned)
+		ms = ms * 0.2;
+
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;
 
@@ -241,6 +244,8 @@ void Enemy_01::update(float ms, vec2 target_pos)
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 	}
+
+    stunned = false;
 
     // setting enemy movement state
     if (facing == 1) {
@@ -302,22 +307,6 @@ void Enemy_01::setTextureLocs(int index)
     glGenBuffers(1, &mesh.ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
-}
-
-
-bool Enemy_01::collide_with(Projectile &projectile)
-{
-	float dx = m_position.x - projectile.get_position().x;
-	float dy = m_position.y - projectile.get_position().y;
-	float d_sq = dx * dx + dy * dy;
-	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
-	float r = std::max(other_r, my_r);
-	r *= 1.f;
-	if (d_sq < r * r)
-			return true;
-	return false;
-
 }
 
 bool Enemy_01::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles)

@@ -80,11 +80,12 @@ bool Hero::init(vec2 screen)
 	hp = max_hp;
 	mp = max_mp;
     ice_arrow_skill.init();
+	thunder_skill.init();
 	deceleration = 1.0f;
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
 	momentum.y = 0.f;
-	level = 0;
+	activeSkill = 0;
 	return true;
 }
 
@@ -97,7 +98,6 @@ void Hero::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-
 
 }
 
@@ -207,15 +207,10 @@ void Hero::update(float ms)
 	else
 	{
 		// If dead we make it face upwards and sink deep down
-        //setTextureLocs(14);
-		//set_rotation(3.1415f);
-		//move({ 0.f, step });
-		int currIndex = 19;
-		numTiles = 2;
-		currIndex += (int)m_animTime % numTiles;
-		setTextureLocs(currIndex);
+        setTextureLocs(14);
+		set_rotation(3.1415f);
+		move({ 0.f, step });
 	}
-
 
 
 	if (m_light_up_countdown_ms > 0.f) {
@@ -245,7 +240,7 @@ void Hero::setTextureLocs(int index) {
     if (m_is_alive) {
         destroy();
     }
-
+    
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
@@ -278,7 +273,6 @@ void Hero::draw(const mat3& projection)
 	GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
-	GLint light_up_uloc = glGetUniformLocation(effect.program, "light_up");
 
 	// Setting vertices and indices
 	glBindVertexArray(mesh.vao);
@@ -302,8 +296,6 @@ void Hero::draw(const mat3& projection)
 	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
-
-	glUniform1iv(light_up_uloc, 1, &m_light_up);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -517,6 +509,11 @@ bool Hero::mesh_collision(vec3 ptest,std::vector<vec3> &cur_vertices)
     return false;
 }
 
+int Hero::get_active_skill()
+{
+	return activeSkill;
+}
+
 void Hero::set_color(vec3 in_color)
 {
 	float color[3] = {in_color.x,in_color.y,in_color.z};
@@ -577,12 +574,24 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 
 }
 
-void Hero::level_up()
+bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 {
-    ice_arrow_skill.level_up();
-	light_up();
-	hp = std::min(max_hp, hp + 10.f);
-	level ++;
+	if (mp > thunder_skill.get_mpcost()) 
+	{
+		float mp_cost = thunder_skill.drop_thunder(thunders, position);
+		change_mp(-1 * mp_cost);
+		return true;
+	}
+	return false;
+	
+}
+
+void Hero::level_up(int select_skill,int select_upgrade)
+{
+	if (select_skill == 0)
+		ice_arrow_skill.level_up(select_upgrade);
+	else if (select_skill == 1)
+		thunder_skill.level_up(select_upgrade);
 }
 
 void Hero::apply_momentum(vec2 f)
@@ -591,3 +600,25 @@ void Hero::apply_momentum(vec2 f)
 	momentum.y += f.y;
 }
 
+bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position)
+{
+	bool success;
+	switch (activeSkill)
+	{
+	case ICE_SKILL:
+		success = use_ice_arrow_skill(hero_projectiles);
+		break;
+	case THUNDER_SKILL:
+		success = use_thunder_skill(thunders, position);
+		break;
+	default:
+		success = false;
+		break;
+	}
+	return success;
+}
+
+void Hero::set_active_skill(int active)
+{
+	activeSkill = active;
+}

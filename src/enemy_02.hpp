@@ -28,9 +28,6 @@ public:
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
-
-	bool collide_with(Projectile &projectile);
-
 	bool checkIfCanFire(clock_t currentClock);
 
     void setTextureLocs(int index);
