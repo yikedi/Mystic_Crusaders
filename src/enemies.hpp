@@ -51,6 +51,8 @@ public:
 
 	virtual bool collide_with(Thunder & thunder);
 
+	void set_stunded(bool hit);
+
 public:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
@@ -66,4 +68,6 @@ public:
     float deceleration;
     float momentum_factor;
     int m_level;
+	bool stunned;
+
 };

@@ -1,5 +1,6 @@
 #include "Thunder.h"
 
+float string_time = 500.f;
 bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale)
 {
 	// Load shared texture
@@ -25,7 +26,7 @@ void Thunder::set_position(vec2 position)
 void Thunder::update(float ms)
 {
 	elapsedTime += ms;
-	if (elapsedTime < 200 )
+	if (elapsedTime < string_time)
 	{
 		thunderString.update(elapsedTime);
 	}
@@ -37,7 +38,7 @@ void Thunder::update(float ms)
 
 void Thunder::draw(const mat3 &projection)
 {
-	if (elapsedTime < 200)
+	if (elapsedTime < string_time)
 	{
 		thunderString.draw(projection);
 	}
@@ -60,11 +61,11 @@ bool Thunder::can_remove()
 
 float Thunder::get_radius()
 {
-	return thunderBall.get_radius();
+	return 0.6 * thunderBall.get_radius();
 }
 
 void Thunder::apply_effect(Enemies & e)
 {
 	e.take_damage(m_damage);
-	e.set_speed(e.get_speed() * 0.5);
+	e.set_stunded(true);
 }

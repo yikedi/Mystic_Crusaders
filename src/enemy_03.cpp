@@ -155,6 +155,9 @@ void Enemy_03::draw(const mat3& projection)
 void Enemy_03::update(float ms, vec2 target_pos)
 {
 	//momentum first
+	if (stunned)
+		ms = ms * 2;
+
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;
 
@@ -211,6 +214,8 @@ void Enemy_03::update(float ms, vec2 target_pos)
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 	}
+
+	stunned = false;
 }
 
 

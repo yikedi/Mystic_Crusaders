@@ -100,3 +100,8 @@ float Enemies::get_speed()
 {
 	return m_speed;
 }
+
+void Enemies::set_stunded(bool hit)
+{
+	stunned = hit;
+}

@@ -1,31 +1,37 @@
 #include "ThunderString.h"
 
-Texture ThunderString::texture;
+SpriteSheet ThunderString::texture;
 bool ThunderString::init(vec2 position)
 {
 	// Load shared texture
 	if (!texture.is_valid())
 	{
-		if (!texture.load_from_file(textures_path("thunderString.png")))
+		if (!texture.load_from_file(textures_path("lightning_top.png")))
 		{
 			fprintf(stderr, "Failed to load thunderString texture!");
 			return false;
 		}
 	}
 
+	texture.totalTiles = 28; // custom to current sprite sheet
+	texture.subWidth = 64; // custom to current sprite sheet
+
 	// The position corresponds to the center of the texture
-	float wr = texture.width * 0.5f;
+	float wr = texture.subWidth * 0.5f;
 	float hr = texture.height * 0.5f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.01f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.01f };
-	vertices[1].texcoord = { 1.f, 1.f, };
-	vertices[2].position = { +wr, -hr, -0.01f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.01f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.01f };
+	//vertices[0].texcoord = { 0.f, 1.f };
+	texVertices[1].position = { +wr, +hr, -0.01f };
+	//vertices[1].texcoord = { 1.f, 1.f, };
+	texVertices[2].position = { +wr, -hr, -0.01f };
+	//vertices[2].texcoord = { 1.f, 0.f };
+	texVertices[3].position = { -wr, -hr, -0.01f };
+	//vertices[3].texcoord = { 0.f, 0.f };
+
+	for (int i = 0; i <= texture.totalTiles; i++) {
+		texture_locs.push_back((float)i * texture.subWidth / texture.width);
+	}
 
 	// counterclockwise as it's the default opengl front winding direction
 	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -36,7 +42,7 @@ bool ThunderString::init(vec2 position)
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
 
 	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
@@ -54,7 +60,7 @@ bool ThunderString::init(vec2 position)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 0.1f;
+	m_scale.x = 2.f;
 	m_scale.y = 2.f;
 	m_rotation = 0;
 
@@ -64,20 +70,65 @@ bool ThunderString::init(vec2 position)
 	end_position = { position.x,position.y - hr * m_scale.y };
 	velocity.x = 0;
 	velocity.y = initial_speed;
+	animation_time = 0.0f;
+
 	return true;
 }
 
 void ThunderString::destroy()
 {
+	//glDeleteBuffers(1, &mesh.vbo);
+	//glDeleteBuffers(1, &mesh.ibo);
+	//glDeleteVertexArrays(1, &mesh.vao);
+	//effect.release();
+
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+	//glDeleteBuffers(1, &mesh.vao);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
+}
+
+void ThunderString::setTextureLocs(int index)
+{
+	texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
+	texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
+	texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
+	texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Clear memory allocation
+	if (first_time) {
+		destroy();
+	}
+
+	// Vertex Buffer creation
+	glGenBuffers(1, &mesh.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glGenBuffers(1, &mesh.ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+	first_time = false;
 }
 
 void ThunderString::update(float ms)
 {
 	float stepy = velocity.y * (ms / 1000);	
+	float animation_speed = 1.5f;
+	animation_time += animation_speed * 2;
+	int curidx = 0;
+	curidx += (int)animation_time % texture.totalTiles;
+	setTextureLocs(curidx);
 	if (m_position.y + stepy <= end_position.y)
 		m_position.y += stepy;
 	else

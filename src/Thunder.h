@@ -6,7 +6,7 @@
 
 class Thunder: public Renderable
 {
-	
+
 public:
 	Thunder()
 	{}

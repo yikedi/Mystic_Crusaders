@@ -1,13 +1,13 @@
 #include "ThunderBall.h"
 #include "algorithm"
 
-Texture ThunderBall::texture;
+SpriteSheet ThunderBall::texture;
 bool ThunderBall::init(vec2 position,vec2 scale)
 {
 	// Load shared texture
 	if (!texture.is_valid())
 	{	
-		if (!texture.load_from_file(textures_path("thunderBall.png")))
+		if (!texture.load_from_file(textures_path("lightning_bottom.png")))
 		{
 			fprintf(stderr, "Failed to load thunderball texture!");
 			return false;
@@ -15,18 +15,25 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = texture.width * 0.5f;
+	texture.totalTiles = 15; // custom to current sprite sheet
+	texture.subWidth = 64; // custom to current sprite sheet
+
+	// The position corresponds to the center of the texture
+	float wr = texture.subWidth * 0.5f;
 	float hr = texture.height * 0.5f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.01f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.01f };
-	vertices[1].texcoord = { 1.f, 1.f, };
-	vertices[2].position = { +wr, -hr, -0.01f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.01f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.01f };
+	//vertices[0].texcoord = { 0.f, 1.f };
+	texVertices[1].position = { +wr, +hr, -0.01f };
+	//vertices[1].texcoord = { 1.f, 1.f, };
+	texVertices[2].position = { +wr, -hr, -0.01f };
+	//vertices[2].texcoord = { 1.f, 0.f };
+	texVertices[3].position = { -wr, -hr, -0.01f };
+	//vertices[3].texcoord = { 0.f, 0.f };
+
+	for (int i = 0; i <= texture.totalTiles; i++) {
+		texture_locs.push_back((float)i * texture.subWidth / texture.width);
+	}
 
 	// counterclockwise as it's the default opengl front winding direction
 	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -37,7 +44,7 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
 
 	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
@@ -59,6 +66,9 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 	m_rotation = 0;
 	m_position = position;
 	elapsedTime = 0;
+	animation_time = 0.0f;
+	first_time = true;
+
 	return true;
 }
 
@@ -74,20 +84,64 @@ void ThunderBall::set_position(vec2 position)
 
 void ThunderBall::destroy()
 {
+	//glDeleteBuffers(1, &mesh.vbo);
+	//glDeleteBuffers(1, &mesh.ibo);
+	//glDeleteVertexArrays(1, &mesh.vao);
+	//effect.release();
+
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+	//glDeleteBuffers(1, &mesh.vao);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
 }
 
 void ThunderBall::update(float ms) 
 {
 	//animation
+
+	float animation_speed = 0.1f;
+	animation_time += animation_speed * 2;
+	int curidx = 0;
+	curidx += (int)animation_time % texture.totalTiles;
+	setTextureLocs(curidx);
+}
+
+void ThunderBall::setTextureLocs(int index)
+{
+	texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
+	texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
+	texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
+	texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Clear memory allocation
+	if (!first_time) {
+		destroy();
+	}
+
+	// Vertex Buffer creation
+	glGenBuffers(1, &mesh.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glGenBuffers(1, &mesh.ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+	first_time = false;
 }
 
 vec2 ThunderBall::get_bounding_box()
 {
-	return { std::fabs(m_scale.x) * texture.width, std::fabs(m_scale.y) * texture.height };
+	return { std::fabs(m_scale.x) * texture.subWidth, std::fabs(m_scale.y) * texture.height };
 }
 
 float ThunderBall::get_radius()

@@ -3,12 +3,12 @@
 void ThunderSkill::init()
 {
 	mp_cost = 10;
-	damage = 10;
+	damage = 1;
 	damage_level = 0;
 	effect_level = 0;
 	mp_cost_level = 0;
 	impactTime = 3000;
-	scale = { 0.3f,0.3f };
+	scale = { 2.5f,2.5f };
 }
 bool ThunderSkill::level_up(int select)
 {
@@ -18,7 +18,7 @@ bool ThunderSkill::level_up(int select)
 		case LEVEL_UP_DAMAGE: // increase damage
 			if (damage_level < 4) 
 			{
-				damage += 10;
+				damage += 1;
 				mp_cost += 2;
 				success = true;
 			}

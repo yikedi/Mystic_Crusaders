@@ -94,7 +94,7 @@ void Hero::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	//glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
@@ -178,7 +178,7 @@ void Hero::update(float ms)
         // setting texture coordinates
         if (m_moveState == HeroMoveState::LEFTMOVING) {
             int currIndex = 15;
-            numTiles = 6;
+            numTiles = 4;
             currIndex += (int)m_animTime % numTiles;
             setTextureLocs(currIndex);
         }
@@ -212,7 +212,6 @@ void Hero::update(float ms)
 		set_rotation(3.1415f);
 		move({ 0.f, step });
 	}
-
 
 
 	if (m_light_up_countdown_ms > 0.f) {

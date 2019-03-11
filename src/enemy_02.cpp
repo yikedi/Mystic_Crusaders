@@ -176,6 +176,9 @@ void Enemy_02::draw(const mat3& projection)
 void Enemy_02::update(float ms, vec2 target_pos)
 {
 	//momentum first
+	if (stunned)
+		ms = ms * 0.2;
+
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;
 
@@ -235,6 +238,8 @@ void Enemy_02::update(float ms, vec2 target_pos)
 			speedBoost = !speedBoost;
 		}
 	}
+
+	stunned = false;
 
 }
 
