@@ -33,7 +33,6 @@ bool Skilltree::init(vec2 screen, int element)
 		lower_element = "ice";
 		break;
 	}
-	//screen_texture.load_from_file(textures_path("skill_tree1.png"));
 	float w = screen_texture.width;
 	float h = screen_texture.height;
 	float wr = w * 0.5f;
@@ -73,7 +72,7 @@ bool Skilltree::init(vec2 screen, int element)
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	m_scale = set_scale(w, h, screen);
+	m_scale = {1.f, 1.f};
 	m_position.x = screen.x/2;
 	m_position.y = screen.y/2;
 	if (front_element == "ice") {
@@ -82,13 +81,11 @@ bool Skilltree::init(vec2 screen, int element)
 		ices3.init(screen, 3);
 	}
 	else if (front_element == "thunder") {
-		fprintf(stderr, "init!");
 		thunder1.init(screen, 1);
 		thunder2.init(screen, 2);
 		thunder3.init(screen, 3);
 	}
 	else if (front_element == "fire") {
-		fprintf(stderr, "init!");
 		fire1.init(screen, 1);
 		fire2.init(screen, 2);
 		fire3.init(screen, 3);
@@ -169,7 +166,6 @@ void Skilltree::draw(const mat3 & projection)
 			ices3.draw(projection);
 		}
 		else if (front_element == "thunder") {
-			fprintf(stderr, "draw!");
 			thunder1.draw(projection);
 			thunder2.draw(projection);
 			thunder3.draw(projection);
@@ -194,7 +190,6 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec
 			ices3.update_ice(paused, ice_num.z);
 		}
 		else if (front_element == "thunder") {
-			fprintf(stderr, "update!");
 			thunder1.update_ice(paused, thunder_num.x);
 			thunder2.update_ice(paused, thunder_num.y);
 			thunder3.update_ice(paused, thunder_num.z);
@@ -222,15 +217,6 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec
 std::string Skilltree::get_element()
 {
 	return front_element;
-}
-
-vec2 Skilltree::set_scale(float w, float h, vec2 screen)
-{
-	// temp code, will change after get window is possible
-	float xscale = screen.x / w;
-	float yscale = screen.y / h;
-	//return{ 1.f,1.f };
-	return { xscale, yscale };
 }
 
 bool Skilltree::inside(vec2 h, vec2 w,vec2 pos) 
@@ -278,7 +264,7 @@ bool Skilltree::level_position(vec2 mouse_pos)
  
 }
 
-int Skilltree::ice_position(vec2 mouse_pos, std::string element)
+int Skilltree::icon_position(vec2 mouse_pos, std::string element)
 {
 	float lxpos1 = ices1.get_position().x;
 	float lypos1 = ices1.get_position().y;
@@ -379,8 +365,6 @@ int Skilltree::ice_position(vec2 mouse_pos, std::string element)
 
 std::string Skilltree::element_position(vec2 mouse_pos)
 {
-	// ice, thunder, fire
-	//based on different element, 
 	float lxpos1 = 400.f;	//upper
 	float lypos1 = 270.f;
 
@@ -403,10 +387,10 @@ std::string Skilltree::element_position(vec2 mouse_pos)
 	bool click_lower = inside(height2, width2, mouse_pos);
 	bool click_front = inside(height3, width3, mouse_pos);
 
-	if (click_front) {	//click front element, nothing happened
+	if (click_front) {	
 		return front_element;
 	}
-	else if (click_lower) { //click upper element, upper element will now be the front element
+	else if (click_lower) { 
 		if (front_element == "ice") {
 			front_element = "fire";
 		}
@@ -417,7 +401,7 @@ std::string Skilltree::element_position(vec2 mouse_pos)
 			front_element = "ice";
 		}
 	}
-	else if (click_upper) {	//click lower element, lower element will now be the front element
+	else if (click_upper) {
 		if (front_element == "ice") {
 			front_element = "thunder";
 		}

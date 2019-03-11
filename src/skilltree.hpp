@@ -21,7 +21,6 @@ class Skilltree : public Renderable
 public:
 
 	// Creates all the associated render resources and default transform
-	//bool init(vec2 screen);
 	bool init(vec2 screen, int element);
 
 	// Releases all the associated resources
@@ -33,22 +32,13 @@ public:
 
 	std::string get_element();
 
-	vec2 set_scale(float w, float h, vec2 screen);
-
 	bool inside(vec2 h, vec2 w, vec2 pos);
 
 	bool level_position(vec2 mouse_pos);
 
-	int ice_position(vec2 mouse_pos, std::string element);
-
-	//int ice_position(vec2 mouse_pos);
-
-	int thunder_position(vec2 mouse_pos);
+	int icon_position(vec2 mouse_pos, std::string element);
 
 	std::string element_position(vec2 mouse_pos);
-
-	int element_position(vec2 mouse_pos, int element);
-	void reset();
 
 private:
 	Iceskilltex ices1;
@@ -85,10 +75,4 @@ private:
 	int free_skillpoints;
 	int conversion = 10;
 
-
-	// incre # of amo
-	// decre mp cost
-	// incre damage
-
-	// vec3 skill{fire, 2,2, times}
 };

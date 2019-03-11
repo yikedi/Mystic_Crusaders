@@ -9,14 +9,11 @@
 
 #include <gl3w.h>
 
-bool Iceskilltex::init(vec2 screen, int skill_num)	//, std::string filename
+bool Iceskilltex::init(vec2 screen, int skill_num)
 {
-	//std::string fullpath(data_path "/textures/");
-	//fullpath = fullpath + filename;
-	//std::string a(data_path + tex_name.c_str());
 	switch (skill_num) {
 		case 1:
-			ice_texture.load_from_file(ice_skill1());  //fullpath.c_str()
+			ice_texture.load_from_file(ice_skill1());
 			m_position.x = 0.71*screen.x;
 			m_position.y = 0.42*screen.y;
 			break;
@@ -123,17 +120,13 @@ void Iceskilltex::draw(const mat3 & projection)
 void Iceskilltex::update_ice(bool paused, float degree)
 {
 	if (paused) {
-		//fprintf(stderr, "Failed to load enemy texture!");
 		if (degree ==0.f) {
-			//fprintf(stderr, "texture1");
 			get_texture(0);
 		}
 		else if (degree == 1.f) {
-			//fprintf(stderr, "texture2");
 			get_texture(1);
 		}
 		else if (degree == 2.f) {
-			//fprintf(stderr, "texture3");
 			get_texture(2);
 		}
 		else if (degree == 3.f) {
@@ -150,10 +143,9 @@ void Iceskilltex::update_ice(bool paused, float degree)
 
 void Iceskilltex::get_texture(int loc)
 {
-	//height/width
-	float h = 120.f;
+	float sw = 120.f;
 	float w = 720.f;
-	float texture_locs[] = { 0.f, h / w, 2 * h / w, 3 * h / w, 4 * h / w, 5 * h / w, 1.f };
+	float texture_locs[] = { 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right

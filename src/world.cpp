@@ -882,11 +882,11 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				stree.init(screen, 2);
 			}
 			else if (skill_element == "fire") {
-				stree.init(screen, 3);   // if it is fire screen, it won't change to other screens
+				stree.init(screen, 3); 
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
-				skill_num = stree.ice_position(mouse_pos, skill_element);
+				skill_num = stree.icon_position(mouse_pos, skill_element);
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
 			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
@@ -905,7 +905,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 			}
 			else {
-				skill_num = stree.ice_position(mouse_pos, skill_element);
+				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 2) {
@@ -925,7 +925,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 			}
 			else {
-				skill_num = stree.ice_position(mouse_pos, skill_element);
+				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 3) {
@@ -945,7 +945,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 			}
 			else {
-				skill_num = stree.ice_position(mouse_pos, skill_element);
+				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
 	}
