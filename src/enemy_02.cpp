@@ -4,49 +4,41 @@
 #include <cmath>
 #include <algorithm>
 
-Texture Enemy_02::enemy_texture;
+SpriteSheet Enemy_02::enemy_texture;
 
 bool Enemy_02::init(int level)
 {
 	// Load shared texture
 	if (!enemy_texture.is_valid())
 	{
-		if (!enemy_texture.load_from_file(textures_path("enemy_02.png")))
+		if (!enemy_texture.load_from_file(textures_path("enemy_spider_animation.png")))
 		{
 			fprintf(stderr, "Failed to load enemy texture!");
 			return false;
 		}
 	}
 
+    enemy_texture.totalTiles = 11; // custom to current sprite sheet
+    enemy_texture.subWidth = 128.f; // custom to current sprite sheet
+    enemy_texture.subHeight = 64.f; // custom to current sprite sheet
+    m_is_alive = false;
+
 	// The position corresponds to the center of the texture
-	float wr = enemy_texture.width * 0.5f;
+	float wr = enemy_texture.subWidth * 0.5f;
 	float hr = enemy_texture.height * 0.5f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.02f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.02f };
-	vertices[1].texcoord = { 1.f, 1.f };
-	vertices[2].position = { +wr, -hr, -0.02f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.02f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.02f };
+	texVertices[1].position = { +wr, +hr, -0.02f };
+	texVertices[2].position = { +wr, -hr, -0.02f };
+	texVertices[3].position = { -wr, -hr, -0.02f };
 
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+    for (int i = 0; i <= enemy_texture.totalTiles; i++) {
+        texture_locs.push_back((float)i * enemy_texture.subWidth / enemy_texture.width);
+    }
 
-	// Clearing errors
-	gl_flush_errors();
-
-	// Vertex Buffer creation
-	glGenBuffers(1, &mesh.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
-	glGenBuffers(1, &mesh.ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+    glGenBuffers(1, &mesh.vbo);
+    glGenBuffers(1, &mesh.ibo);
+    setTextureLocs(0);
 
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
@@ -88,10 +80,12 @@ bool Enemy_02::init(int level)
 // Releases all graphics resources
 void Enemy_02::destroy()
 {
-	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+    glDeleteBuffers(1, &mesh.vbo);
+    glDeleteBuffers(1, &mesh.ibo);
+
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 
@@ -103,9 +97,9 @@ void Enemy_02::draw(const mat3& projection)
 	transform_translate(m_position);
 
 	if(m_face_left_or_right == 1){
-		m_scale.x = 0.8f;
-	} else {
 		m_scale.x = -0.8f;
+	} else {
+		m_scale.x = 0.8f;
 	}
 
 	transform_scale(m_scale);
@@ -123,7 +117,7 @@ void Enemy_02::draw(const mat3& projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 
-	// Setting vertices and indices
+	// Setting texVertices and indices
 	glBindVertexArray(mesh.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
@@ -175,6 +169,8 @@ void Enemy_02::draw(const mat3& projection)
 
 void Enemy_02::update(float ms, vec2 target_pos)
 {
+    float animSpeed = 0.1f;
+
 	//momentum first
 	if (stunned)
 		ms = ms * 0.2;
@@ -241,6 +237,58 @@ void Enemy_02::update(float ms, vec2 target_pos)
 
 	stunned = false;
 
+    // update animation loop
+    m_animTime += animSpeed * 2;
+    numTiles = 11;
+    int currIndex = 0;
+    currIndex += (int)m_animTime % numTiles;
+    setTextureLocs(currIndex);
+
+}
+
+void Enemy_02::setTextureLocs(int index) {
+
+    texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
+    texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
+    texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
+    texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
+
+    // counterclockwise as it's the default opengl front winding direction
+    uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+    // Clearing errors
+    gl_flush_errors();
+
+    // Clear Memory
+
+    if (m_is_alive) {
+        destroy();
+    }
+
+    // Vertex Buffer creation
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+    // Index Buffer creation
+    glGenBuffers(1, &mesh.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+}
+
+
+bool Enemy_02::collide_with(Projectile &projectile)
+{
+	float dx = m_position.x - projectile.get_position().x;
+	float dy = m_position.y - projectile.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+			return true;
+	return false;
 }
 
 
