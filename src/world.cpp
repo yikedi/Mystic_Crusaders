@@ -157,9 +157,9 @@ bool World::init(vec2 screen)
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ screen.x / 3 - 120.f, screen.y / 3  });
-	m_treetrunk_position.push_back({ screen.x / 3 - 50.f , screen.y / 3 });
+	m_treetrunk_position.push_back({ screen.x / 3 - 50.f , screen.y / 3 - 50.f });
 	m_treetrunk_position.push_back({ screen.x / 2 , screen.y / 4 });
-	m_treetrunk_position.push_back({ screen.x / 2 - 70.f , screen.y / 4 });
+	m_treetrunk_position.push_back({ screen.x / 2 - 70.f , screen.y / 4 + 50.f });
 	m_treetrunk_position.push_back({ screen.x * 2 / 3 , screen.y *3/ 4  });
 
 
@@ -179,7 +179,7 @@ bool World::initTrees() {
 			return false;
 
 		Treetrunk& new_trunk = m_treetrunk.back();
-		new_trunk.set_position({ position.x,position.y + 120.f});
+		new_trunk.set_position({ position.x,position.y + 200.f});
 	}
 
 	for (auto & position : m_treetrunk_position)
@@ -188,7 +188,7 @@ bool World::initTrees() {
 			return false;
 
 		Tree& new_tree = m_tree.back();
-		new_tree.set_position({ position.x ,position.y });
+		new_tree.set_position({ position.x +10.f ,position.y });
 	}
 }
 
