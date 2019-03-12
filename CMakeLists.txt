@@ -48,6 +48,7 @@ set(SOURCE_FILES
     src/start_screen.cpp
     src/user_interface.cpp
     src/screen_button.cpp
+    src/tutorial_screen.cpp
     src/enemy_laser.cpp
 	src/map_screen.cpp
     src/Ice_arrow.cpp
@@ -70,6 +71,7 @@ set(SOURCE_FILES
     src/start_screen.hpp
     src/user_interface.hpp
     src/screen_button.hpp
+    src/tutorial_screen.hpp
     src/enemy_laser.h
 	src/sprite_sheet.hpp
 	src/map_screen.hpp

@@ -24,20 +24,33 @@ using namespace std;
 using ClickCallbackSTD = std::function<void()>;
 
 // Gets the top-left corner coordinates, width, height, and message for the button, and returns a button
-Button::Button(int x, int y, int w, int h, std::string path, std::string type, ClickCallbackSTD onClick) {// ClickCallback onClick) {
+void Button::makeButton(int x, int y, int w, int h, std::string path, std::string type, ClickCallbackSTD onClick) {// ClickCallback onClick) {
 	if (path == "") {
 		// empty string for path, therefore no path; regular button with only a type, and a white color probably
-		// init((double)x, (double)y, (double)w, (double)h, type);
-		fprintf(stderr, "CANNOT FIND BUTTON AT POSITION X= %i , Y= %i \n", x, y);
+		fprintf(stderr, "CANNOT FIND BUTTON PATH AT POSITION X= %i , Y= %i \n", x, y);
 	}
 	else {
 		// we wouldn't care what the text says, unless we come back and decide we do.
 		if (type == "") {
 			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %i , Y= %i \n", x, y);
 		}
-		else {
-			init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
+		init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
+	}
+}
+
+void Button::makeButton(int x, int y, int w, int h, float opacity1, std::string path, std::string type, ClickCallbackSTD onClick) {// ClickCallback onClick) {
+	if (path == "") {
+		// empty string for path, therefore no path; regular button with only a type, and a white color probably
+		fprintf(stderr, "CANNOT FIND BUTTON PATH AT POSITION X= %i , Y= %i \n", x, y);
+	}
+	else {
+		// we wouldn't care what the text says, unless we come back and decide we do.
+		if (type == "") {
+			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %i , Y= %i \n", x, y);
 		}
+		is_transparency_enabled = true;
+		opacity = opacity1;
+		init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
 	}
 }
 
@@ -66,7 +79,6 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 		  and then convert it back to const char-star
 		*/
 		string s = string(textures_path()) + path;
-		fprintf(stderr, "PATH: %s", s);
 		if (!button_texture.load_from_file(s.c_str()))
 		{
 			fprintf(stderr, "Failed to load button texture! pathname: %s", path);
@@ -112,7 +124,7 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 	}
 
 	// Loading shaders
-	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
+	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured_button.fs.glsl")))
 		return false;
 
 	// Setting initial values
@@ -145,7 +157,7 @@ void Button::destroy() {
 	glDeleteShader(effect.program);
 }
 
-void Button::CheckClick(vec2 mouse_position) {
+void Button::check_click(vec2 mouse_position) {
 	float mouse_x = mouse_position.x;
 	float mouse_y = mouse_position.y;
 	if (mouse_x >= left_corner && mouse_x <= left_corner + width &&
@@ -154,8 +166,18 @@ void Button::CheckClick(vec2 mouse_position) {
 	}
 }
 
+bool Button::mouse_inside_button(vec2 mouse_position) {
+	float mouse_x = mouse_position.x;
+	float mouse_y = mouse_position.y;
+	if (mouse_x >= left_corner && mouse_x <= left_corner + width &&
+		mouse_y >= top_corner && mouse_y <= top_corner + height) {
+		return true;
+	}
+}
+
 void Button::draw(const mat3 &projection)
 {
+	// if ((button_hoverable && mouse_hovering) || !button_hoverable) {
 	transform_begin();
 	transform_translate(m_position);
 	transform_rotate(m_rotation);
@@ -166,7 +188,8 @@ void Button::draw(const mat3 &projection)
 	glUseProgram(effect.program);
 
 	// Enabling alpha channel for textures
-	glEnable(GL_BLEND); glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
 	// Getting uniform locations for glUniform* calls
@@ -193,24 +216,38 @@ void Button::draw(const mat3 &projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
-	glUniform3fv(color_uloc, 1, color);
+
+	float color[] = { 1.f, 1.f, 1.f, opacity };
+	glUniform4fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	// }
 }
 
 
 void Button::set_color(vec3 in_color)
 {
-	float color[3] = { in_color.x,in_color.y,in_color.z };
-	memcpy(m_color, color, sizeof(color));
+	if (is_transparency_enabled) {
+		// fprintf(stderr, "USING TRANSPARENT BUTTON! BEWARE IF ERRORS OCCUR \n");
+		float color[4] = { in_color.x,in_color.y,in_color.z, opacity };
+		memcpy(m_color_transparent, color, sizeof(color));
+	}
+	else {
+		float color[3] = { in_color.x,in_color.y,in_color.z };
+		memcpy(m_color, color, sizeof(color));
+	}
+
 }
 
 void Button::set_position(vec2 position)
 {
 	m_position = { position.x / zoom_factor + (float)width / (2.f * zoom_factor), position.y / zoom_factor + (float)height / (2.f * zoom_factor) };
+}
+
+void Button::set_hoverable(bool is_hoverable) {
+	button_hoverable = is_hoverable;
 }
 
 /*

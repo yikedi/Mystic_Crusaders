@@ -17,6 +17,7 @@
 #include "start_screen.hpp"
 #include "user_interface.hpp"
 #include "screen_button.hpp"
+#include "tutorial_screen.hpp"
 
 // stlib
 #include <vector>
@@ -65,6 +66,7 @@ private:
 	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
 
 	void startGame();
+	void doNothing();
 
 
 private:
@@ -119,5 +121,13 @@ private:
 
 	clock_t lastFireProjectileTime;
 	Button testButton;
+	Button testButton1;
+	Button testButton2;
+	Button testButton3;
+	Button testButton4;
+	bool display_tutorial = false;
 	vec2 mouse_pos;
+	TutorialScreen m_tutorial;
+
+
 };
