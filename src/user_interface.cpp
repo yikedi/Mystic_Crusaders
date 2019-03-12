@@ -119,7 +119,7 @@ void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom)
 	cur_exp = exp.x;
 	max_exp = exp.y;
 	if (max_exp == 0)
-		max_exp = 20;
+		max_exp = 15;
 	zoom_factor = zoom;
 	m_scale = { 1.f / zoom, 1.f / zoom };
 
