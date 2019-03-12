@@ -8,7 +8,7 @@ class Thunder;
 enum class EnemyMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
 
 // general enemies
-class Enemies
+class Enemies : public Renderable
 {
 	// Shared between all enemys, no need to load one for each instance
 	static Texture enemy_texture;
@@ -51,6 +51,9 @@ public:
 
 	bool checkIfCanChangeDirectionOfMove(clock_t currentClock);
 
+	vec2 get_momentum();
+
+	vec2 get_scale();
 	virtual bool collide_with(Projectile &projectile);
 
 	virtual bool collide_with(Thunder & thunder);

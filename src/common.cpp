@@ -304,3 +304,52 @@ void Renderable::transform_end()
 {
 	//
 }
+
+void Renderable::transform_current_vertex(std::vector<vec3> &cur_vertices)
+{
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		vec3 old_position = { vertices.at(i).position.x, vertices.at(i).position.y,1 };
+		vec3 cur_position = mul_vec(transform, old_position);
+		cur_vertices.push_back(cur_position);
+	}
+}
+
+bool Renderable::mesh_collision(vec3 ptest, std::vector<vec3> &cur_vertices)
+{
+
+	for (size_t i = 0; i < indices.size(); i += 3) {
+
+		//three vertices of a triangle
+		vec3 A = cur_vertices.at(indices[i]);
+		vec3 B = cur_vertices.at(indices[i + 1]);
+		vec3 C = cur_vertices.at(indices[i + 2]);
+
+		/*v0 = C - A
+		v1 = B - A
+		v2 = P - A*/
+
+		vec2 v0 = { C.x - A.x, C.y - A.y };
+		vec2 v1 = { B.x - A.x, B.y - A.y };
+		vec2 v2 = { ptest.x - A.x,ptest.y - A.y };
+
+		// Compute dot products
+		float dot00 = dot(v0, v0);
+		float dot01 = dot(v0, v1);
+		float dot02 = dot(v0, v2);
+		float dot11 = dot(v1, v1);
+		float dot12 = dot(v1, v2);
+
+		// Compute barycentric coordinates
+		float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+		float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+		if ((u >= 0) && (v >= 0) && (u + v < 1))
+			int a = 0;
+
+		return (u >= 0) && (v >= 0) && (u + v < 1);
+
+	}
+
+	return false;
+}

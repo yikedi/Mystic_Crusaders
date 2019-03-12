@@ -16,6 +16,8 @@
 #include "map_screen.hpp"
 #include "start_screen.hpp"
 #include "user_interface.hpp"
+#include "treetrunk.hpp"
+#include "tree.hpp"
 #include "skilltree.hpp"
 #include "ice_skill_tex.hpp"
 #include "Thunder.h"
@@ -59,6 +61,9 @@ private:
 	bool spawn_enemy_01();
 	bool spawn_enemy_02();
 	bool spawn_enemy_03();
+	bool spawn_treetrunk();
+	bool spawn_tree();
+
 	bool shootingFireBall;
 
 	// Generates a new fish
@@ -68,6 +73,7 @@ private:
 	void on_key(GLFWwindow*, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
 	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
+	bool initTrees();
 	void on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset);
 
 
@@ -90,7 +96,7 @@ private:
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
 	unsigned int previous_point;
-	
+
 	int m_level;
 
 	//zoom
@@ -112,10 +118,14 @@ private:
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Enemy_03> m_enemys_03;
+	std::vector<Treetrunk> m_treetrunk;
+	std::vector<Tree> m_tree;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
+	//Treetrunk m_treetrunk;
+	//Tree m_tree;
 
 	float m_current_speed;
 	float m_next_enemy1_spawn;
@@ -135,6 +145,8 @@ private:
 	float m_window_width;
 	float m_window_height;
 
+	int m_tree_number;
+	std::vector<vec2> m_treetrunk_position;
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;

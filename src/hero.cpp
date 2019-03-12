@@ -242,7 +242,7 @@ void Hero::setTextureLocs(int index) {
     if (m_is_alive) {
         destroy();
     }
-    
+
     // Vertex Buffer creation
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
@@ -473,13 +473,13 @@ void Hero::transform_current_vertex(std::vector<vec3> &cur_vertices)
     }
 }
 
+vec2 Hero::get_bounding_box()
+{
+	return { std::fabs(m_scale.x) * hero_texture.subWidth, std::fabs(m_scale.y) * hero_texture.height };
+}
+
 bool Hero::mesh_collision(vec3 ptest,std::vector<vec3> &cur_vertices)
 {
-    //mat3 A = mul(m_projection,transform);
-//    for (size_t i = 0; i < vertices.size(); ++i) {
-//        vec3 cur_position= mul_vec(transform, vertices.at(i).position);
-//        cur_vertices.push_back(cur_position);
-//    }
 
     for (size_t i = 0; i < indices.size(); i+=3) {
 
@@ -556,6 +556,16 @@ float Hero::get_mp()
     return mp;
 }
 
+void Hero::set_position(vec2 position)
+{
+	m_position = position;
+}
+
+vec2 Hero::get_position()
+{
+	return m_position;
+}
+
 bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
 	//Fish fish;
@@ -580,7 +590,7 @@ bool Hero::use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles)
 
 bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 {
-	if (mp > thunder_skill.get_mpcost()) 
+	if (mp > thunder_skill.get_mpcost())
 	{
 		float mp_cost = thunder_skill.drop_thunder(thunders, position);
 		change_mp(-1 * mp_cost);

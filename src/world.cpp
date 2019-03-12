@@ -158,8 +158,39 @@ bool World::init(vec2 screen)
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	shootingFireBall = false;
+
+	//initialize treetrunk & tree;
+	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
+	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
+	m_treetrunk_position.push_back({ screen.x / 4 , screen.y / 4 });
+	m_treetrunk_position.push_back({ screen.x / 4 - 120.f , screen.y / 4 + 50.f });
+	m_treetrunk_position.push_back({ 2* screen.x  / 3 , screen.y *3/ 4  });
+
+
+	initTrees();
+
 	mouse_position = { 0.f,0.f };
 	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
+}
+
+bool World::initTrees() {
+	for (auto & position : m_treetrunk_position)
+	{
+		if (!spawn_treetrunk())
+			return false;
+
+		Treetrunk& new_trunk = m_treetrunk.back();
+		new_trunk.set_position({ position.x,position.y + 200.f});
+	}
+
+	for (auto & position : m_treetrunk_position)
+	{
+		if (!spawn_tree())
+			return false;
+
+		Tree& new_tree = m_tree.back();
+		new_tree.set_position({ position.x +10.f ,position.y });
+	}
 }
 
 // Releases all the associated resources
@@ -187,6 +218,10 @@ void World::destroy()
 		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
+	for (auto& tree : m_tree)
+		tree.destroy();
+	for (auto& treetrunk : m_tree)
+		treetrunk.destroy();
 	for (auto& thunder : thunders)
 		thunder->destroy();
 
@@ -277,8 +312,6 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-
-
 		for (Enemy_01 enemy : m_enemys_01)
 		{
 			if (enemy.needFireProjectile == true)
@@ -322,6 +355,7 @@ bool World::update(float elapsed_ms)
 
 		// Updating all entities, making the enemy and fish
 		// faster based on current
+
 		m_hero.update(elapsed_ms);
 		for (auto& enemy : m_enemys_01)
 			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
@@ -333,10 +367,88 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 
+		//check treetrunk collision
+		//some bugs in collision detection need to be fixed latter, but it is not related to here
+		for (auto &treeTrunk : m_treetrunk)
+		{
+
+			if (treeTrunk.collide_with(m_hero)) {
+				vec2 cur_direction = m_hero.get_direction();
+				vec2 cur_position = m_hero.get_position();
+				float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
+				vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
+				m_hero.set_position(new_position);
+			}
+
+			// if hero projectile hit the tree trunck then destroy it
+			int p_len = (int)hero_projectiles.size() - 1;
+			for (int i = p_len; i >= 0; i--)
+			{
+				Projectile* h_proj = hero_projectiles.at(i);
+				if (treeTrunk.collide_with(*h_proj))
+				{
+					h_proj->destroy();
+					hero_projectiles.erase(hero_projectiles.begin() + i);
+				}
+			}
+
+			//same for enemy projectile
+			int l_len = (int)enemy_projectiles.size() - 1;
+			for (int i = l_len; i >= 0; i--)
+			{
+				EnemyLaser laser = enemy_projectiles.at(i);
+				if (treeTrunk.collide_with(laser))
+				{
+					laser.destroy();
+					enemy_projectiles.erase(enemy_projectiles.begin() + i);
+				}
+			}
+
+			//not sure what to do for enemies, tree trunk collision now
+			for (auto &e1 : m_enemys_01)
+			{
+				if (treeTrunk.collide_with(e1))
+				{
+					vec2 cur_position = e1.get_position();
+					int facing = e1.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e1.set_position(new_position);
+				}
+			}
+
+			for (auto &e2 : m_enemys_02)
+			{
+				if (treeTrunk.collide_with(e2))
+				{
+					vec2 cur_position = e2.get_position();
+					int facing = e2.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e2.set_position(new_position);
+				}
+			}
+
+			for (auto &e3 : m_enemys_03)
+			{
+				if (treeTrunk.collide_with(e3))
+				{
+					vec2 cur_position = e3.get_position();
+					int facing = e3.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e3.set_position(new_position);
+				}
+			}
+		}
 		//remove out of screen fireball
 
 		int len = (int)hero_projectiles.size() - 1;
@@ -641,6 +753,9 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
+		m_treetrunk.clear();
+		m_tree.clear();
+		initTrees();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -731,6 +846,7 @@ void World::draw()
 	start.draw(projection_2D);
 	// Drawing entities
 	map.draw(projection_2D);
+
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -746,6 +862,11 @@ void World::draw()
 	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
+
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.draw(projection_2D);
+		for (auto& tree : m_tree)
+			tree.draw(projection_2D);
 		m_interface.draw(projection_2D);
 	}
 
@@ -820,6 +941,34 @@ bool World::spawn_enemy_03()
 	return false;
 }
 
+
+bool World::spawn_treetrunk()
+{
+	Treetrunk treetrunk;
+	if (treetrunk.init({ m_window_width,m_window_height }))
+	{
+		m_treetrunk.emplace_back(treetrunk);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn treetrunk");
+	return false;
+}
+
+
+bool World::spawn_tree()
+{
+	Tree tree;
+	if (tree.init({ m_window_width,m_window_height }))
+	{
+		m_tree.emplace_back(tree);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn treetrunk");
+	return false;
+}
+
+
+
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 {
@@ -839,8 +988,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		glfwGetWindowSize(m_window, &w, &h);
 		m_hero.destroy();
 		m_interface.destroy();
+		m_treetrunk.clear();
+		m_tree.clear();
 		start.init(screen);
 		m_hero.init(screen);
+		initTrees();
 		m_enemys_01.clear();
 		m_enemys_02.clear();
 		m_enemys_03.clear();

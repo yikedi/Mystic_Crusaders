@@ -7,7 +7,7 @@
 #include "time.h"
 
 // Salmon enemy
-class Enemy_02 : public Renderable, public Enemies
+class Enemy_02 :public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
 	static SpriteSheet enemy_texture;
