@@ -156,11 +156,11 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 
 	//initialize treetrunk & tree;
-	m_treetrunk_position.push_back({ screen.x / 3 - 120.f, screen.y / 3  });
-	m_treetrunk_position.push_back({ screen.x / 3 - 50.f , screen.y / 3 - 50.f });
-	m_treetrunk_position.push_back({ screen.x / 2 , screen.y / 4 });
-	m_treetrunk_position.push_back({ screen.x / 2 - 70.f , screen.y / 4 + 50.f });
-	m_treetrunk_position.push_back({ screen.x * 2 / 3 , screen.y *3/ 4  });
+	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
+	m_treetrunk_position.push_back({ 4* screen.x / 5 - 50.f , screen.y / 3 - 50.f });
+	m_treetrunk_position.push_back({ screen.x / 4 , screen.y / 4 });
+	m_treetrunk_position.push_back({ screen.x / 4 - 70.f , screen.y / 4 + 50.f });
+	m_treetrunk_position.push_back({ 2* screen.x  / 3 , screen.y *3/ 4  });
 
 
 	initTrees();
@@ -361,10 +361,10 @@ bool World::update(float elapsed_ms)
 
 		//check treetrunk collision
 		//some bugs in collision detection need to be fixed latter, but it is not related to here
-		for (auto &treeTruck : m_treetrunk)
+		for (auto &treeTrunk : m_treetrunk)
 		{
 			
-			if (treeTruck.collide_with(m_hero)) {
+			if (treeTrunk.collide_with(m_hero)) {
 				vec2 cur_direction = m_hero.get_direction();
 				vec2 cur_position = m_hero.get_position();
 				float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
@@ -377,7 +377,7 @@ bool World::update(float elapsed_ms)
 			for (int i = p_len; i >= 0; i--)
 			{
 				Projectile* h_proj = hero_projectiles.at(i);
-				if (treeTruck.collide_with(*h_proj))
+				if (treeTrunk.collide_with(*h_proj))
 				{
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
@@ -389,7 +389,7 @@ bool World::update(float elapsed_ms)
 			for (int i = l_len; i >= 0; i--)
 			{
 				EnemyLaser laser = enemy_projectiles.at(i);
-				if (treeTruck.collide_with(laser))
+				if (treeTrunk.collide_with(laser))
 				{
 					laser.destroy();
 					enemy_projectiles.erase(enemy_projectiles.begin() + i);
@@ -399,7 +399,7 @@ bool World::update(float elapsed_ms)
 			//not sure what to do for enemies, tree trunk collision now
 			for (auto &e1 : m_enemys_01)
 			{
-				if (treeTruck.collide_with(e1))
+				if (treeTrunk.collide_with(e1))
 				{
 					vec2 cur_position = e1.get_position();
 					int facing = e1.m_face_left_or_right;
@@ -412,7 +412,7 @@ bool World::update(float elapsed_ms)
 
 			for (auto &e2 : m_enemys_02)
 			{
-				if (treeTruck.collide_with(e2))
+				if (treeTrunk.collide_with(e2))
 				{
 					vec2 cur_position = e2.get_position();
 					int facing = e2.m_face_left_or_right;
@@ -425,7 +425,7 @@ bool World::update(float elapsed_ms)
 
 			for (auto &e3 : m_enemys_03)
 			{
-				if (treeTruck.collide_with(e3))
+				if (treeTrunk.collide_with(e3))
 				{
 					vec2 cur_position = e3.get_position();
 					int facing = e3.m_face_left_or_right;
