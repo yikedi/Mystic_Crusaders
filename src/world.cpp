@@ -76,6 +76,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
@@ -212,6 +213,7 @@ bool World::update(float elapsed_ms)
 	
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
+	
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
@@ -1011,6 +1013,19 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
 			skill_num = stree.icon_position(mouse_pos, skill_element);
+			if (skill_num == 1 && skill_element == "ice" && ice_skill_set.x == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 1 && skill_element == "thunder" && thunder_skill_set.x == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 2 && skill_element == "ice" && ice_skill_set.y == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 2 && skill_element == "thunder" && thunder_skill_set.y == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 3 && skill_element == "ice" && ice_skill_set.z == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 3 && skill_element == "thunder" && thunder_skill_set.z == 5.f) {
+				skill_num = 0;
+			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
 			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
@@ -1079,7 +1094,6 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
-			//m_hero.use_ice_arrow_skill(hero_projectiles);
 			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
 		}
 	}
