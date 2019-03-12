@@ -53,6 +53,8 @@ set(SOURCE_FILES
 	src/map_screen.cpp
     src/Ice_arrow.cpp
     src/Ice_arrow_skill.cpp
+	src/treetrunk.cpp
+	src/tree.cpp
 	src/skilltree.cpp
 	src/ice_skill_tex.cpp
 	src/skillup.cpp
@@ -87,6 +89,8 @@ set(SOURCE_FILES
 	src/map_screen.hpp
     src/Ice_arrow.h
     src/Ice_arrow_skill.h
+	src/treetrunk.hpp
+	src/tree.hpp
 	src/skilltree.hpp
 	src/ice_skill_tex.hpp
 	src/skillup.hpp

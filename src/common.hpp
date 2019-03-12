@@ -122,6 +122,10 @@ struct Renderable
 	// renders itself it needs it to correctly bind it to its shader.
 	virtual void draw(const mat3& projection) = 0;
 
+	void transform_current_vertex(std::vector<vec3> &cur_vertices);
+
+	bool mesh_collision(vec3 ptest, std::vector<vec3> &cur_vertices);
+
 	// gl Immediate mode equivalent, see the Rendering and Transformations section in the
 	// specification pdf
 	void transform_begin();

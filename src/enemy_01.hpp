@@ -6,7 +6,7 @@
 #include "projectile.h"
 
 // Salmon enemy
-class Enemy_01 : public Renderable, public Enemies
+class Enemy_01 : public Enemies
 {
 	// Shared between all enemys, no need to load one for each instance
 	static SpriteSheet enemy_texture;
