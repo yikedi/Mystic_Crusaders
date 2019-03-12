@@ -9,38 +9,24 @@
 #include "projectile.h"
 #include <cmath>
 #include <math.h>
+#include "Skill.h"
 
-class Ice_arrow_skill {
+class Ice_arrow_skill: public Skill{
 public:
     Ice_arrow_skill()
     {
-        mp_cost = 2;
-        damage = 40.f;
-        level = 0;
-        num_arrows = 3;
-        shoot_range_angle = (float) M_PI * 15 /180;
+		init();
     }
 
     void init();
 
-    void level_up();
-
-    void set_mp_cost(float cost);
-
-    void set_damage(float damage);
+	bool level_up(int select);
 
     void set_range_angle(float radius);
-
-    float get_damage();
-
-    float get_mpcost();
 
     float shoot_ice_arrow(std::vector<Projectile*> &hero_projectiles, float radius, vec2 position);
 
 protected:
-    float mp_cost;
-    float damage;
-    int level;
     int num_arrows;
     float shoot_range_angle;
 };

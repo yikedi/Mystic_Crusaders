@@ -9,20 +9,14 @@ void Ice_arrow_skill::init()
 {
     mp_cost = 2;
     damage = 20.f;
-    level = 0;
+    damage_level = 0;
+	effect_level = 0;
+	mp_cost_level = 0;
     num_arrows = 3;
     shoot_range_angle = (float) M_PI * 15 /180;
 }
 
-float Ice_arrow_skill::get_damage() {return damage;}
-
-void Ice_arrow_skill::set_damage(float m_damage) {damage = m_damage;}
-
-void Ice_arrow_skill::set_mp_cost(float cost) {mp_cost = cost;}
-
 void Ice_arrow_skill::set_range_angle(float radius) {shoot_range_angle = radius;}
-
-float Ice_arrow_skill::get_mpcost(){return mp_cost;}
 
 float Ice_arrow_skill::shoot_ice_arrow(std::vector<Projectile *> &hero_projectiles, float radius, vec2 position)
 {
@@ -39,8 +33,9 @@ float Ice_arrow_skill::shoot_ice_arrow(std::vector<Projectile *> &hero_projectil
 
 }
 
-void Ice_arrow_skill::level_up()
+bool Ice_arrow_skill::level_up(int select)
 {
+/*
     if (level < 4)
     {
         level++;
@@ -49,4 +44,36 @@ void Ice_arrow_skill::level_up()
         shoot_range_angle += (float) M_PI * 7.5 /180;
         mp_cost += 1;
     }
+*/
+	bool success = false;
+	switch (select)
+	{
+	case LEVEL_UP_DAMAGE:
+		if (damage_level < 4)
+		{
+			damage += 10;
+			mp_cost += 1;
+			success = true;
+		}
+		break;
+	case LEVEL_UP_EFFECT:
+		if (effect_level < 4)
+		{
+			num_arrows += 1;
+			shoot_range_angle += (float)M_PI * 7.5 / 180;
+			mp_cost += 1;
+			success = true;
+		}
+		break;
+	case LEVEL_UP_MANA_COST:
+		if (mp_cost_level < 4)
+		{
+			mp_cost *= 0.8;
+			success = true;
+		}
+		break;
+	default:
+		break;
+	}
+	return success;
 }
