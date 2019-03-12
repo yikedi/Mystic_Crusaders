@@ -10,7 +10,7 @@
 Texture TutorialScreen::tutorial_screen;
 
 bool TutorialScreen::init(vec2 screen) {
-	tutorial_screen.load_from_file(textures_path("tutorial_screen.png"));
+	tutorial_screen.load_from_file(textures_path("tutorial screen.png"));
 	float w = tutorial_screen.width;
 	float h = tutorial_screen.height;
 	float wr = w * 0.5f;

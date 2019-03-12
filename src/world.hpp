@@ -140,13 +140,10 @@ private:
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;
-	Button testButton;
-	Button testButton1;
-	Button testButton2;
-	Button testButton3;
-	Button testButton4;
+	Button button_play;
+	Button button_tutorial;
+	Button button_back_to_menu;
 	bool display_tutorial = false;
-	vec2 mouse_pos;
 	TutorialScreen m_tutorial;
 
 
