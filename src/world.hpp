@@ -21,6 +21,8 @@
 #include "skilltree.hpp"
 #include "ice_skill_tex.hpp"
 #include "Thunder.h"
+#include "screen_button.hpp"
+#include "tutorial_screen.hpp"
 
 // stlib
 #include <vector>
@@ -53,9 +55,6 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
-	// Returns the size of our game screen
-	vec2 getScreenSize();
-
 private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
@@ -75,6 +74,9 @@ private:
 	void on_mouse_click(GLFWwindow* window, int button, int action, int mods);
 	bool initTrees();
 	void on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset);
+
+	void startGame();
+	void doNothing();
 
 
 private:
@@ -150,4 +152,11 @@ private:
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;
+	Button button_play;
+	Button button_tutorial;
+	Button button_back_to_menu;
+	bool display_tutorial = false;
+	TutorialScreen m_tutorial;
+
+
 };

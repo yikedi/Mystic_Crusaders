@@ -159,6 +159,18 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	shootingFireBall = false;
 
+	// std::function<void> f1 = &World::startGame;
+	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+	button_play.set_hoverable(true);
+	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
+	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
+	// testButton2.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->doNothing(); });
+	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+	// For future reference: examples of how to use buttons
+	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
+	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
+	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
+	
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
 	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
@@ -170,7 +182,8 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f }) && m_tutorial.init(screen);
+	//m_hero.init(screen) && m_water.init();
 }
 
 bool World::initTrees() {
@@ -231,6 +244,9 @@ void World::destroy()
 	enemy_projectiles.clear();
 	m_interface.destroy();
 	start.destroy();
+	button_play.destroy();
+	button_tutorial.destroy();
+	button_back_to_menu.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -742,8 +758,16 @@ bool World::update(float elapsed_ms)
 		m_water.get_salmon_dead_time() > 5) {
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
+		button_play.destroy();
+		button_tutorial.destroy();
+		button_back_to_menu.destroy();
+		m_tutorial.destroy();
 		m_hero.destroy();
 		m_hero.init(screen);
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		m_tutorial.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -769,6 +793,7 @@ bool World::update(float elapsed_ms)
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
+		display_tutorial = false;
 	}
 
 
@@ -844,6 +869,17 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
+	if (!display_tutorial) {
+		button_play.draw(projection_2D);
+		button_tutorial.draw(projection_2D);
+	}
+	
+	if (display_tutorial) {
+		// button_play2.draw(projection_2D);
+		m_tutorial.draw(projection_2D);
+		button_back_to_menu.draw(projection_2D);
+	}
+	
 	// Drawing entities
 	map.draw(projection_2D);
 
@@ -986,11 +1022,19 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
+		button_play.destroy();
+		button_tutorial.destroy();
+		button_back_to_menu.destroy();
+		m_tutorial.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
 		start.init(screen);
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		m_tutorial.init(screen);
 		m_hero.init(screen);
 		initTrees();
 		m_enemys_01.clear();
@@ -1017,6 +1061,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
+		display_tutorial = false;
 	}
 
 	// Control the current speed with `<` `>`
@@ -1100,6 +1145,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
+
 	if (start_is_over && !game_is_paused) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
@@ -1110,9 +1156,8 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 		mouse_position.x = float(xpos);
 		mouse_position.y = float(ypos);
 	}
-	else {
-		mouse_pos = { (float)xpos,(float)ypos };
-	}
+
+	mouse_pos = { (float)xpos,(float)ypos };
 }
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
@@ -1120,6 +1165,17 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over) {
+		if (!display_tutorial) {
+			button_play.check_click(mouse_pos);
+			button_tutorial.check_click(mouse_pos);
+		}
+		else {
+			button_back_to_menu.check_click(mouse_pos);
+		}
+		
+	}
+
 	if (!game_is_paused && start_is_over) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
@@ -1227,6 +1283,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
+
 void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (yoffset < -0.f)
@@ -1239,11 +1296,30 @@ void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 		int level_up_skill = (m_hero.get_active_skill() + 1) % 2;
 		m_hero.set_active_skill(level_up_skill);
 	}
+
 }
 
-vec2 World::getScreenSize()
+void World::startGame()
 {
+	// grab screen size first
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
-	return { (float)w, (float)h };
+	vec2 screen = { (float)w, (float)h };
+	
+	// input code from key input, "G"
+	if (start_is_over == false) {
+		map.init(screen);
+		start_is_over = true;
+		zoom_factor = 1.1f;
+	}
+	else {
+		fprintf(stderr, "WORLD::STARTGAME CALLED WHEN start_is_over IS NOT FALSE!");
+	}
+	return;
 }
+
+void World::doNothing() {
+	// NOT A STUB
+	return;
+}
+
