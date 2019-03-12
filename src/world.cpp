@@ -677,6 +677,7 @@ bool World::update(float elapsed_ms)
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
+		display_tutorial = false;
 	}
 
 
@@ -907,6 +908,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
+		display_tutorial = false;
 	}
 
 	// Control the current speed with `<` `>`
