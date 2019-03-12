@@ -648,11 +648,13 @@ bool World::update(float elapsed_ms)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		m_tutorial.destroy();
 		m_hero.destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		m_tutorial.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -872,12 +874,14 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		m_tutorial.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		m_tutorial.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
