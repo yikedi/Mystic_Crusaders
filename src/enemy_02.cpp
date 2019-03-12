@@ -61,8 +61,8 @@ bool Enemy_02::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(70.0f + (float)level * 0.8f * randAttributeFactor, 400.0f);
-	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 200.0);
+	m_speed = std::min(70.0f + (float)level * 0.7f * randAttributeFactor, 400.0f);
+	randMovementCooldown = std::max(1000.0 - (double)level * 2.0 * randAttributeFactor, 200.0);
 	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.3f;

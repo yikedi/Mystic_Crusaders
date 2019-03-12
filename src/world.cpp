@@ -76,7 +76,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	
+
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	if (m_window == nullptr)
 		return false;
@@ -205,10 +205,10 @@ bool World::update(float elapsed_ms)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	
+
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
-	
+
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
@@ -268,7 +268,7 @@ bool World::update(float elapsed_ms)
 				vec2 force = { 10.f, 0.f };
 				m_hero.apply_momentum(force);
 			}
-			if (m_points - previous_point > 20 + (m_hero.level * 5))
+			if (m_points - previous_point > 15 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
 				m_hero.levelup();
@@ -398,7 +398,7 @@ bool World::update(float elapsed_ms)
 						//enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
-						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 17);
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 23);
 					}
 					break;
 				}
@@ -427,7 +427,7 @@ bool World::update(float elapsed_ms)
 						//enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
-						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 10;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 23;
 					}
 					break;
 				}
@@ -457,7 +457,7 @@ bool World::update(float elapsed_ms)
 						//enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 13);
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 17);
 					}
 					break;
 				}
@@ -484,7 +484,7 @@ bool World::update(float elapsed_ms)
 						//enemy->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 10;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
 					}
 					break;
 				}
@@ -541,7 +541,7 @@ bool World::update(float elapsed_ms)
 						//enemy->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
-						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 10;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 41;
 					}
 					break;
 				}
@@ -689,9 +689,9 @@ void World::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	float sx = zoom_factor * 2.f / (screen_right - screen_left);
-	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	
+	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);
 
-	vec2 salmon_position = m_hero.get_position(); 
+	vec2 salmon_position = m_hero.get_position();
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
 
@@ -699,7 +699,7 @@ void World::draw()
 	float h_not_scaled = (float)h;
 	float w_scaled = (float)w * zoom_factor;
 	float h_scaled = (float)h * zoom_factor;
-	screen_left = our_x * zoom_factor - (w_not_scaled / 2); 
+	screen_left = our_x * zoom_factor - (w_not_scaled / 2);
 
 	if (screen_left < m_hero.m_scale.x * 2) {
 		screen_left = m_hero.m_scale.x * 2;
