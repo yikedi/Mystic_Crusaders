@@ -1,7 +1,11 @@
 #pragma once
-
+class Thunder;
 #include "common.hpp"
+#include "sprite_sheet.hpp"
 #include "time.h"
+#include "projectile.h"
+
+enum class EnemyMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
 
 // general enemies
 class Enemies : public Renderable
@@ -31,9 +35,13 @@ public:
 
     void take_damage(float damage, vec2 direction);
 
+	void take_damage(float damage);
+
     bool is_alive()const;
 
     void set_speed(float speed);
+
+	float get_speed();
 
     void apply_momentum(vec2 momentum);
 
@@ -46,6 +54,11 @@ public:
 	vec2 get_momentum();
 
 	vec2 get_scale();
+	virtual bool collide_with(Projectile &projectile);
+
+	virtual bool collide_with(Thunder & thunder);
+
+	void set_stunded(bool hit);
 
 public:
 	vec2 m_position; // Window coordinates
@@ -62,4 +75,6 @@ public:
     float deceleration;
     float momentum_factor;
     int m_level;
+	bool stunned;
+
 };

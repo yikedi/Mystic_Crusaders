@@ -119,7 +119,7 @@ void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom)
 	cur_exp = exp.x;
 	max_exp = exp.y;
 	if (max_exp == 0)
-		max_exp = 20;
+		max_exp = 15;
 	zoom_factor = zoom;
 	m_scale = { 1.f / zoom, 1.f / zoom };
 
@@ -379,5 +379,5 @@ void UserInterface::change_mp(float d_mp)
 
 void UserInterface::set_position(vec2 position)
 {
-	m_position = { position.x / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
+	m_position = { (position.x + 30.f) / zoom_factor + (float)w / (2.f * zoom_factor), position.y / zoom_factor + (float)h / (2.f * zoom_factor) };
 }

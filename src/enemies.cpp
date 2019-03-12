@@ -1,7 +1,8 @@
 // Header
 #include "enemies.hpp"
-
+#include "Thunder.h"
 #include <cmath>
+#include <algorithm>
 
 Texture Enemies::enemy_texture;
 
@@ -50,6 +51,13 @@ void Enemies::take_damage(float damage, vec2 direction){
 	momentum.y = direction.y / 100.f * damage / 10.f * momentum_factor;
 }
 
+void Enemies::take_damage(float damage) {
+	hp = hp - 1.f * damage;
+	if (hp <= 0.5f) {
+		m_is_alive = false;
+	}
+}
+
 bool Enemies::is_alive()const
 {
 	return m_is_alive;
@@ -63,4 +71,47 @@ vec2 Enemies::get_momentum()
 vec2 Enemies::get_scale()
 {
 	return m_scale;
+}
+
+bool Enemies::collide_with(Projectile &projectile)
+{
+	float dx = m_position.x - projectile.get_position().x;
+	float dy = m_position.y - projectile.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
+bool Enemies::collide_with(Thunder &thunder)
+{
+	float dx = m_position.x - thunder.get_position().x;
+	float dy = m_position.y - thunder.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = thunder.get_radius();
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 0.6f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
+void Enemies::set_speed(float speed)
+{
+	m_speed = speed;
+}
+
+float Enemies::get_speed()
+{
+	return m_speed;
+}
+
+void Enemies::set_stunded(bool hit)
+{
+	stunned = hit;
 }

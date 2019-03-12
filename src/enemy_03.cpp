@@ -155,6 +155,9 @@ void Enemy_03::draw(const mat3& projection)
 void Enemy_03::update(float ms, vec2 target_pos)
 {
 	//momentum first
+	if (stunned)
+		ms = ms * 0.2f;
+
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;
 
@@ -211,23 +214,10 @@ void Enemy_03::update(float ms, vec2 target_pos)
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 	}
+
+	stunned = false;
 }
 
-
-bool Enemy_03::collide_with(Projectile &projectile)
-{
-	float dx = m_position.x - projectile.get_position().x;
-	float dy = m_position.y - projectile.get_position().y;
-	float d_sq = dx * dx + dy * dy;
-	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
-	float r = std::max(other_r, my_r);
-	r *= 1.f;
-	if (d_sq < r * r)
-			return true;
-	return false;
-
-}
 
 bool Enemy_03::checkIfCanFire(clock_t currentClock)
 {

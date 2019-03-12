@@ -53,6 +53,16 @@ set(SOURCE_FILES
     src/Ice_arrow_skill.cpp
 	src/treetrunk.cpp
 	src/tree.cpp
+	src/skilltree.cpp
+	src/ice_skill_tex.cpp
+	src/skillup.cpp
+	src/thunder_skill_tex.cpp
+	src/fire_skill_tex.cpp
+	src/ThunderSKill.cpp
+	src/Thunder.cpp
+	src/ThunderString.cpp
+	src/ThunderBall.cpp
+	src/Skill.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -77,6 +87,16 @@ set(SOURCE_FILES
     src/Ice_arrow_skill.h
 	src/treetrunk.hpp
 	src/tree.hpp
+	src/skilltree.hpp
+	src/ice_skill_tex.hpp
+	src/skillup.hpp
+	src/thunder_skill_tex.hpp
+	src/fire_skill_tex.hpp
+	src/ThunderSKill.h
+	src/Thunder.h
+	src/ThunderString.h
+	src/ThunderBall.h
+	src/Skill.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
