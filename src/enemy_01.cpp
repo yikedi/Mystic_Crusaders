@@ -69,9 +69,9 @@ bool Enemy_01::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(40.0f + (float)level * 0.5f * randAttributeFactor, 200.0f);
-	attackCooldown = std::max(2300.0 - (double)level * 5.0 * randAttributeFactor, 200.0);
-	randMovementCooldown = std::max(1000.0 - (double)level * 2.5 * randAttributeFactor, 250.0);
+	m_speed = std::min(40.0f + (float)level * 0.4f * randAttributeFactor, 200.0f);
+	attackCooldown = std::max(2300.0 - (double)level * 4.0 * randAttributeFactor, 200.0);
+	randMovementCooldown = std::max(1000.0 - (double)level * 2.0 * randAttributeFactor, 250.0);
 	projectileSpeed = std::min(150.0 + (double)level * 1.0 * randAttributeFactor, 450.0);
 	m_range = 50.0 * randAttributeFactor + 475.f;
 	hp = std::min(30.0f + (float)level * 0.2f * randAttributeFactor, 50.f);
@@ -183,7 +183,7 @@ void Enemy_01::update(float ms, vec2 target_pos)
 
 	//momentum first
 	if (stunned)
-		ms = ms * 0.2;
+		ms = ms * 0.2f;
 
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;

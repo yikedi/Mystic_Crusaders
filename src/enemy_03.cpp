@@ -156,7 +156,7 @@ void Enemy_03::update(float ms, vec2 target_pos)
 {
 	//momentum first
 	if (stunned)
-		ms = ms * 2;
+		ms = ms * 0.2f;
 
 	m_position.x += momentum.x;
 	m_position.y += momentum.y;

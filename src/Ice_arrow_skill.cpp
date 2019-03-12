@@ -7,7 +7,7 @@
 
 void Ice_arrow_skill::init()
 {
-    mp_cost = 2;
+    mp_cost = 3.f;
     damage = 20.f;
     damage_level = 0;
 	effect_level = 0;
@@ -49,24 +49,24 @@ bool Ice_arrow_skill::level_up(int select)
 	switch (select)
 	{
 	case LEVEL_UP_DAMAGE:
-		if (damage_level < 4)
+		if (damage_level < 5)
 		{
-			damage += 10;
-			mp_cost += 1;
+			damage += 10.f;
+			mp_cost += 0.5f;
 			success = true;
 		}
 		break;
 	case LEVEL_UP_EFFECT:
-		if (effect_level < 4)
+		if (effect_level < 5)
 		{
 			num_arrows += 1;
 			shoot_range_angle += (float)M_PI * 7.5 / 180;
-			mp_cost += 1;
+			mp_cost += 1.f;
 			success = true;
 		}
 		break;
 	case LEVEL_UP_MANA_COST:
-		if (mp_cost_level < 4)
+		if (mp_cost_level < 5)
 		{
 			mp_cost *= 0.8;
 			success = true;
