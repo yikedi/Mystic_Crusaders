@@ -15,7 +15,7 @@ class Startscreen : public Renderable
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen);	//vec2 screen
+	bool init(vec2 screen);
 
 	// Releases all associated resources
 	void destroy();
@@ -27,10 +27,10 @@ public:
 	bool is_over();
 
 private:
-	vec2 m_position; // Window coordinates
-	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+	vec2 m_position; 
+	vec2 m_scale; 
 	float m_rotation;
 	int g_level;
-	bool s_is_over;			// true: not on start screen
+	bool s_is_over;
 	
 };

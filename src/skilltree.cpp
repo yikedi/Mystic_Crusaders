@@ -10,24 +10,24 @@
 #include <gl3w.h>
 Texture Skilltree::screen_texture;
 
-//ice:1, thunder:2, fire:3
+
 bool Skilltree::init(vec2 screen, int element)
 {
 	switch (element) {
 	case 1:
-		screen_texture.load_from_file(element1());  //ice
+		screen_texture.load_from_file(element1());  
 		front_element = "ice";
 		upper_element = "fire";
 		lower_element = "thunder";
 		break;
 	case 2:
-		screen_texture.load_from_file(element2()); // thunder 
+		screen_texture.load_from_file(element2());  
 		front_element = "thunder";
 		upper_element = "ice";
 		lower_element = "fire";
 		break;
 	case 3:
-		screen_texture.load_from_file(element3()); //fire
+		screen_texture.load_from_file(element3()); 
 		front_element = "fire";
 		upper_element = "thunder";
 		lower_element = "ice";
@@ -180,9 +180,6 @@ void Skilltree::draw(const mat3 & projection)
 
 void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, int skill_num)
 {
-	//level0: only basic skill
-	//level1: one element is chose by the player, degree will all be 0
-	//level2: degree can be 1 2 3
 	if (paused) {
 		if (front_element == "ice") {
 			ices1.update_ice(paused, ice_num.x);
@@ -365,22 +362,22 @@ int Skilltree::icon_position(vec2 mouse_pos, std::string element)
 
 std::string Skilltree::element_position(vec2 mouse_pos)
 {
-	float lxpos1 = 400.f;	//upper
+	float lxpos1 = 400.f;
 	float lypos1 = 270.f;
 
-	float lxpos2 = 400.f;	//lower
+	float lxpos2 = 400.f;
 	float lypos2 = 540.f;
 
 	float lxpos3 = 520.f;
 	float lypos3 = 405.f;
 	
-	vec2 height1 = { lypos1 + 60.f,lypos1 - 60.f };	 //upper
+	vec2 height1 = { lypos1 + 60.f,lypos1 - 60.f };
 	vec2 width1 = { lxpos1 + 60.f,lxpos1 - 60.f };
 
-	vec2 height2 = { lypos2 + 60.f,lypos2 - 60.f };	//lower element
+	vec2 height2 = { lypos2 + 60.f,lypos2 - 60.f };
 	vec2 width2 = { lxpos2 + 60.f,lxpos2 - 60.f };
 
-	vec2 height3 = { lypos3 + 60.f,lypos3 - 60.f };	//front
+	vec2 height3 = { lypos3 + 60.f,lypos3 - 60.f };
 	vec2 width3 = { lxpos3 + 60.f,lxpos3 - 60.f };
 
 	bool click_upper = inside(height1, width1, mouse_pos);

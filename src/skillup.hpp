@@ -25,13 +25,8 @@ public:
 
 	void get_texture(int loc);
 
-	bool in_position(vec2 mouse_pos, vec2 screen, int used);
-
 	vec2 get_position() const;
 
-	vec2 set_scale(float w, float h, vec2 screen);
-
-	void reset();
 
 private:
 	vec2 m_scale;

@@ -295,7 +295,6 @@ void UserInterface::draw(const mat3& projection)
 	/*
 	EXP bar
 	*/
-	//printf(".%6f", EXP_scale_factor);
 	if (EXP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.

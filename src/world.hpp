@@ -78,7 +78,7 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
-	Iceskilltex ices;
+
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;

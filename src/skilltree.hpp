@@ -56,7 +56,6 @@ private:
 	Skillup skillup;
 	vec2 m_scale;
 	vec2 m_position;
-	// skill element
 	std::string front_element;
 	std::string upper_element; 
 	std::string lower_element;
@@ -65,14 +64,8 @@ private:
 	TexturedVertex vertices0[4];
 	TexturedVertex vertices2[4];
 
-	// level and degree for skills
-	int level;
-	int degree;
-	int times;
-
 	int skillpoints;
 	int used_skillpoints;
 	int free_skillpoints;
-	int conversion = 10;
 
 };

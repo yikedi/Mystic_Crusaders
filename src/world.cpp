@@ -78,7 +78,6 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 	
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
-	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -94,7 +93,6 @@ bool World::init(vec2 screen)
 	glfwSetWindowUserPointer(m_window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
-	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2); };
 	auto mouse_wheel_callback = [](GLFWwindow* wnd, double _0, double _1) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_wheel(wnd, _0, _1); };
 
@@ -102,8 +100,6 @@ bool World::init(vec2 screen)
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
 	glfwSetScrollCallback(m_window, mouse_wheel_callback);
-
-	//glutReshapeFunc(reshape);
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
@@ -198,7 +194,6 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
-	// in_main_game = false;
 	m_interface.destroy();
 	start.destroy();
 	glfwDestroyWindow(m_window);
@@ -276,7 +271,7 @@ bool World::update(float elapsed_ms)
 			if (m_points - previous_point > 20 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
-				m_hero.levelup(); // use 0 for now
+				m_hero.levelup();
 				m_level++;
 				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
@@ -693,17 +688,10 @@ void World::draw()
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Fake projection matrix, scales with respect to window coordinates
-	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	//float screen_left = 0.f;// *-0.5;
-	//float screen_top = 0.f;// (float)h * -0.5;
-	//float screen_right = (float)w;// *0.5;
-	//float bottom = (float)h;// *0.5;
-
 	float sx = zoom_factor * 2.f / (screen_right - screen_left);
-	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	// named "screen_bottom" now because compiler complained about ambiguity
+	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	
 
-	vec2 salmon_position = m_hero.get_position(); //get the hero position
+	vec2 salmon_position = m_hero.get_position(); 
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
 
@@ -711,16 +699,15 @@ void World::draw()
 	float h_not_scaled = (float)h;
 	float w_scaled = (float)w * zoom_factor;
 	float h_scaled = (float)h * zoom_factor;
-	screen_left = our_x * zoom_factor - (w_not_scaled / 2); // divided by 2? // in your case this would be x - 400
+	screen_left = our_x * zoom_factor - (w_not_scaled / 2); 
 
-	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
 	if (screen_left < m_hero.m_scale.x * 2) {
 		screen_left = m_hero.m_scale.x * 2;
 	}
 	else if (screen_left + w_not_scaled > w_scaled - m_hero.m_scale.x * 2) {
 		screen_left = w_scaled - w_not_scaled - m_hero.m_scale.x * 2;
 	}
-	screen_top = our_y * zoom_factor - (h_not_scaled / 2); // divided by 2? // and this would be y - 300
+	screen_top = our_y * zoom_factor - (h_not_scaled / 2);
 	if (screen_top < m_hero.m_scale.y * 2 * zoom_factor) {
 		screen_top = m_hero.m_scale.y * 2 * zoom_factor;
 	}
@@ -961,11 +948,6 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (start_is_over && !game_is_paused) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
@@ -1032,12 +1014,10 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
-					// increase # of arrows
 					ice_skill_set.x = ice_skill_set.x + 1.f;
 					m_hero.level_up(0, 1);
 				}
 				else if (skill_element == "thunder") {
-					//increase damage
 					thunder_skill_set.x = thunder_skill_set.x + 1.f;
 					m_hero.level_up(1, 0);
 				}
@@ -1054,12 +1034,10 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
-					//decrease mana cost
 					ice_skill_set.y = ice_skill_set.y + 1.f;
 					m_hero.level_up(0, 2);
 				}
 				else if (skill_element == "thunder") {
-					//increase area
 					thunder_skill_set.y = thunder_skill_set.y + 1.f;
 					m_hero.level_up(1, 1);
 				}
@@ -1076,12 +1054,10 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				used_skillpoints++;
 				skill_num = 0;
 				if (skill_element == "ice") {
-					// increase damage
 					ice_skill_set.z = ice_skill_set.z + 1.f;
 					m_hero.level_up(0, 0);
 				}
 				else if (skill_element == "thunder") {
-					//decrease mana cost
 					thunder_skill_set.z = thunder_skill_set.z + 1.f;
 					m_hero.level_up(1, 2);
 				}

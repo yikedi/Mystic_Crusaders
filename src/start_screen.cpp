@@ -64,7 +64,6 @@ void Startscreen::destroy() {
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-	//g_level = 1;
 }
 
 void Startscreen::draw(const mat3& projection) {
@@ -124,13 +123,11 @@ void Startscreen::update(bool game_on) {
 }
 vec2 Startscreen::set_scale(float w, float h, vec2 screen)
 {
-	// temp code, will change after get window is possible
 	float xscale = screen.x / w;
 	float yscale = screen.y / h;
-	//return{ 1.f,1.f };
 	return { xscale, yscale };
 }
 bool Startscreen::is_over()
 {
-	return s_is_over; // 
+	return s_is_over; 
 }

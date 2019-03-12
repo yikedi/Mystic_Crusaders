@@ -33,7 +33,6 @@ public:
 private:
 	vec2 m_scale;
 	vec2 m_position;
-	// skill element
 	std::string element;
 
 	TexturedVertex vertices[4];

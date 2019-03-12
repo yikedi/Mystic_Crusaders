@@ -103,13 +103,10 @@ void Skillup::draw(const mat3 & projection)
 void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
 {
 	if (paused) {
-		//fprintf(stderr, "Failed to load enemy texture!");
 		if (freepoints > 0 && skill_num != 0) {
-			//fprintf(stderr, "text!");
 			get_texture(0);
 		}
 		else {
-			//fprintf(stderr, "text....!");
 			get_texture(1);
 		}
 	}
