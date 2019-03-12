@@ -74,8 +74,8 @@ bool Treetrunk::init(vec2 screen)
 		return false;
 
 	// Setting initial values
-	m_scale.x = -35.f;
-	m_scale.y = 35.f;
+	m_scale.x = -60.f;
+	m_scale.y = 60.f;
 	
 	m_num_indices = indices.size();
 	//m_position = { screen.x / 3, screen.y / 3 };
@@ -180,13 +180,15 @@ bool Treetrunk::collide_with(Hero &hero)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 1.0f;
+	r *= 0.8f;
 	float top, bottom, left, right;
 	float scale_back = 1.0f;
-	top = -1.f * hero.get_bounding_box().y / scale_back;
-	bottom = hero.get_bounding_box().y / scale_back;
-	left = -1.f * hero.get_bounding_box().x / scale_back;
-	right = hero.get_bounding_box().x / scale_back;
+	float content_ratio = 0.95f; // we have extra space at the sides of texture
+	float factor = content_ratio * 0.5; // 0.5 because it's half the length and width from boundary to center
+	top = -1.f * hero.get_bounding_box().y / scale_back * factor;
+	bottom = hero.get_bounding_box().y / scale_back * factor;
+	left = -1.f * hero.get_bounding_box().x / scale_back * factor;
+	right = hero.get_bounding_box().x / scale_back * factor;
 	//points before transform
 	vec3 p_top, p_left, p_right, p_bottom;
 
@@ -199,8 +201,9 @@ bool Treetrunk::collide_with(Hero &hero)
 	std::vector<vec3> cur_vertices;
 	transform_current_vertex(cur_vertices);
 	if (d_sq < r * r) {
-		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
+		bool res =  mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
 			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+		return res;
 	}
 
 	return false;
@@ -218,11 +221,12 @@ bool Treetrunk::collide_with(Projectile &p)
 
 	r *= 1.0f;
 	float top, bottom, left, right;
-	float scale_back = 1.0f;
-	top = -1.f * p.get_bounding_box().y / scale_back;
-	bottom = p.get_bounding_box().y / scale_back;
-	left = -1.f * p.get_bounding_box().x / scale_back;
-	right = p.get_bounding_box().x / scale_back;
+	float scale_back = abs(p.get_scale().x);
+	float factor = 0.95 * 0.5; 
+	top = -1.f * p.get_bounding_box().y / scale_back * factor;
+	bottom = p.get_bounding_box().y / scale_back * factor;
+	left = -1.f * p.get_bounding_box().x / scale_back * factor;
+	right = p.get_bounding_box().x / scale_back * factor;
 	//points before transform
 	vec3 p_top, p_left, p_right, p_bottom;
 
@@ -253,11 +257,12 @@ bool Treetrunk::collide_with(Enemies &e)
 
 	r *= 1.0f;
 	float top, bottom, left, right;
-	float scale_back = 1.0f;
-	top = -1.f * e.get_bounding_box().y / scale_back;
-	bottom = e.get_bounding_box().y / scale_back;
-	left = -1.f * e.get_bounding_box().x / scale_back;
-	right = e.get_bounding_box().x / scale_back;
+	float scale_back = abs(e.get_scale().x);
+	float factor = 0.95 * 0.5;
+	top = -1.f * e.get_bounding_box().y / scale_back * factor;
+	bottom = e.get_bounding_box().y / scale_back * factor;
+	left = -1.f * e.get_bounding_box().x / scale_back * factor;
+	right = e.get_bounding_box().x / scale_back * factor;
 	//points before transform
 	vec3 p_top, p_left, p_right, p_bottom;
 

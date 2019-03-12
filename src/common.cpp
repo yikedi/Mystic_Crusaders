@@ -320,29 +320,35 @@ bool Renderable::mesh_collision(vec3 ptest, std::vector<vec3> &cur_vertices)
 	for (size_t i = 0; i < indices.size(); i += 3) {
 
 		//three vertices of a triangle
-		vec3 point1 = cur_vertices.at(indices[i]);
-		vec3 point2 = cur_vertices.at(indices[i + 1]);
-		vec3 point3 = cur_vertices.at(indices[i + 2]);
+		vec3 A = cur_vertices.at(indices[i]);
+		vec3 B = cur_vertices.at(indices[i + 1]);
+		vec3 C = cur_vertices.at(indices[i + 2]);
 
-		vec2 p1 = { point1.x, point1.y };
-		vec2 p1_p2 = { point2.x - point1.x,point2.y - point1.y };
-		vec2 p1_p3 = { point3.x - point1.x,point3.y - point1.y };
-		vec2 ptest2d = { ptest.x,ptest.y };
+		/*v0 = C - A
+		v1 = B - A
+		v2 = P - A*/
 
-		float a, b = 0.f;
-		float detv12 = det(p1_p2, p1_p3); //This should not be 0;
-		if (detv12 == 0)
-			return false;
-		float detvv2 = det(ptest2d, p1_p2);
-		float detvv3 = det(ptest2d, p1_p3);
-		float detv1v2 = det(p1, p1_p2);
-		float detv1v3 = det(p1, p1_p3);
-		a = (detvv2 - detv1v2) / detv12;
-		b = -1.f* (detvv3 - detv1v3) / detv12;
+		vec2 v0 = { C.x - A.x, C.y - A.y };
+		vec2 v1 = { B.x - A.x, B.y - A.y };
+		vec2 v2 = { ptest.x - A.x,ptest.y - A.y };
 
-		if (a > 0 && b > 0 && a + b < 1.f) {
-			return true;
-		}
+		// Compute dot products
+		float dot00 = dot(v0, v0);
+		float dot01 = dot(v0, v1);
+		float dot02 = dot(v0, v2);
+		float dot11 = dot(v1, v1);
+		float dot12 = dot(v1, v2);
+
+		// Compute barycentric coordinates
+		float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+		float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+		if ((u >= 0) && (v >= 0) && (u + v < 1))
+			int a = 0;
+
+		return (u >= 0) && (v >= 0) && (u + v < 1);
+
 	}
 
 	return false;

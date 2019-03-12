@@ -54,3 +54,13 @@ bool Enemies::is_alive()const
 {
 	return m_is_alive;
 }
+
+vec2 Enemies::get_momentum()
+{
+	return momentum;
+}
+
+vec2 Enemies::get_scale()
+{
+	return m_scale;
+}

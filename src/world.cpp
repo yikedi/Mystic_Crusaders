@@ -347,14 +347,28 @@ bool World::update(float elapsed_ms)
 		// Updating all entities, making the enemy and fish
 		// faster based on current
 
+		m_hero.update(elapsed_ms);
+		for (auto& enemy : m_enemys_01)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& enemy : m_enemys_02)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& enemy : m_enemys_03)
+			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
+		for (auto& h_proj : hero_projectiles)
+			h_proj->update(elapsed_ms * m_current_speed);
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.update(elapsed_ms * m_current_speed);
+
 		//check treetrunk collision
 		//some bugs in collision detection need to be fixed latter, but it is not related to here
 		for (auto &treeTruck : m_treetrunk)
 		{
+			
 			if (treeTruck.collide_with(m_hero)) {
 				vec2 cur_direction = m_hero.get_direction();
 				vec2 cur_position = m_hero.get_position();
-				vec2 new_position = { cur_position.x + cur_direction.x * -20.f, cur_position.y + cur_direction.y * -20.f };
+				float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
+				vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
 				m_hero.set_position(new_position);
 			}
 
@@ -383,33 +397,45 @@ bool World::update(float elapsed_ms)
 			}
 
 			//not sure what to do for enemies, tree trunk collision now
-			//for (auto &e1 : m_enemys_01)
-			//{
+			for (auto &e1 : m_enemys_01)
+			{
+				if (treeTruck.collide_with(e1))
+				{
+					vec2 cur_position = e1.get_position();
+					int facing = e1.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e1.set_position(new_position);
+				}
+			}
 
-			//}
+			for (auto &e2 : m_enemys_02)
+			{
+				if (treeTruck.collide_with(e2))
+				{
+					vec2 cur_position = e2.get_position();
+					int facing = e2.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e2.set_position(new_position);
+				}
+			}
 
-			//for (auto &e2 : m_enemys_02)
-			//{
-
-			//}
-
-			//for (auto &e3 : m_enemys_03)
-			//{
-
-			//}
+			for (auto &e3 : m_enemys_03)
+			{
+				if (treeTruck.collide_with(e3))
+				{
+					vec2 cur_position = e3.get_position();
+					int facing = e3.m_face_left_or_right;
+					facing = (facing == 0) ? facing - 1 : facing;
+					facing = facing * -10;
+					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					e3.set_position(new_position);
+				}
+			}
 		}
-
-		m_hero.update(elapsed_ms);
-		for (auto& enemy : m_enemys_01)
-			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-		for (auto& enemy : m_enemys_02)
-			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-		for (auto& enemy : m_enemys_03)
-			enemy.update(elapsed_ms * m_current_speed, m_hero.get_position());
-		for (auto& h_proj : hero_projectiles)
-			h_proj->update(elapsed_ms * m_current_speed);
-		for (auto& e_proj : enemy_projectiles)
-			e_proj.update(elapsed_ms * m_current_speed);
 		
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 
