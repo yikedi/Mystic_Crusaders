@@ -98,6 +98,8 @@ public:
 	void set_speed(vec2 speed);
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
+    void levelup();
+	void ice_arrow_level_up();
 	bool use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position);
 	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position);
     void level_up(int select_skill, int select_upgrade);

@@ -16,27 +16,30 @@ bool ThunderSkill::level_up(int select)
 	switch (select) 
 	{
 		case LEVEL_UP_DAMAGE: // increase damage
-			if (damage_level < 4) 
+			if (damage_level < 5) 
 			{
-				damage += 1;
-				mp_cost += 2;
+				damage += 1.f;
+				mp_cost += 2.f;
 				success = true;
+				damage_level++;
 			}
 			break;
 		case LEVEL_UP_EFFECT: // 
-			if (effect_level < 4)
+			if (effect_level < 5)
 			{
-				scale = { scale.x * 1.1f + scale.y * 1.1f };
-				mp_cost += 2;
+				scale = { scale.x * 1.1f , scale.y * 1.1f };
+				mp_cost += 2.f;
 				success = true;
+				effect_level++;
 			}
 			
 			break;
 		case LEVEL_UP_MANA_COST:
-			if (mp_cost_level < 4)
+			if (mp_cost_level < 5)
 			{
 				mp_cost *= 0.8;
 				success = true;
+				mp_cost_level++;
 			}
 			break;
 		default:

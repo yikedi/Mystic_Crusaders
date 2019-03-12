@@ -76,9 +76,8 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
-
+	
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -94,7 +93,6 @@ bool World::init(vec2 screen)
 	glfwSetWindowUserPointer(m_window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
-	//auto reshape_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_click(wnd, _0, _1, _2); };
 	auto mouse_wheel_callback = [](GLFWwindow* wnd, double _0, double _1) {((World*)glfwGetWindowUserPointer(wnd))->on_mouse_wheel(wnd, _0, _1); };
 
@@ -102,8 +100,6 @@ bool World::init(vec2 screen)
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
 	glfwSetScrollCallback(m_window, mouse_wheel_callback);
-
-	//glutReshapeFunc(reshape);
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
@@ -150,13 +146,20 @@ bool World::init(vec2 screen)
 	m_current_speed = 1.f;
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
+	m_level = 0;
+	used_skillpoints = 0;
+	skill_num = 0;
+	ice_skill_set = { 0.f,0.f,0.f };
+	thunder_skill_set = { 0.f,0.f,0.f };
+	game_is_paused = false;
+	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
+	stree.init(screen, 1);
 	m_hero.init(screen);
 	shootingFireBall = false;
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 	mouse_position = { 0.f,0.f };
-
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f });
 }
 
 // Releases all the associated resources
@@ -191,7 +194,6 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
-	// in_main_game = false;
 	m_interface.destroy();
 	start.destroy();
 	glfwDestroyWindow(m_window);
@@ -203,10 +205,11 @@ bool World::update(float elapsed_ms)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-
-
+	
 	start.update(start_is_over);
-	if (start_is_over) {
+	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
+	
+	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -265,11 +268,11 @@ bool World::update(float elapsed_ms)
 				vec2 force = { 10.f, 0.f };
 				m_hero.apply_momentum(force);
 			}
-
 			if (m_points - previous_point > 20 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
-				m_hero.level_up(0,0); // use 0 for now
+				m_hero.levelup();
+				m_level++;
 				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
 		}
@@ -636,13 +639,18 @@ bool World::update(float elapsed_ms)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		// in_main_game = false;
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_level = 0;
+		used_skillpoints = 0;
+		skill_num = 0;
+		ice_skill_set = { 0.f,0.f,0.f };
+		thunder_skill_set = { 0.f,0.f,0.f };
+		game_is_paused = false;
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
@@ -665,7 +673,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" << m_hero.get_mp();
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_level;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -680,17 +688,10 @@ void World::draw()
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Fake projection matrix, scales with respect to window coordinates
-	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	//float screen_left = 0.f;// *-0.5;
-	//float screen_top = 0.f;// (float)h * -0.5;
-	//float screen_right = (float)w;// *0.5;
-	//float bottom = (float)h;// *0.5;
-
 	float sx = zoom_factor * 2.f / (screen_right - screen_left);
-	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	// named "screen_bottom" now because compiler complained about ambiguity
+	float sy = zoom_factor * 2.f / (screen_top - screen_bottom);	
 
-	vec2 salmon_position = m_hero.get_position(); //get the hero position
+	vec2 salmon_position = m_hero.get_position(); 
 	our_x = salmon_position.x;
 	our_y = salmon_position.y;
 
@@ -698,16 +699,15 @@ void World::draw()
 	float h_not_scaled = (float)h;
 	float w_scaled = (float)w * zoom_factor;
 	float h_scaled = (float)h * zoom_factor;
-	screen_left = our_x * zoom_factor - (w_not_scaled / 2); // divided by 2? // in your case this would be x - 400
+	screen_left = our_x * zoom_factor - (w_not_scaled / 2); 
 
-	//if conditions makes sure that the camera stays in the scene if player reaches the boundary
 	if (screen_left < m_hero.m_scale.x * 2) {
 		screen_left = m_hero.m_scale.x * 2;
 	}
 	else if (screen_left + w_not_scaled > w_scaled - m_hero.m_scale.x * 2) {
 		screen_left = w_scaled - w_not_scaled - m_hero.m_scale.x * 2;
 	}
-	screen_top = our_y * zoom_factor - (h_not_scaled / 2); // divided by 2? // and this would be y - 300
+	screen_top = our_y * zoom_factor - (h_not_scaled / 2);
 	if (screen_top < m_hero.m_scale.y * 2 * zoom_factor) {
 		screen_top = m_hero.m_scale.y * 2 * zoom_factor;
 	}
@@ -745,11 +745,13 @@ void World::draw()
 		thunder->draw(projection_2D);
 	m_hero.draw(projection_2D);
 
-	// Testing TODO
 	if (start_is_over) {
 		m_interface.draw(projection_2D);
 	}
 
+	if (game_is_paused){
+		stree.draw(projection_2D);
+	}
 	/////////////////////
 	// Truely render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -854,9 +856,15 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_level = 0;
+		used_skillpoints = 0;
+		skill_num = 0;
+		ice_skill_set = { 0.f,0.f,0.f };
+		thunder_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
+		game_is_paused = false;
 	}
 
 	// Control the current speed with `<` `>`
@@ -921,6 +929,15 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (key == GLFW_KEY_ESCAPE) {
 		glfwSetWindowShouldClose(m_window, GL_TRUE);
 	}
+	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE && start_is_over) {
+		if (game_is_paused) {
+			zoom_factor = 1.1f;
+		}
+		else {
+			zoom_factor = 1.f;
+		}
+		game_is_paused = !game_is_paused;
+	}
 	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
 		m_hero.set_active_skill(0);
 	}
@@ -931,12 +948,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if (start_is_over) {
+	if (start_is_over && !game_is_paused) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
 		if (xpos - salmon_position.x != 0)
@@ -946,19 +958,121 @@ void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 		mouse_position.x = float(xpos);
 		mouse_position.y = float(ypos);
 	}
+	else {
+		mouse_pos = { (float)xpos,(float)ypos };
+	}
 }
 
 void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && start_is_over) {
-		shootingFireBall = true;
+	int w, h;
+	glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = { (float)w, (float)h };
+	if (!game_is_paused && start_is_over) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+			shootingFireBall = true;
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+			shootingFireBall = false;
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
 	}
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && start_is_over) {
-		shootingFireBall = false;
+	else if (game_is_paused && start_is_over) {
+
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
+			skill_element = stree.element_position(mouse_pos);
+			if (skill_element == "ice") {
+				stree.init(screen, 1);
+			}
+			else if (skill_element == "thunder") {
+				stree.init(screen, 2);
+			}
+			else if (skill_element == "fire") {
+				stree.init(screen, 3);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0) {
+			skill_num = stree.icon_position(mouse_pos, skill_element);
+			if (skill_num == 1 && skill_element == "ice" && ice_skill_set.x == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 1 && skill_element == "thunder" && thunder_skill_set.x == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 2 && skill_element == "ice" && ice_skill_set.y == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 2 && skill_element == "thunder" && thunder_skill_set.y == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 3 && skill_element == "ice" && ice_skill_set.z == 5.f) {
+				skill_num = 0;
+			}else if (skill_num == 3 && skill_element == "thunder" && thunder_skill_set.z == 5.f) {
+				skill_num = 0;
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.x = ice_skill_set.x + 1.f;
+					m_hero.level_up(0, 1);
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.x = thunder_skill_set.x + 1.f;
+					m_hero.level_up(1, 0);
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.icon_position(mouse_pos, skill_element);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 2) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.y = ice_skill_set.y + 1.f;
+					m_hero.level_up(0, 2);
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.y = thunder_skill_set.y + 1.f;
+					m_hero.level_up(1, 1);
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.icon_position(mouse_pos, skill_element);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 3) {
+			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
+				used_skillpoints++;
+				skill_num = 0;
+				if (skill_element == "ice") {
+					ice_skill_set.z = ice_skill_set.z + 1.f;
+					m_hero.level_up(0, 0);
+				}
+				else if (skill_element == "thunder") {
+					thunder_skill_set.z = thunder_skill_set.z + 1.f;
+					m_hero.level_up(1, 2);
+				}
+				else if (skill_element == "fire") {
+					//fire
+				}
+			}
+			else {
+				skill_num = stree.icon_position(mouse_pos, skill_element);
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
+			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+		}
 	}
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over)
-		//m_hero.use_ice_arrow_skill(hero_projectiles);
-		m_hero.use_skill(hero_projectiles, thunders, mouse_position);
 }
 
 void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)

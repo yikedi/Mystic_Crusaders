@@ -16,6 +16,8 @@
 #include "map_screen.hpp"
 #include "start_screen.hpp"
 #include "user_interface.hpp"
+#include "skilltree.hpp"
+#include "ice_skill_tex.hpp"
 #include "Thunder.h"
 
 // stlib
@@ -74,6 +76,9 @@ private:
 	GLFWwindow* m_window;
 
 	Startscreen start;
+
+	Skilltree stree;
+
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -85,12 +90,22 @@ private:
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int m_points;
 	unsigned int previous_point;
+	
+	int m_level;
 
 	//zoom
 	float zoom_factor;
 
 	//start screen
 	bool start_is_over;
+
+	bool game_is_paused;
+	vec2 mouse_pos;
+	int used_skillpoints;
+	vec3 ice_skill_set;
+	vec3 thunder_skill_set;
+	int skill_num;
+	std::string skill_element;
 
 	// Game entities
 	Hero m_hero;

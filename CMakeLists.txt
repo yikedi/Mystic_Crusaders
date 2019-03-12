@@ -51,6 +51,11 @@ set(SOURCE_FILES
 	src/map_screen.cpp
     src/Ice_arrow.cpp
     src/Ice_arrow_skill.cpp
+	src/skilltree.cpp
+	src/ice_skill_tex.cpp
+	src/skillup.cpp
+	src/thunder_skill_tex.cpp
+	src/fire_skill_tex.cpp
 	src/ThunderSKill.cpp
 	src/Thunder.cpp
 	src/ThunderString.cpp
@@ -78,6 +83,11 @@ set(SOURCE_FILES
 	src/map_screen.hpp
     src/Ice_arrow.h
     src/Ice_arrow_skill.h
+	src/skilltree.hpp
+	src/ice_skill_tex.hpp
+	src/skillup.hpp
+	src/thunder_skill_tex.hpp
+	src/fire_skill_tex.hpp
 	src/ThunderSKill.h
 	src/Thunder.h
 	src/ThunderString.h

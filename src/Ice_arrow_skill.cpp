@@ -65,7 +65,7 @@ bool Ice_arrow_skill::level_up(int select)
 			success = true;
 		}
 		break;
-	case 3:
+	case LEVEL_UP_MANA_COST:
 		if (mp_cost_level < 4)
 		{
 			mp_cost *= 0.8;
