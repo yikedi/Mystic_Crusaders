@@ -157,9 +157,9 @@ bool World::init(vec2 screen)
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
-	m_treetrunk_position.push_back({ 4* screen.x / 5 - 50.f , screen.y / 3 - 50.f });
+	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
 	m_treetrunk_position.push_back({ screen.x / 4 , screen.y / 4 });
-	m_treetrunk_position.push_back({ screen.x / 4 - 70.f , screen.y / 4 + 50.f });
+	m_treetrunk_position.push_back({ screen.x / 4 - 120.f , screen.y / 4 + 50.f });
 	m_treetrunk_position.push_back({ 2* screen.x  / 3 , screen.y *3/ 4  });
 
 
@@ -737,10 +737,7 @@ void World::draw()
 	start.draw(projection_2D);
 	// Drawing entities
 	map.draw(projection_2D);
-	if (start_is_over) {
-		for (auto& treetrunk : m_treetrunk)
-			treetrunk.draw(projection_2D);
-	}
+
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -756,6 +753,9 @@ void World::draw()
 
 	// Testing TODO
 	if (start_is_over) {
+
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.draw(projection_2D);
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
 		m_interface.draw(projection_2D);
