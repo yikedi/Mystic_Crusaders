@@ -6,7 +6,7 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 {
 	// Load shared texture
 	if (!texture.is_valid())
-	{	
+	{
 		if (!texture.load_from_file(textures_path("lightning_bottom.png")))
 		{
 			fprintf(stderr, "Failed to load thunderball texture!");
@@ -98,11 +98,11 @@ void ThunderBall::destroy()
 	glDeleteShader(effect.program);
 }
 
-void ThunderBall::update(float ms) 
+void ThunderBall::update(float ms)
 {
 	//animation
 
-	float animation_speed = 0.1f;
+	float animation_speed = 0.2f;
 	animation_time += animation_speed * 2;
 	int curidx = 0;
 	curidx += (int)animation_time % texture.totalTiles;
