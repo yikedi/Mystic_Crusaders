@@ -112,6 +112,7 @@ private:
 	int used_skillpoints;
 	vec3 ice_skill_set;
 	vec3 thunder_skill_set;
+	vec3 fire_skill_set;
 	int skill_num;
 	std::string skill_element;
 

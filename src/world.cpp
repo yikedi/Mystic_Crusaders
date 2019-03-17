@@ -151,6 +151,7 @@ bool World::init(vec2 screen)
 	skill_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
+	fire_skill_set = { 0.f,0.f,0.f };
 	game_is_paused = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
@@ -258,7 +259,7 @@ bool World::update(float elapsed_ms)
 	vec2 screen = { (float)w, (float)h };
 
 	start.update(start_is_over);
-	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
+	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num);
 
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
@@ -788,6 +789,7 @@ bool World::update(float elapsed_ms)
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
+		fire_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
@@ -1057,6 +1059,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
+		fire_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
@@ -1216,6 +1219,15 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			}else if (skill_num == 3 && skill_element == "thunder" && thunder_skill_set.z == 5.f) {
 				skill_num = 0;
 			}
+			else if (skill_num == 1 && skill_element == "fire" && fire_skill_set.x == 5.f) {
+				skill_num = 0;
+			}
+			else if (skill_num == 2 && skill_element == "fire" && fire_skill_set.y == 5.f) {
+				skill_num = 0;
+			}
+			else if (skill_num == 3 && skill_element == "fire" && fire_skill_set.z == 5.f) {
+				skill_num = 0;
+			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 1) {
 			if (stree.level_position(mouse_pos) && m_level > used_skillpoints) {
@@ -1231,6 +1243,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 				else if (skill_element == "fire") {
 					//fire
+					fire_skill_set.x = fire_skill_set.x + 1.f;
 				}
 			}
 			else {
@@ -1251,6 +1264,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 				else if (skill_element == "fire") {
 					//fire
+					fire_skill_set.y = fire_skill_set.y + 1.f;
 				}
 			}
 			else {
@@ -1271,6 +1285,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				}
 				else if (skill_element == "fire") {
 					//fire
+					fire_skill_set.z = fire_skill_set.z + 1.f;
 				}
 			}
 			else {
