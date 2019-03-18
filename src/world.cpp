@@ -1123,9 +1123,25 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (key == GLFW_KEY_H) {
 		//shopping
 	}
-	else if (key == GLFW_KEY_ESCAPE) {
-		glfwSetWindowShouldClose(m_window, GL_TRUE);
+	else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && !start_is_over) {
+        if (!display_tutorial) {
+            // escape in start screen
+            glfwSetWindowShouldClose(m_window, GL_TRUE);
+        }
+        else {
+            // escape in tutorial
+            display_tutorial = !display_tutorial;
+        }
 	}
+    else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && start_is_over) {
+        if (game_is_paused) {
+            zoom_factor = 1.1f;
+        }
+        else {
+            zoom_factor = 1.f;
+        }
+        game_is_paused = !game_is_paused;
+    }
 	else if (key == GLFW_KEY_SPACE && action != GLFW_RELEASE && start_is_over) {
 		if (game_is_paused) {
 			zoom_factor = 1.1f;
