@@ -101,6 +101,20 @@ bool Enemies::collide_with(Thunder &thunder)
 	return false;
 }
 
+bool Enemies::collide_with(AltarPortal &altarPortal)
+{
+	float dx = m_position.x - altarPortal.get_position().x;
+	float dy = m_position.y - altarPortal.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(altarPortal.get_bounding_box().x, altarPortal.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
 void Enemies::set_speed(float speed)
 {
 	m_speed = speed;

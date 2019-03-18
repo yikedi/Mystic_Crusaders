@@ -1,9 +1,11 @@
 #pragma once
 class Thunder;
+class AltarPortal;
 #include "common.hpp"
 #include "sprite_sheet.hpp"
 #include "time.h"
 #include "projectile.h"
+#include "altar_portal.hpp"
 
 enum class EnemyMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
 
@@ -57,6 +59,8 @@ public:
 	virtual bool collide_with(Projectile &projectile);
 
 	virtual bool collide_with(Thunder & thunder);
+
+    virtual bool collide_with(AltarPortal &altarPortal);
 
 	void set_stunded(bool hit);
 

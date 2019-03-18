@@ -23,6 +23,7 @@
 #include "Thunder.h"
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
+#include "altar_portal.hpp"
 
 // stlib
 #include <vector>
@@ -117,6 +118,7 @@ private:
 
 	// Game entities
 	Hero m_hero;
+	AltarPortal m_portal;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Enemy_03> m_enemys_03;

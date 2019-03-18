@@ -157,6 +157,7 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	stree.init(screen, 1);
 	m_hero.init(screen);
+	m_portal.init(screen);
 	shootingFireBall = false;
 
 	// std::function<void> f1 = &World::startGame;
@@ -170,7 +171,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
-	
+
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
 	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
@@ -873,13 +874,13 @@ void World::draw()
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
 	}
-	
+
 	if (display_tutorial) {
 		// button_play2.draw(projection_2D);
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
-	
+
 	// Drawing entities
 	map.draw(projection_2D);
 
@@ -896,6 +897,7 @@ void World::draw()
 	for (auto& thunder : thunders)
 		thunder->draw(projection_2D);
 	m_hero.draw(projection_2D);
+	m_portal.draw(projection_2D);
 
 	if (start_is_over) {
 
@@ -1173,7 +1175,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		else {
 			button_back_to_menu.check_click(mouse_pos);
 		}
-		
+
 	}
 
 	if (!game_is_paused && start_is_over) {
@@ -1305,7 +1307,7 @@ void World::startGame()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	
+
 	// input code from key input, "G"
 	if (start_is_over == false) {
 		map.init(screen);
