@@ -4,6 +4,7 @@ class Hero;
 #include "hero.hpp"
 #include "projectile.h"
 #include "enemies.hpp"
+#include "Thunder.h"
 
 class AltarPortal: public Renderable
 {
@@ -36,9 +37,12 @@ public:
 
     bool getIsPortal();
 
-public:
+	void killAll(std::vector<Thunder*> &thunders);
+
+private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
     bool isPortal;
+	vec2 m_screen;
 
 };

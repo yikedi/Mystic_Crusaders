@@ -1,11 +1,11 @@
 #include "Thunder.h"
 
 float string_time = 300.f;
-bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale)
+bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale, vec3 color)
 {
 	// Load shared texture
-	thunderString.init(position);
-	thunderBall.init(position, m_scale);
+	thunderString.init(position, color);
+	thunderBall.init(position, m_scale, color);
 	impactTime = m_impactTime;
 	elapsedTime = 0.f;
 	m_position = position;
@@ -68,4 +68,9 @@ void Thunder::apply_effect(Enemies & e)
 {
 	e.take_damage(m_damage);
 	e.set_stunded(true);
+}
+
+void Thunder::set_color(vec3 color)
+{
+	custom_color = color;
 }

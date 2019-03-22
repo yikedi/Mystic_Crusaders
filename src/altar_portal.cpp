@@ -72,6 +72,7 @@ bool AltarPortal::init(vec2 screen)
 	m_scale.y = 1.f;
 
 	m_position = { screen.x/2, screen.y/2 };
+	m_screen = screen;
 
 	return true;
 }
@@ -141,7 +142,11 @@ void AltarPortal::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, altar_texture.id);
+	if (isPortal) {
+		glBindTexture(GL_TEXTURE_2D, portal_texture.id);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, altar_texture.id);
+	}
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -184,6 +189,23 @@ bool AltarPortal::collides_with(Hero &hero)
 void AltarPortal::setIsPortal(bool portal)
 {
     isPortal = portal;
+}
+
+void AltarPortal::killAll(std::vector<Thunder*> & thunders) {
+	float duration = 5000.f;
+	float damage = 1.f;
+	vec2 scale = {6.f, 6.f};
+	vec3 color = {0.5f,0.f,0.f};
+	Thunder* t1 = new Thunder({m_screen.x/2, m_screen.y/2}, duration, damage, scale, color);
+	Thunder* t2 = new Thunder({m_screen.x/4, m_screen.y/4}, duration, damage, scale, color);
+	Thunder* t3 = new Thunder({m_screen.x*3/4, m_screen.y*3/4}, duration, damage, scale, color);
+	Thunder* t4 = new Thunder({m_screen.x*3/4, m_screen.y/4}, duration, damage, scale, color);
+	Thunder* t5 = new Thunder({m_screen.x/4, m_screen.y*3/4}, duration, damage, scale, color);
+	thunders.emplace_back(t1);
+	thunders.emplace_back(t2);
+	thunders.emplace_back(t3);
+	thunders.emplace_back(t4);
+	thunders.emplace_back(t5);
 }
 
 bool AltarPortal::getIsPortal()

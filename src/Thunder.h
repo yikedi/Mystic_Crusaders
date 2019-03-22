@@ -11,12 +11,12 @@ public:
 	Thunder()
 	{}
 
-	Thunder(vec2 position, float impactTime = 3000.f, float damage = 40.f, vec2 scale = {1.0f,1.0f})
+	Thunder(vec2 position, float impactTime = 3000.f, float damage = 40.f, vec2 scale = {1.0f,1.0f}, vec3 color={1.f,1.f,1.f})
 	{
-		init(position, impactTime, damage,scale);
+		init(position, impactTime, damage, scale, color);
 	}
 
-	bool init(vec2 position, float impactTime, float damage, vec2 scale);
+	bool init(vec2 position, float impactTime, float damage, vec2 scale, vec3 color = {1.f,1.f,1.f});
 
 	void set_position(vec2 position);
 
@@ -34,10 +34,12 @@ public:
 
 	void apply_effect(Enemies & e);
 
-	~Thunder() 
+	~Thunder()
 	{
 		destroy();
 	}
+
+	void set_color(vec3 color);
 
 protected:
 	ThunderBall thunderBall;
@@ -46,5 +48,6 @@ protected:
 	float impactTime;
 	vec2 m_position;
 	float m_damage;
+	vec3 custom_color;
 };
 

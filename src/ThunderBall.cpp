@@ -2,7 +2,7 @@
 #include "algorithm"
 
 SpriteSheet ThunderBall::texture;
-bool ThunderBall::init(vec2 position,vec2 scale)
+bool ThunderBall::init(vec2 position,vec2 scale, vec3 color)
 {
 	// Load shared texture
 	if (!texture.is_valid())
@@ -68,6 +68,7 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 	elapsedTime = 0;
 	animation_time = 0.0f;
 	first_time = true;
+	custom_color = color;
 
 	return true;
 }
@@ -188,7 +189,7 @@ void ThunderBall::draw(const mat3 &projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = {custom_color.x, custom_color.y, custom_color.z};
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 

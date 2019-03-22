@@ -101,6 +101,7 @@ private:
 	unsigned int previous_point;
 
 	int m_level;
+	int pass_points;
 
 	//zoom
 	float zoom_factor;
@@ -159,6 +160,8 @@ private:
 	Button button_back_to_menu;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
+
+	bool passed_level;
 
 
 };
