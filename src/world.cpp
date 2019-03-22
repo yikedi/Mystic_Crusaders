@@ -263,7 +263,14 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 
-	if (start_is_over && !game_is_paused) {
+	if (passed_level && m_hero.justFinishedTransition) {
+		passed_level = !passed_level;
+		m_hero.justFinishedTransition = false;
+		m_portal.setIsPortal(false);
+		pass_points += m_points + 5;
+	}
+
+	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
 		if (m_hero.is_alive()) {
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -398,6 +405,82 @@ bool World::update(float elapsed_ms)
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
+
+		//check portal collision
+		for (auto &e1 : m_enemys_01)
+		{
+			if (m_portal.collides_with(e1))
+			{
+				vec2 cur_position = e1.get_position();
+				int facing = e1.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e1.set_position(new_position);
+			}
+		}
+
+		for (auto &e2 : m_enemys_02)
+		{
+			if (m_portal.collides_with(e2))
+			{
+				vec2 cur_position = e2.get_position();
+				int facing = e2.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e2.set_position(new_position);
+			}
+		}
+
+		for (auto &e3 : m_enemys_03)
+		{
+			if (m_portal.collides_with(e3))
+			{
+				vec2 cur_position = e3.get_position();
+				int facing = e3.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e3.set_position(new_position);
+			}
+		}
+
+		if (m_portal.collides_with(m_hero)) {
+			vec2 cur_direction = m_hero.get_direction();
+			vec2 cur_position = m_hero.get_position();
+			float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
+			vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
+			m_hero.set_position(new_position);
+			if(passed_level && !m_hero.isInTransition) {
+				m_hero.next_level();
+			}
+		}
+
+		int p_len = (int)hero_projectiles.size() - 1;
+		for (int i = p_len; i >= 0; i--)
+		{
+			Projectile* h_proj = hero_projectiles.at(i);
+			if (m_portal.collides_with(*h_proj))
+			{
+				h_proj->destroy();
+				hero_projectiles.erase(hero_projectiles.begin() + i);
+			}
+		}
+
+		//same for enemy projectile
+		int l_len = (int)enemy_projectiles.size() - 1;
+		for (int i = l_len; i >= 0; i--)
+		{
+			EnemyLaser laser = enemy_projectiles.at(i);
+			if (m_portal.collides_with(laser))
+			{
+				laser.destroy();
+				enemy_projectiles.erase(enemy_projectiles.begin() + i);
+			}
+		}
+
+
 
 		//check treetrunk collision
 		//some bugs in collision detection need to be fixed latter, but it is not related to here
@@ -818,6 +901,7 @@ bool World::update(float elapsed_ms)
 		thunder_skill_set = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
+		pass_points = 10;
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
@@ -909,7 +993,7 @@ void World::draw()
 
 	// Drawing entities
 	map.draw(projection_2D);
-
+	m_hero.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -922,7 +1006,6 @@ void World::draw()
 		e_proj.draw(projection_2D);
 	for (auto& thunder : thunders)
 		thunder->draw(projection_2D);
-	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
 
@@ -1088,6 +1171,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
+		pass_points = 10;
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;

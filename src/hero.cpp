@@ -87,6 +87,9 @@ bool Hero::init(vec2 screen)
 	momentum.y = 0.f;
 	activeSkill = 0;
 	level = 0;
+	transition_duration = 2000;
+	isInTransition = false;
+	justFinishedTransition = false;
 	return true;
 }
 
@@ -221,8 +224,6 @@ void Hero::update(float ms)
 	}
 	else
 		m_light_up = 0;
-
-
 }
 
 void Hero::setTextureLocs(int index) {
@@ -258,10 +259,21 @@ void Hero::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
+	vec2 cur_scale = m_scale;
+	vec2 cur_pos = m_position;
+	float color[] = { 1.f, 1.f, 1.f };
+	if (isInTransition) {
+		cur_pos.y -= (clock() - transition_time) / 5.f;
+		float ratio = 1 - ((clock() - transition_time) / transition_duration);
+		cur_scale.x = m_scale.x * ratio;
+		color[0] = color[0] + color[0] * (1 - ratio);
+		color[1] = color[1] + color[1] * (1 - ratio);
+		color[2] = color[2] + color[2] * (1 - ratio);
+	}
 	transform_begin();
-	transform_translate(m_position);
+	transform_translate(cur_pos);
 	// transform_rotate(m_rotation);
-	transform_scale(m_scale);
+	transform_scale(cur_scale);
 	transform_end();
 
 	// Setting shaders
@@ -296,13 +308,17 @@ void Hero::draw(const mat3& projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 	glUniform1iv(light_up_uloc, 1, &m_light_up);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+	if (isInTransition && clock() - transition_time > transition_duration) {
+		isInTransition = false;
+		justFinishedTransition = true;
+	}
 }
 
 // Simple bounding box collision check,
@@ -641,4 +657,12 @@ bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Th
 void Hero::set_active_skill(int active)
 {
 	activeSkill = active;
+}
+
+void Hero::next_level()
+{
+	if(!isInTransition) {
+		transition_time = clock();
+		isInTransition = true;
+	}
 }

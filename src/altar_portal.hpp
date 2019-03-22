@@ -1,7 +1,9 @@
 #pragma once
 class Hero;
+class Enemies;
 #include "common.hpp"
 #include "hero.hpp"
+#include "enemies.hpp"
 #include "projectile.h"
 #include "enemies.hpp"
 #include "Thunder.h"
@@ -32,6 +34,7 @@ public:
 
 	bool collides_with(Projectile &projectile);
 	bool collides_with(Hero &hero);
+	bool collides_with(Enemies &enemy);
 
     void setIsPortal(bool portal);
 

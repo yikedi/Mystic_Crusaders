@@ -54,6 +54,7 @@ public:
 	vec2 get_momentum();
 
 	vec2 get_scale();
+
 	virtual bool collide_with(Projectile &projectile);
 
 	virtual bool collide_with(Thunder & thunder);

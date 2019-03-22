@@ -1,6 +1,7 @@
 // Header
 #include "enemies.hpp"
 #include "Thunder.h"
+#include "altar_portal.hpp"
 #include <cmath>
 #include <algorithm>
 

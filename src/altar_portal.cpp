@@ -68,8 +68,8 @@ bool AltarPortal::init(vec2 screen)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 1.f;
-	m_scale.y = 1.f;
+	m_scale.x = 0.5f;
+	m_scale.y = 0.5f;
 
 	m_position = { screen.x/2, screen.y/2 };
 	m_screen = screen;
@@ -178,6 +178,20 @@ bool AltarPortal::collides_with(Hero &hero)
 	float dy = m_position.y - hero.get_position().y;
 	float d_sq = dx * dx + dy * dy;
 	float other_r = std::max(hero.get_bounding_box().x, hero.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
+bool AltarPortal::collides_with(Enemies &enemy)
+{
+	float dx = m_position.x - enemy.get_position().x;
+	float dy = m_position.y - enemy.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 	r *= 1.f;
