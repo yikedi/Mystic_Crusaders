@@ -16,7 +16,7 @@
 class Button : public Renderable
 {
 
-	static Texture button_texture;
+	Texture button_texture;
 
 public:
 	
