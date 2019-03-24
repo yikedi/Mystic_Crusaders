@@ -35,7 +35,7 @@ public:
 
 	double attackCooldown;
 
-	bool shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles, Enemies& enemy);
+	int recentPowerupType;
 
 	private:
 	float m_range;

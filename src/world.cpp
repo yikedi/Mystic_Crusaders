@@ -234,8 +234,6 @@ void World::destroy()
 		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
 		e_proj.destroy();
-	for (auto& e_proj : enemy_powerup_projectiles)
-		e_proj.destroy();
 	for (auto& tree : m_tree)
 		tree.destroy();
 	for (auto& treetrunk : m_tree)
@@ -247,7 +245,6 @@ void World::destroy()
 	m_enemys_02.clear();
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
-	enemy_powerup_projectiles.clear();
 	m_interface.destroy();
 	start.destroy();
 	button_play.destroy();
@@ -357,23 +354,24 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-		for (Enemy_03 enemy : m_enemys_03)
+		for (auto & enemy : m_enemys_03)
 		{
 			if (enemy.needFireProjectile == true)
 			{
+				enemy.set_wave();
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
 				if (rand_factor == 0)
 				{
 					if (m_enemys_01.size() > 0) {
 						int factor = m_enemys_01.size();
 						if (factor == 0) {
-							m_enemys_01[0].powerup();
-							enemy.shoot_projectiles(enemy_powerup_projectiles, m_enemys_01[0]);
+							enemy.recentPowerupType = m_enemys_01[0].powerup();
+							m_enemys_01[0].set_wave();
 						}
 						else {
 							rand_factor = std::rand() % factor + 0;
-							m_enemys_01[rand_factor].powerup();
-							enemy.shoot_projectiles(enemy_powerup_projectiles, m_enemys_01[rand_factor]);
+							enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
+							m_enemys_01[rand_factor].set_wave();
 						}
 					}
 				}
@@ -381,13 +379,13 @@ bool World::update(float elapsed_ms)
 					if (m_enemys_02.size() > 0) {
 						int factor = m_enemys_02.size();
 						if (factor == 0) {
-							m_enemys_02[0].powerup();
-							enemy.shoot_projectiles(enemy_powerup_projectiles, m_enemys_02[0]);
+							enemy.recentPowerupType = m_enemys_02[0].powerup();
+							m_enemys_02[0].set_wave();
 						}
 						else {
 							rand_factor = std::rand() % factor + 0;
-							m_enemys_02[rand_factor].powerup();
-							enemy.shoot_projectiles(enemy_powerup_projectiles, m_enemys_02[rand_factor]);
+							enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
+							m_enemys_02[rand_factor].set_wave();
 						}
 					}
 				}
@@ -407,8 +405,6 @@ bool World::update(float elapsed_ms)
 		for (auto& h_proj : hero_projectiles)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
-			e_proj.update(elapsed_ms * m_current_speed);
-		for (auto& e_proj : enemy_powerup_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
@@ -592,20 +588,6 @@ bool World::update(float elapsed_ms)
 			{
 				//e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
-				continue;
-			}
-
-			++e_proj;
-		}
-
-		//remove expired enemy powerup lasers
-		e_proj = enemy_powerup_projectiles.begin();
-		while (e_proj != enemy_powerup_projectiles.end())
-		{
-			if (clock() - e_proj->timePassed > 1000.f)
-			{
-				//e_proj->destroy();
-				e_proj = enemy_powerup_projectiles.erase(e_proj);
 				continue;
 			}
 
@@ -860,7 +842,7 @@ bool World::update(float elapsed_ms)
 			}
 
 			m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
-			if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f && m_points > 20)
+			if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f)
 			{
 				if (!spawn_enemy_03())
 					return false;
@@ -905,7 +887,6 @@ bool World::update(float elapsed_ms)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
-		enemy_powerup_projectiles.clear();
 		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
@@ -1027,8 +1008,6 @@ void World::draw()
 	for (auto& h_proj : hero_projectiles)
 		h_proj->draw(projection_2D);
 	for (auto& e_proj : enemy_projectiles)
-		e_proj.draw(projection_2D);
-	for (auto& e_proj : enemy_powerup_projectiles)
 		e_proj.draw(projection_2D);
 	for (auto& thunder : thunders)
 		thunder->draw(projection_2D);
@@ -1179,7 +1158,6 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
-		enemy_powerup_projectiles.clear();
 		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();

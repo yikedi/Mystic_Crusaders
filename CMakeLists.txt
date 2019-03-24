@@ -66,6 +66,7 @@ set(SOURCE_FILES
 	src/ThunderBall.cpp
 	src/Skill.cpp
     src/altar_portal.cpp
+    src/enemyPowerupWave.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -103,6 +104,7 @@ set(SOURCE_FILES
 	src/ThunderBall.h
 	src/Skill.h
     src/altar_portal.hpp
+    src/enemyPowerupWave.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

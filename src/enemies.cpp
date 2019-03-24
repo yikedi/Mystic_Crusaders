@@ -116,3 +116,10 @@ void Enemies::set_stunded(bool hit)
 {
 	stunned = hit;
 }
+
+void Enemies::set_wave()
+{
+	waveTime = clock();
+	wave.init(m_position, enemyColor);
+	waved = true;
+}

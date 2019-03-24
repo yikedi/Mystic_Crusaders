@@ -81,6 +81,7 @@ bool Enemy_01::init(int level)
 	momentum.y = 0.f;
 	m_level = level;
 	poweredup = false;
+	waved = false;
 
 	return true;
 }
@@ -170,11 +171,17 @@ void Enemy_01::draw(const mat3& projection)
 				break;
 		}
 	}
+	enemyColor.x = color[0];
+	enemyColor.y = color[1];
+	enemyColor.z = color[2];
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	if(waved) {
+		wave.draw(projection);
+	}
 }
 
 void Enemy_01::update(float ms, vec2 target_pos)
@@ -275,6 +282,15 @@ void Enemy_01::update(float ms, vec2 target_pos)
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }
+	if (waved) {
+		if (clock() - waveTime > 1500.f){
+			waved = false;
+		} else {
+			wave.update(ms);
+			wave.m_position = m_position;
+			wave.custom_color = enemyColor;
+		}
+	}
 }
 
 void Enemy_01::setTextureLocs(int index)
@@ -349,7 +365,7 @@ void Enemy_01::setLastFireProjectileTime(clock_t c)
 	lastFireProjectileTime = c;
 }
 
-void Enemy_01::powerup()
+int Enemy_01::powerup()
 {
 	if (!poweredup) {
 		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
@@ -375,4 +391,5 @@ void Enemy_01::powerup()
 		}
 		poweredup = true;
 	}
+	return powerupType;
 }

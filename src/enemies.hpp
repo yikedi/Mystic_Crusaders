@@ -4,6 +4,7 @@ class Thunder;
 #include "sprite_sheet.hpp"
 #include "time.h"
 #include "projectile.h"
+#include "enemyPowerupWave.h"
 
 enum class EnemyMoveState { STANDING, FRONTMOVING, BACKMOVING, LEFTMOVING, RIGHTMOVING, ATTACKING };
 
@@ -61,6 +62,15 @@ public:
 
 	void set_stunded(bool hit);
 
+    void set_wave();
+
+    clock_t waveTime;
+
+    bool waved;
+
+protected:
+	EnemyPowerupWave wave;
+
 public:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
@@ -77,5 +87,5 @@ public:
     float momentum_factor;
     int m_level;
 	bool stunned;
-
+    vec3 enemyColor;
 };
