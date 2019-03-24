@@ -231,3 +231,26 @@ void Enemy_03::setLastFireProjectileTime(clock_t c)
 {
 	lastFireProjectileTime = c;
 }
+
+bool Enemy_03::shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles, Enemies& enemy)
+{
+	EnemyLaser enemyLaser;
+	float x_diff =  m_position.x - enemy.get_position().x;
+	float y_diff =  m_position.y - enemy.get_position().y;
+	float x_mid =  (m_position.x + enemy.get_position().x) / 2.f;
+	float y_mid =  (m_position.y + enemy.get_position().y) / 2.f;
+	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
+	float fireDir = atan2(y_diff, x_diff);
+	float variation = 0.f;
+	if (enemyLaser.init(fireDir, 0.f, 0.f))
+	{
+		enemyLaser.set_position({x_mid, y_mid});
+		enemyLaser.setVariation(variation);
+		enemyLaser.set_scale({-distance / 40.f, 0.3f});
+		enemy_projectiles.emplace_back(enemyLaser);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn fish");
+	return false;
+
+}

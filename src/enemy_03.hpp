@@ -35,6 +35,8 @@ public:
 
 	double attackCooldown;
 
+	bool shoot_projectiles(std::vector<EnemyLaser> & enemy_projectiles, Enemies& enemy);
+
 	private:
 	float m_range;
 	clock_t lastFireProjectileTime;

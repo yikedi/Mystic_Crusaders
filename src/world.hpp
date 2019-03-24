@@ -127,6 +127,7 @@ private:
 	std::vector<Tree> m_tree;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
