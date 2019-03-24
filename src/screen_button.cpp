@@ -17,7 +17,6 @@
 
 
 // static Texture button_texture;
-Texture Button::button_texture;
 
 typedef void (*ClickCallback)();
 using namespace std;
