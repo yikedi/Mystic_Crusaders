@@ -526,7 +526,7 @@ void Hero::set_color(vec3 in_color)
 
 void Hero::take_damage(float damage)
 {
-	change_hp(-1.f * damage);
+	//change_hp(-1.f * damage);
 	if (hp <= 0.5f) {
 		m_is_alive = false;
 	}

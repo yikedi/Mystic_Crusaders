@@ -89,6 +89,11 @@ void Enemy_02::destroy()
 }
 
 
+vec2 Enemy_02::get_bounding_box()const
+{
+	return { std::fabs(m_scale.x) * enemy_texture.subWidth, std::fabs(m_scale.y) * enemy_texture.subHeight };
+}
+
 void Enemy_02::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info

@@ -31,7 +31,7 @@ public:
     void set_facing(int rotation_value);
 
 	// Returns the enemy' bounding box for collision detection, called by collides_with()
-	vec2 get_bounding_box()const;
+	virtual vec2 get_bounding_box()const;
 
     void take_damage(float damage, vec2 direction);
 

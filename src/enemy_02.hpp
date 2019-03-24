@@ -32,6 +32,8 @@ public:
 
     void setTextureLocs(int index);
 
+	vec2 get_bounding_box()const;
+
 	void powerup();
 
 	bool poweredup;

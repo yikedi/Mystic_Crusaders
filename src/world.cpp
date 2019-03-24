@@ -77,7 +77,9 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+
 	if (m_window == nullptr)
 		return false;
 
@@ -395,10 +397,18 @@ bool World::update(float elapsed_ms)
 		{
 
 			if (treeTrunk.collide_with(m_hero)) {
-				vec2 cur_direction = m_hero.get_direction();
 				vec2 cur_position = m_hero.get_position();
-				float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
-				vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
+				vec2 tree_location = treeTrunk.get_position();
+				vec2 current_direction = m_hero.get_direction();
+
+				//find the difference vector, but only push back hero in the opposite direction that the hero walks
+				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
+				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
+				float size = sqrtf(dot(difference, difference));
+				difference = { difference.x / size, difference.y / size }; //scale the difference 
+				float stepback = elapsed_ms * 0.4; // -0.2 is 200 / 1000, which is in hero.cpp so 0.4 to stepback more so the hero does not stuck on it
+				vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback  };
+
 				m_hero.set_position(new_position);
 			}
 
@@ -432,10 +442,12 @@ bool World::update(float elapsed_ms)
 				if (treeTrunk.collide_with(e1))
 				{
 					vec2 cur_position = e1.get_position();
-					int facing = e1.m_face_left_or_right;
-					facing = (facing == 0) ? facing - 1 : facing;
-					facing = facing * -10;
-					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					vec2 tree_location = treeTrunk.get_position();
+					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+					float size = sqrtf(dot(difference, difference));
+					difference = { difference.x / size, difference.y / size };
+					float stepback = elapsed_ms * 0.5;
+					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
 					e1.set_position(new_position);
 				}
 			}
@@ -445,10 +457,12 @@ bool World::update(float elapsed_ms)
 				if (treeTrunk.collide_with(e2))
 				{
 					vec2 cur_position = e2.get_position();
-					int facing = e2.m_face_left_or_right;
-					facing = (facing == 0) ? facing - 1 : facing;
-					facing = facing * -10;
-					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					vec2 tree_location = treeTrunk.get_position();
+					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+					float size = sqrtf(dot(difference, difference));
+					difference = { difference.x / size, difference.y / size };
+					float stepback = elapsed_ms * 0.5;
+					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
 					e2.set_position(new_position);
 				}
 			}
@@ -458,10 +472,12 @@ bool World::update(float elapsed_ms)
 				if (treeTrunk.collide_with(e3))
 				{
 					vec2 cur_position = e3.get_position();
-					int facing = e3.m_face_left_or_right;
-					facing = (facing == 0) ? facing - 1 : facing;
-					facing = facing * -10;
-					vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+					vec2 tree_location = treeTrunk.get_position();
+					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+					float size = sqrtf(dot(difference, difference));
+					difference = { difference.x / size, difference.y / size };
+					float stepback = elapsed_ms * 0.5;
+					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
 					e3.set_position(new_position);
 				}
 			}
