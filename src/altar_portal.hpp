@@ -17,7 +17,7 @@ public:
 
     bool init(vec2 screen);
 
-    bool update(float ms);
+    bool update(float ms, int points, int max_points);
 
     void destroy();
 
@@ -42,10 +42,16 @@ public:
 
 	void killAll(std::vector<Thunder*> &thunders);
 
+	void AltarPortal::setTextureLocs(int index);
+
 private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
     bool isPortal;
 	vec2 m_screen;
+	float animation_time;
+	TexturedVertex texVertices[4];
+	std::vector<float> texture_locs;
+	bool first_time;
 
 };

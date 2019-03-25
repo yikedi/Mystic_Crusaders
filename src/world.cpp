@@ -161,6 +161,7 @@ bool World::init(vec2 screen)
 	m_portal.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
+	cur_points_needed = pass_points - m_points;
 
 	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -268,6 +269,7 @@ bool World::update(float elapsed_ms)
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
 		pass_points += m_points + 5;
+		cur_points_needed = pass_points - m_points;
 	}
 
 	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
@@ -406,6 +408,7 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
@@ -910,6 +913,7 @@ bool World::update(float elapsed_ms)
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		cur_points_needed = pass_points - m_points;
 	}
 
 
@@ -1181,6 +1185,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		start_is_over = false;
 		game_is_paused = false;
 		display_tutorial = false;
+		cur_points_needed = pass_points - m_points;
 	}
 
 	// Control the current speed with `<` `>`

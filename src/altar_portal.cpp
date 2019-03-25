@@ -11,35 +11,32 @@ bool AltarPortal::init(vec2 screen)
 	// Load shared texture
 	if (!altar_texture.is_valid())
 	{
-		if (!altar_texture.load_from_file(textures_path("fish.png")))
+		if (!altar_texture.load_from_file(textures_path("altar.png")))
 		{
 			fprintf(stderr, "Failed to load altar texture!");
 			return false;
 		}
 	}
 
-    if (!portal_texture.is_valid())
-	{
-		if (!portal_texture.load_from_file(textures_path("turtle.png")))
-		{
-			fprintf(stderr, "Failed to load altar texture!");
-			return false;
-		}
-	}
+	altar_texture.totalTiles = 16; // custom to current sprite sheet
+	altar_texture.subWidth = 256; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
-	float wr = altar_texture.width * 0.5f;
+	float wr = altar_texture.subWidth * 0.5f;
 	float hr = altar_texture.height * 0.5f;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, -0.01f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, -0.01f };
-	vertices[1].texcoord = { 1.f, 1.f,  };
-	vertices[2].position = { +wr, -hr, -0.01f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, -0.01f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	texVertices[0].position = { -wr, +hr, -0.01f };
+	//vertices[0].texcoord = { 0.f, 1.f };
+	texVertices[1].position = { +wr, +hr, -0.01f };
+	//vertices[1].texcoord = { 1.f, 1.f, };
+	texVertices[2].position = { +wr, -hr, -0.01f };
+	//vertices[2].texcoord = { 1.f, 0.f };
+	texVertices[3].position = { -wr, -hr, -0.01f };
+	//vertices[3].texcoord = { 0.f, 0.f };
+
+	for (int i = 0; i <= altar_texture.totalTiles; i++) {
+		texture_locs.push_back((float)i * altar_texture.subWidth / altar_texture.width);
+	}
 
 	// counterclockwise as it's the default opengl front winding direction
 	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -50,7 +47,7 @@ bool AltarPortal::init(vec2 screen)
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
 
 	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
@@ -73,20 +70,34 @@ bool AltarPortal::init(vec2 screen)
 
 	m_position = { screen.x/2, screen.y/2 };
 	m_screen = screen;
+	isPortal = false;
 
 	return true;
 }
 
-bool AltarPortal::update(float ms) {
-    return true;
+bool AltarPortal::update(float ms, int points, int max_points) {
+	int curidx = 0;
+	if(!isPortal) {
+		int tiles = altar_texture.totalTiles - 1;
+		float ratio = (float)points / (float)max_points;
+		curidx = (int)(ratio * (float)tiles);
+	} else {
+		float animation_speed = 0.3f;
+		animation_time += animation_speed * 2;
+		curidx += (int)animation_time % altar_texture.totalTiles;
+	}
+	setTextureLocs(curidx);
+	return true;
 }
 
 void AltarPortal::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
-    glDeleteBuffers(1, &mesh.ibo);
-    glDeleteVertexArrays(1, &mesh.vao);
-    effect.release();
+	glDeleteBuffers(1, &mesh.ibo);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
 }
 
 vec2 AltarPortal::get_position()
@@ -107,11 +118,8 @@ vec2 AltarPortal::get_bounding_box()const
 
 void AltarPortal::draw(const mat3& projection)
 {
-	// Transformation code, see Rendering and Transformation in the template specification for more info
-	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
-	transform_translate(m_position);
-
+	transform_translate({m_position.x, m_position.y});
 	transform_scale(m_scale);
 	transform_end();
 
@@ -142,21 +150,48 @@ void AltarPortal::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	if (isPortal) {
-		glBindTexture(GL_TEXTURE_2D, portal_texture.id);
-	} else {
-		glBindTexture(GL_TEXTURE_2D, altar_texture.id);
-	}
+	glBindTexture(GL_TEXTURE_2D, altar_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = {1.f, 1.f, 1.f};
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
+
+void AltarPortal::setTextureLocs(int index)
+{
+	texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
+	texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
+	texVertices[2].texcoord = { texture_locs[index + 1], 0.f }; //bottom right
+	texVertices[3].texcoord = { texture_locs[index], 0.f }; //bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Clear memory allocation
+	if (first_time) {
+		destroy();
+	}
+
+	// Vertex Buffer creation
+	glGenBuffers(1, &mesh.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glGenBuffers(1, &mesh.ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+	first_time = false;
+}
+
 
 bool AltarPortal::collides_with(Projectile &projectile)
 {

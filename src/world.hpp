@@ -102,6 +102,7 @@ private:
 
 	int m_level;
 	int pass_points;
+	int cur_points_needed;
 
 	//zoom
 	float zoom_factor;
