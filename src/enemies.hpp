@@ -43,8 +43,6 @@ public:
 
 	float get_speed();
 
-    void apply_momentum(vec2 momentum);
-
     void set_rotation(float rotation_value);
 
     void setRandMovementTime(clock_t c);

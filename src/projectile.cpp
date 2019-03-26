@@ -35,16 +35,8 @@ vec2 Projectile::get_velocity() const{
 
 void Projectile::destroy()
 {
-//    glDeleteBuffers(1, &mesh.vbo);
-//    glDeleteBuffers(1, &mesh.ibo);
-//    glDeleteBuffers(1, &mesh.vao);
-//
-//    glDeleteShader(effect.vertex);
-//    glDeleteShader(effect.fragment);
-//    glDeleteShader(effect.program);
-
-    glDeleteBuffers(1, &mesh.vbo);
-    glDeleteBuffers(1, &mesh.ibo);
-    glDeleteVertexArrays(1, &mesh.vao);
-    effect.release();
+	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
+	effect.release();
 }

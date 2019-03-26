@@ -526,7 +526,7 @@ void Hero::set_color(vec3 in_color)
 
 void Hero::take_damage(float damage)
 {
-	//change_hp(-1.f * damage);
+	change_hp(-1.f * damage);
 	if (hp <= 0.5f) {
 		m_is_alive = false;
 	}
@@ -568,7 +568,6 @@ vec2 Hero::get_position()
 
 bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
-	//Fish fish;
 	Fireball* fireball = new Fireball(m_rotation, 400.f, 20.0f);
 	fireball->set_position(m_position);
 	hero_projectiles.emplace_back(fireball);

@@ -436,7 +436,6 @@ bool World::update(float elapsed_ms)
 				}
 			}
 
-			//not sure what to do for enemies, tree trunk collision now
 			for (auto &e1 : m_enemys_01)
 			{
 				if (treeTrunk.collide_with(e1))
@@ -1090,12 +1089,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_current_speed += 0.1f;
 
 	//add toggle
-	if (action == GLFW_RELEASE && key == GLFW_KEY_1) {
-		m_hero.advanced = true;
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
-		m_hero.advanced = false;
-	}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_1) {
+	//	m_hero.advanced = true;
+	//}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_B) {
+	//	m_hero.advanced = false;
+	//}
 
 	m_current_speed = fmax(0.f, m_current_speed);
 
@@ -1105,23 +1104,37 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 		m_hero.set_direction({ 1.0f,cur_direction.y });
 	}
+	else if (action == GLFW_RELEASE && key == GLFW_KEY_D && m_hero.get_direction().x > 0)
+	{
+		m_hero.set_direction({ 0.f,cur_direction.y });
+	}
 
-	else if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 		m_hero.set_direction({ -1.0f,cur_direction.y });
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_A || key == GLFW_KEY_D)) {
-		m_hero.set_direction({ 0.0f,cur_direction.y });
+	else if (action == GLFW_RELEASE && key == GLFW_KEY_A && m_hero.get_direction().x < 0)
+	{
+		m_hero.set_direction({ 0.f,cur_direction.y });
 	}
 
+	
+	cur_direction = m_hero.get_direction();
 	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-		m_hero.set_direction({ cur_direction.x,-1.0f });
+		m_hero.set_direction({ cur_direction.x,-1.0 });
 	}
-	else if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+	else if (action == GLFW_RELEASE && key == GLFW_KEY_W && m_hero.get_direction().y < 0)
+	{
+		m_hero.set_direction({ cur_direction.x,0.f });
+	}
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_S) {
 		m_hero.set_direction({ cur_direction.x,1.0f });
 	}
-	else if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_S)) {
-		m_hero.set_direction({ cur_direction.x,0.0f });
+	else if (action == GLFW_RELEASE && key == GLFW_KEY_S && m_hero.get_direction().y > 0)
+	{
+		m_hero.set_direction({ cur_direction.x,0.f });
 	}
+
 	else if (key == GLFW_KEY_P && start_is_over == true) {
 		zoom_factor += 0.1f;
 		if ((zoom_factor > 1.5f)) {
