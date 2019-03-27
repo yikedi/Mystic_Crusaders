@@ -18,7 +18,7 @@ bool AltarPortal::init(vec2 screen)
 		}
 	}
 
-	altar_texture.totalTiles = 16; // custom to current sprite sheet
+	altar_texture.totalTiles = 34; // custom to current sprite sheet
 	altar_texture.subWidth = 256; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
@@ -53,6 +53,7 @@ bool AltarPortal::init(vec2 screen)
 	glGenBuffers(1, &mesh.ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+	setTextureLocs(0);
 
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
@@ -71,20 +72,31 @@ bool AltarPortal::init(vec2 screen)
 	m_position = { screen.x/2, screen.y/2 };
 	m_screen = screen;
 	isPortal = false;
+	justChangedToPortal = false;
 
 	return true;
 }
 
 bool AltarPortal::update(float ms, int points, int max_points) {
 	int curidx = 0;
+	float animation_speed = 0.05f;
 	if(!isPortal) {
-		int tiles = altar_texture.totalTiles - 1;
+		int tiles = 16;
 		float ratio = (float)points / (float)max_points;
 		curidx = (int)(ratio * (float)tiles);
 	} else {
-		float animation_speed = 0.3f;
-		animation_time += animation_speed * 2;
-		curidx += (int)animation_time % altar_texture.totalTiles;
+		if(justChangedToPortal){
+			curidx = 17;
+			animation_time += animation_speed * 2;
+			curidx += (int)animation_time % 17;
+			if (curidx == 33) {
+				justChangedToPortal = false;
+			}
+		} else {
+			curidx = 30;
+			animation_time += animation_speed * 2;
+			curidx += (int)animation_time % 4;
+		}
 	}
 	setTextureLocs(curidx);
 	return true;
@@ -93,11 +105,11 @@ bool AltarPortal::update(float ms, int points, int max_points) {
 void AltarPortal::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 vec2 AltarPortal::get_position()
@@ -176,9 +188,7 @@ void AltarPortal::setTextureLocs(int index)
 	gl_flush_errors();
 
 	// Clear memory allocation
-	if (first_time) {
-		destroy();
-	}
+	destroy();
 
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
@@ -189,7 +199,6 @@ void AltarPortal::setTextureLocs(int index)
 	glGenBuffers(1, &mesh.ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
-	first_time = false;
 }
 
 
@@ -238,6 +247,9 @@ bool AltarPortal::collides_with(Enemies &enemy)
 void AltarPortal::setIsPortal(bool portal)
 {
     isPortal = portal;
+	if (portal) {
+		justChangedToPortal = true;
+	}
 }
 
 void AltarPortal::killAll(std::vector<Thunder*> & thunders) {

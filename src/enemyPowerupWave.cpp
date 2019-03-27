@@ -67,20 +67,16 @@ bool EnemyPowerupWave::init(vec2 position, vec3 color)
 	m_position = {position.x, position.y};
 	animation_time = 0.0f;
 	custom_color = color;
+	first_time = false;
 
 	return true;
 }
 
 void EnemyPowerupWave::destroy()
 {
-	//glDeleteBuffers(1, &mesh.vbo);
-	//glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteVertexArrays(1, &mesh.vao);
-	//effect.release();
-
+	first_time = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);

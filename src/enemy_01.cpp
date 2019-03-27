@@ -96,6 +96,9 @@ void Enemy_01::destroy()
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
+	if(waved) {
+		wave.destroy();
+	}
 }
 
 
@@ -285,6 +288,7 @@ void Enemy_01::update(float ms, vec2 target_pos)
 	if (waved) {
 		if (clock() - waveTime > 1500.f){
 			waved = false;
+			wave.destroy();
 		} else {
 			wave.update(ms);
 			wave.m_position = m_position;

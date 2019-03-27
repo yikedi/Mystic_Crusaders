@@ -87,7 +87,7 @@ bool Hero::init(vec2 screen)
 	momentum.y = 0.f;
 	activeSkill = 0;
 	level = 0;
-	transition_duration = 2000;
+	transition_duration = 4000;
 	isInTransition = false;
 	justFinishedTransition = false;
 	return true;
@@ -263,12 +263,23 @@ void Hero::draw(const mat3& projection)
 	vec2 cur_pos = m_position;
 	float color[] = { 1.f, 1.f, 1.f };
 	if (isInTransition) {
-		cur_pos.y -= (clock() - transition_time) / 5.f;
-		float ratio = 1 - ((clock() - transition_time) / transition_duration);
-		cur_scale.x = m_scale.x * ratio;
-		color[0] = color[0] + color[0] * (1 - ratio);
-		color[1] = color[1] + color[1] * (1 - ratio);
-		color[2] = color[2] + color[2] * (1 - ratio);
+		if(clock() - transition_time <= 2000.f) {
+			if(clock() - transition_time > 600.f){
+				cur_pos.y -= (clock() - transition_time - 600.f) / 1.5f;
+			}
+			float ratio = std::max(1 - ((clock() - transition_time) / transition_duration), 0.1f);
+			cur_scale.x = m_scale.x * ratio;
+			color[0] = color[0] + color[0] * (5 - 5 * ratio);
+			color[1] = color[1] + color[1] * (5 - 5 * ratio);
+			color[2] = color[2] + color[2] * (5 - 5 * ratio);
+		} else {
+			cur_pos.y -= (4000.f - (clock() - transition_time)) / 1.5f;
+			float ratio = std::min(((clock() - transition_time) / transition_duration), 1.f);
+			cur_scale.x = m_scale.x * ratio;
+			color[0] = color[0] + color[0] * (5 - 5 * ratio);
+			color[1] = color[1] + color[1] * (5 - 5 * ratio);
+			color[2] = color[2] + color[2] * (5 - 5 * ratio);
+		}
 	}
 	transform_begin();
 	transform_translate(cur_pos);
