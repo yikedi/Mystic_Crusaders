@@ -127,14 +127,27 @@ bool World::init(vec2 screen)
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 	m_levelup_sound = Mix_LoadWAV(audio_path("level_up.wav"));
+	m_lightning_sound = Mix_LoadWAV(audio_path("lightning.wav"));
+	m_ice_sound = Mix_LoadWAV(audio_path("ice.wav"));
+	m_fireball_sound = Mix_LoadWAV(audio_path("fireball.wav"));
+	m_laser_sound = Mix_LoadWAV(audio_path("laser.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr)
+	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr 
+		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr 
+		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
+		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
+		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav"),
 			audio_path("salmon_dead.wav"),
 			audio_path("salmon_eat.wav"),
-			audio_path("level_up.wav"));
+			audio_path("level_up.wav"),
+			audio_path("lightning.wav"),
+			audio_path("ice.wav"),
+			audio_path("fireball.wav"),
+			audio_path("laser.wav")
+		);
 		return false;
 	}
 
@@ -217,6 +230,14 @@ void World::destroy()
 		Mix_FreeChunk(m_salmon_dead_sound);
 	if (m_salmon_eat_sound != nullptr)
 		Mix_FreeChunk(m_salmon_eat_sound);
+	if (m_ice_sound != nullptr)
+		Mix_FreeChunk(m_ice_sound);
+	if (m_lightning_sound != nullptr)
+		Mix_FreeChunk(m_lightning_sound);
+	if (m_fireball_sound != nullptr)
+		Mix_FreeChunk(m_fireball_sound);
+	if (m_laser_sound != nullptr)
+		Mix_FreeChunk(m_laser_sound);
 
 	Mix_CloseAudio();
 
@@ -265,6 +286,7 @@ bool World::update(float elapsed_ms)
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 				m_hero.shoot_projectiles(hero_projectiles);
+				Mix_PlayChannel(-1, m_fireball_sound, 0);
 				lastFireProjectileTime = clock();
 			}
 
@@ -289,6 +311,7 @@ bool World::update(float elapsed_ms)
 				if (m_hero.collides_with(*e_proj))
 				{
 					m_hero.take_damage(e_proj->get_damage());
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 					//comment back later
 					//e_proj->destroy();
 					e_proj = enemy_projectiles.erase(e_proj);
@@ -333,6 +356,7 @@ bool World::update(float elapsed_ms)
 			if (enemy.needFireProjectile == true)
 			{
 				enemy.shoot_projectiles(enemy_projectiles);
+				Mix_PlayChannel(-1, m_laser_sound, 0);
 			}
 		}
 
@@ -1195,13 +1219,22 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	if (!game_is_paused && start_is_over) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
+			
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 			shootingFireBall = false;
 		}
 
-		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+			if (m_hero.get_active_skill() == THUNDER_SKILL)
+				Mix_PlayChannel(-1, m_lightning_sound, 0);
+			else if(m_hero.get_active_skill() == ICE_SKILL)
+				Mix_PlayChannel(-1, m_ice_sound, 0);
+
+		}
+			
+
 	}
 	else if (game_is_paused && start_is_over) {
 

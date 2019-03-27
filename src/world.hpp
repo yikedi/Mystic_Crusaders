@@ -139,6 +139,11 @@ private:
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
 	Mix_Chunk* m_levelup_sound;
+	Mix_Chunk* m_lightning_sound;
+	Mix_Chunk* m_ice_sound;
+	Mix_Chunk* m_fireball_sound;
+	Mix_Chunk* m_laser_sound;
+
 
 	// C++ rng
 	std::default_random_engine m_rng;
