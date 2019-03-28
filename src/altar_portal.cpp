@@ -125,7 +125,7 @@ void AltarPortal::set_position(vec2 position)
 vec2 AltarPortal::get_bounding_box()const
 {
 	// fabs is to avoid negative scale due to the facing direction
-	return { std::fabs(m_scale.x) * altar_texture.width, std::fabs(m_scale.y) * altar_texture.height };
+	return { std::fabs(m_scale.x) * altar_texture.subWidth/2, std::fabs(m_scale.y) * altar_texture.subWidth/2 };
 }
 
 void AltarPortal::draw(const mat3& projection)
@@ -208,7 +208,7 @@ bool AltarPortal::collides_with(Projectile &projectile)
 	float dy = m_position.y - projectile.get_position().y;
 	float d_sq = dx * dx + dy * dy;
 	float other_r = std::max(projectile.get_bounding_box().x, projectile.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
+	float my_r = std::max(get_bounding_box().x, get_bounding_box().y);
 	float r = std::max(other_r, my_r);
 	r *= 1.f;
 	if (d_sq < r * r)
@@ -236,7 +236,7 @@ bool AltarPortal::collides_with(Enemies &enemy)
 	float dy = m_position.y - enemy.get_position().y;
 	float d_sq = dx * dx + dy * dy;
 	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
+	float my_r = std::max(get_bounding_box().x, get_bounding_box().y);
 	float r = std::max(other_r, my_r);
 	r *= 1.f;
 	if (d_sq < r * r)
