@@ -800,7 +800,7 @@ bool World::update(float elapsed_ms)
 		// Spawning new enemys
 		if (!passed_level){
 			m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
-			if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
+			if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f && m_points >= 5)
 			{
 				if (!spawn_enemy_01())
 					return false;
@@ -845,7 +845,7 @@ bool World::update(float elapsed_ms)
 			}
 
 			m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
-			if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f)
+			if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f && m_points >= 15)
 			{
 				if (!spawn_enemy_03())
 					return false;
