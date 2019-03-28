@@ -253,20 +253,12 @@ void AltarPortal::setIsPortal(bool portal)
 }
 
 void AltarPortal::killAll(std::vector<Thunder*> & thunders) {
-	float duration = 5000.f;
-	float damage = 2.f;
-	vec2 scale = {8.f, 8.f};
-	vec3 color = {0.6f,0.f,0.f};
-	Thunder* t1 = new Thunder({m_screen.x/2, m_screen.y/2}, duration, damage, scale, color);
-	Thunder* t2 = new Thunder({m_screen.x/4, m_screen.y/4}, duration, damage, scale, color);
-	Thunder* t3 = new Thunder({m_screen.x*3/4, m_screen.y*3/4}, duration, damage, scale, color);
-	Thunder* t4 = new Thunder({m_screen.x*3/4, m_screen.y/4}, duration, damage, scale, color);
-	Thunder* t5 = new Thunder({m_screen.x/4, m_screen.y*3/4}, duration, damage, scale, color);
+	float duration = 2500.f;
+	float damage = 400.f;
+	vec2 scale = {16.f, 16.f};
+	vec3 color = {0.8f,0.2f,0.2f};
+	Thunder* t1 = new Thunder({m_screen.x/2, m_screen.y/2}, duration, damage, scale, color, true);
 	thunders.emplace_back(t1);
-	thunders.emplace_back(t2);
-	thunders.emplace_back(t3);
-	thunders.emplace_back(t4);
-	thunders.emplace_back(t5);
 }
 
 bool AltarPortal::getIsPortal()

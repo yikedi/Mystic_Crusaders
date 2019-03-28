@@ -147,7 +147,7 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
-	pass_points = 10;
+	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
@@ -800,7 +800,7 @@ bool World::update(float elapsed_ms)
 		// Spawning new enemys
 		if (!passed_level){
 			m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
-			if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f && m_points >= 5)
+			if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f && m_points >= 3)
 			{
 				if (!spawn_enemy_01())
 					return false;
@@ -909,7 +909,7 @@ bool World::update(float elapsed_ms)
 		thunder_skill_set = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
-		pass_points = 10;
+		pass_points = 5;
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
@@ -1180,7 +1180,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
-		pass_points = 10;
+		pass_points = 5;
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
