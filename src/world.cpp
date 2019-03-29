@@ -127,14 +127,32 @@ bool World::init(vec2 screen)
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 	m_levelup_sound = Mix_LoadWAV(audio_path("level_up.wav"));
+	m_lightning_sound = Mix_LoadWAV(audio_path("lightning.wav"));
+	m_ice_sound = Mix_LoadWAV(audio_path("ice.wav"));
+	m_fireball_sound = Mix_LoadWAV(audio_path("fireball.wav"));
+	m_laser_sound = Mix_LoadWAV(audio_path("laser.wav"));
+	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
+	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr)
+	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr
+		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr
+		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
+		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
+		|| m_transition_sound == nullptr || m_amplify_sound == nullptr
+		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav"),
 			audio_path("salmon_dead.wav"),
 			audio_path("salmon_eat.wav"),
-			audio_path("level_up.wav"));
+			audio_path("level_up.wav"),
+			audio_path("lightning.wav"),
+			audio_path("ice.wav"),
+			audio_path("fireball.wav"),
+			audio_path("laser.wav"),
+			audio_path("transition.wav"),
+			audio_path("amplify.wav")
+		);
 		return false;
 	}
 
@@ -147,6 +165,7 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
+	m_game_level = 0;
 	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
@@ -191,23 +210,37 @@ bool World::init(vec2 screen)
 }
 
 bool World::initTrees() {
-	for (auto & position : m_treetrunk_position)
-	{
-		if (!spawn_treetrunk())
-			return false;
+	if (m_game_level % 2 == 0) {
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_treetrunk())
+				return false;
 
-		Treetrunk& new_trunk = m_treetrunk.back();
-		new_trunk.set_position({ position.x,position.y + 200.f});
+			Treetrunk& new_trunk = m_treetrunk.back();
+			new_trunk.set_position({ position.x,position.y + 200.f });
+		}
+
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_tree())
+				return false;
+
+			Tree& new_tree = m_tree.back();
+			new_tree.set_position({ position.x + 10.f ,position.y });
+		}
 	}
-
-	for (auto & position : m_treetrunk_position)
+	else
 	{
-		if (!spawn_tree())
-			return false;
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_vine())
+				return false;
 
-		Tree& new_tree = m_tree.back();
-		new_tree.set_position({ position.x +10.f ,position.y });
+			Vine& new_vine = m_vine.back();
+			new_vine.set_position({ position.x,position.y - 30.f });
+		}
 	}
+	
 }
 
 // Releases all the associated resources
@@ -221,6 +254,18 @@ void World::destroy()
 		Mix_FreeChunk(m_salmon_dead_sound);
 	if (m_salmon_eat_sound != nullptr)
 		Mix_FreeChunk(m_salmon_eat_sound);
+	if (m_ice_sound != nullptr)
+		Mix_FreeChunk(m_ice_sound);
+	if (m_lightning_sound != nullptr)
+		Mix_FreeChunk(m_lightning_sound);
+	if (m_fireball_sound != nullptr)
+		Mix_FreeChunk(m_fireball_sound);
+	if (m_laser_sound != nullptr)
+		Mix_FreeChunk(m_laser_sound);
+	if (m_transition_sound != nullptr)
+		Mix_FreeChunk(m_transition_sound);
+	if (m_amplify_sound != nullptr)
+		Mix_FreeChunk(m_amplify_sound);
 
 	Mix_CloseAudio();
 
@@ -239,6 +284,8 @@ void World::destroy()
 		tree.destroy();
 	for (auto& treetrunk : m_tree)
 		treetrunk.destroy();
+	for (auto& vine : m_vine)
+		vine.destroy();
 	for (auto& thunder : thunders)
 		thunder->destroy();
 
@@ -265,9 +312,22 @@ bool World::update(float elapsed_ms)
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 
 	if (passed_level && m_hero.justFinishedTransition) {
+		map.destroy();
 		passed_level = !passed_level;
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
+		m_game_level++;
+		m_tree.clear();
+		m_treetrunk.clear();
+		m_vine.clear();
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.destroy();
+		for (auto& tree : m_tree)
+			tree.destroy();
+		for (auto& vine : m_vine)
+			vine.destroy();
+		initTrees();
+		map.init(screen, m_game_level);
 		pass_points += m_points + 5;
 		cur_points_needed = pass_points - m_points;
 	}
@@ -277,6 +337,7 @@ bool World::update(float elapsed_ms)
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 				m_hero.shoot_projectiles(hero_projectiles);
+				Mix_PlayChannel(-1, m_fireball_sound, 0);
 				lastFireProjectileTime = clock();
 			}
 
@@ -294,6 +355,26 @@ bool World::update(float elapsed_ms)
 				}
 			}
 
+
+
+			auto vine = m_vine.begin();
+			while (vine != m_vine.end())
+			{
+				if (m_hero.collides_with(*vine))
+				{
+					m_hero.take_damage(vine->get_damage());
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+					}
+					break;
+				}
+				++vine;
+			}
+
 			// Checking hero - Enemy collisions
 			auto e_proj = enemy_projectiles.begin();
 			while (e_proj != enemy_projectiles.end())
@@ -301,6 +382,7 @@ bool World::update(float elapsed_ms)
 				if (m_hero.collides_with(*e_proj))
 				{
 					m_hero.take_damage(e_proj->get_damage());
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 					//comment back later
 					//e_proj->destroy();
 					e_proj = enemy_projectiles.erase(e_proj);
@@ -342,6 +424,7 @@ bool World::update(float elapsed_ms)
 				m_portal.setIsPortal(true);
 				passed_level = true;
 				m_portal.killAll(thunders);
+				Mix_PlayChannel(-1, m_transition_sound, 0);
 				m_hero.hp = m_hero.max_hp;
 				m_hero.mp = m_hero.max_mp;
 			}
@@ -352,6 +435,7 @@ bool World::update(float elapsed_ms)
 			if (enemy.needFireProjectile == true)
 			{
 				enemy.shoot_projectiles(enemy_projectiles);
+				Mix_PlayChannel(-1, m_laser_sound, 0);
 			}
 		}
 
@@ -360,6 +444,7 @@ bool World::update(float elapsed_ms)
 			if (enemy.needFireProjectile == true)
 			{
 				enemy.set_wave();
+				Mix_PlayChannel(-1, m_amplify_sound, 0);
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
 				if (rand_factor == 0)
 				{
@@ -407,6 +492,8 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		for (auto& vine : m_vine)
+			vine.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
@@ -894,6 +981,7 @@ bool World::update(float elapsed_ms)
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
 		m_tree.clear();
+		m_vine.clear();
 		initTrees();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -902,6 +990,7 @@ bool World::update(float elapsed_ms)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -932,7 +1021,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_level;
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_game_level ;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -1021,6 +1110,8 @@ void World::draw()
 			treetrunk.draw(projection_2D);
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
+		for (auto& vine : m_vine)
+			vine.draw(projection_2D);
 		m_interface.draw(projection_2D);
 		m_portal.draw(projection_2D);
 	}
@@ -1122,6 +1213,17 @@ bool World::spawn_tree()
 	return false;
 }
 
+bool World::spawn_vine()
+{
+	Vine vine;
+	if (vine.init({ m_window_width,m_window_height }))
+	{
+		m_vine.emplace_back(vine);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn vine");
+	return false;
+}
 
 
 // On key callback
@@ -1145,10 +1247,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		map.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
+		m_vine.clear();
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -1174,6 +1278,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -1239,7 +1344,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
@@ -1318,13 +1423,22 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	if (!game_is_paused && start_is_over) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
+
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 			shootingFireBall = false;
 		}
 
-		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+			if (m_hero.get_active_skill() == THUNDER_SKILL)
+				Mix_PlayChannel(-1, m_lightning_sound, 0);
+			else if(m_hero.get_active_skill() == ICE_SKILL)
+				Mix_PlayChannel(-1, m_ice_sound, 0);
+
+		}
+
+
 	}
 	else if (game_is_paused && start_is_over) {
 
@@ -1447,7 +1561,7 @@ void World::startGame()
 
 	// input code from key input, "G"
 	if (start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
