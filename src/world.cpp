@@ -77,7 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -159,11 +159,11 @@ bool World::init(vec2 screen)
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	m_portal.init(screen);
+	m_skill_switch.init({ 500.f, 500.f });
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 
-	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 	button_play.set_hoverable(true);
 	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
@@ -251,6 +251,7 @@ void World::destroy()
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
+	m_skill_switch.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -413,6 +414,7 @@ bool World::update(float elapsed_ms)
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
+		m_skill_switch.update(m_hero.get_active_skill(), zoom_factor);
 
 		//check portal collision
 		for (auto &e1 : m_enemys_01)
@@ -1024,6 +1026,7 @@ void World::draw()
 			tree.draw(projection_2D);
 		m_interface.draw(projection_2D);
 		m_portal.draw(projection_2D);
+		m_skill_switch.draw(projection_2D);
 	}
 
 	if (game_is_paused){

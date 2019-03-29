@@ -24,6 +24,7 @@
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
 #include "altar_portal.hpp"
+#include "skill_switch_UI.hpp"
 
 // stlib
 #include <vector>
@@ -87,6 +88,8 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
+
+	SkillSwitch m_skill_switch;
 
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
