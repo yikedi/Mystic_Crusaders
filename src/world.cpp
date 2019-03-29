@@ -160,8 +160,7 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	stree.init(screen, 1);
 	m_hero.init(screen);
-	hme.init(screen);
-	ingame.init(screen);
+	
 	shootingFireBall = false;
 
 	// std::function<void> f1 = &World::startGame;
@@ -265,6 +264,8 @@ bool World::update(float elapsed_ms)
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 
+	level_num = {0,6,1};
+	kill_num = {1,0,0};
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num, screen);
 	hme.update_hme(m_hero.get_position(), zoom_factor, screen);
@@ -767,6 +768,9 @@ bool World::update(float elapsed_ms)
 		m_water.get_salmon_dead_time() > 5) {
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
+		m_interface.destroy();
+		hme.destroy();
+		ingame.destroy();
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
@@ -784,12 +788,6 @@ bool World::update(float elapsed_ms)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		m_interface.destroy();
-		m_interface.init({ 300.f, 50.f });
-		hme.destroy();
-		hme.init(screen);
-		ingame.destroy();
-		ingame.init(screen);
 		m_treetrunk.clear();
 		m_tree.clear();
 		initTrees();
@@ -809,6 +807,9 @@ bool World::update(float elapsed_ms)
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		m_interface.init({ 300.f, 42.f });
+		ingame.init(screen);
+		hme.init(screen);
 	}
 
 
@@ -875,7 +876,7 @@ void World::draw()
 	// for our UI bar
 	m_interface.set_position({ screen_left, screen_top }, h, 15);
 	hme.set_position({ screen_left, screen_top }, h, 12);
-	ingame.set_position({ screen_left, screen_top }, 150, w-200);
+	ingame.set_position({ screen_left, screen_top }, h + 15, w-200);
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
@@ -1063,7 +1064,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		m_interface.init({ 300.f, 50.f });
+		m_interface.init({ 300.f, 42.f });
 		ingame.init(screen);
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;

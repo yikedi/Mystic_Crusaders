@@ -136,7 +136,7 @@ void UserInterface::draw(const mat3& projection)
 	transform_translate(m_position);
 	transform_rotate(m_rotation);
 	vec2 whiteBarScale = m_scale;
-	whiteBarScale.y = whiteBarScale.y * 1.7f;
+	whiteBarScale.y = whiteBarScale.y * 3.f;
 	whiteBarScale.x = whiteBarScale.x * 1.1f;
 	transform_scale(whiteBarScale);
 	transform_end();
@@ -187,11 +187,11 @@ void UserInterface::draw(const mat3& projection)
 	HP bar
 	*/
 	float HP_scale_factor = hp / max_hp; // a value (theoretically) between 0 and 1
-	vec2 hp_scale = { m_scale.x * HP_scale_factor, m_scale.y * 0.31f };
+	vec2 hp_scale = { m_scale.x * HP_scale_factor, m_scale.y * 0.51f };
 	if (HP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 hp_position = { 15 + m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y - 29.f / zoom_factor };
+		vec2 hp_position = { 15.f/ zoom_factor + m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y - 52.f / zoom_factor };
 		transform_begin();
 		transform_translate(hp_position);
 		transform_rotate(m_rotation);
@@ -241,11 +241,11 @@ void UserInterface::draw(const mat3& projection)
 	MP bar
 	*/
 	float MP_scale_factor = mp / max_mp; // a value (theoretically) between 0 and 1
-	vec2 mp_scale = { m_scale.x * MP_scale_factor, m_scale.y * 0.31f };
+	vec2 mp_scale = { m_scale.x * MP_scale_factor, m_scale.y * 0.51f };
 	if (MP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 mp_position = {15 + m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y - 6.f / zoom_factor };
+		vec2 mp_position = { 15.f / zoom_factor + m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y - 20.f / zoom_factor };
 		transform_begin();
 		transform_translate(mp_position);
 		transform_rotate(m_rotation);
@@ -292,14 +292,14 @@ void UserInterface::draw(const mat3& projection)
 	}
 
 	float EXP_scale_factor = (float)cur_exp / (float)max_exp;
-	vec2 exp_scale = { m_scale.x * EXP_scale_factor, m_scale.y * 0.31f };
+	vec2 exp_scale = { m_scale.x * EXP_scale_factor, m_scale.y * 0.51f };
 	/*
 	EXP bar
 	*/
 	if (EXP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 exp_position = { 15 + m_position.x - 0.5f * w * (1.f - EXP_scale_factor) / zoom_factor, m_position.y + 17.f / zoom_factor };
+		vec2 exp_position = { 15.f / zoom_factor + m_position.x - 0.5f * w * (1.f - EXP_scale_factor) / zoom_factor, m_position.y + 13.f / zoom_factor };
 		transform_begin();
 		transform_translate(exp_position);
 		transform_rotate(m_rotation);

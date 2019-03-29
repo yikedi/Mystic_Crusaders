@@ -140,12 +140,12 @@ void Bar_description::update_hme(vec2 hero_pos, float world_zoom, vec2 screen)		
 	float dx = mapx - gamex;
 	float dy = mapy - gamey;
 	zoom_factor = world_zoom;
-	m_scale = { 0.4f / world_zoom, 0.4f / world_zoom };
+	m_scale = { 0.5f / world_zoom, 0.66f / world_zoom };
 	
 }
 
 void Bar_description::set_position(vec2 position, int sh, int offsetx)
 {
-	m_position = { (position.x + 30.f) / zoom_factor + (float)0 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)51 / (1.f * zoom_factor) };
+	m_position = { (position.x + 30.f) / zoom_factor + (float)3 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)58 / (1.f * zoom_factor) };
 }
 

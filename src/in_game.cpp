@@ -163,11 +163,11 @@ void In_game::set_position(vec2 position, int sh, int offsetx)
 	size = position;
 	osx = offsetx;
 	osh = sh;
-	m_position = { (position.x + 30.f) / zoom_factor + (float)0 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)51 / (1.f * zoom_factor) };
-	//num11.set_position(position, sh - 115, offsetx + 15);
-	//num12.set_position(position, sh - 130, offsetx + 30);
-	//num13.set_position(position, sh - 45, offsetx + 45);
-	//num21.set_position(position, sh - 55, offsetx - 55);
-	//num22.set_position(position, sh - 65, offsetx - 65);
-	num23.set_position(position, sh - 15, offsetx - 75);
+	m_position = { (position.x + 30.f) / zoom_factor + (float)0 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)50 / (1.f * zoom_factor) };
+	num11.set_position(position, sh - 62, offsetx - 65);
+	num12.set_position(position, sh - 62, offsetx - 40);
+	num13.set_position(position, sh - 62, offsetx + 0);
+	num21.set_position(position, sh - 17, offsetx - 94);
+	num22.set_position(position, sh - 17, offsetx - 66);
+	num23.set_position(position, sh - 17, offsetx - 38);
 }

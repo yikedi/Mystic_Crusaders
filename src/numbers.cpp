@@ -131,7 +131,7 @@ void Numbers::draw(const mat3 & projection)
 void Numbers::update_numbers(bool start_is_over, float num, float world_zoom, vec2 hero_pos)
 {
 	zoom_factor = world_zoom;
-	m_scale = { 1.3f / world_zoom, 1.3f / world_zoom };
+	m_scale = { 1.1f / world_zoom, 1.1f / world_zoom };
 	int number = (int)num;
 	if (start_is_over) {
 		get_texture(number);
