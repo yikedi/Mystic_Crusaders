@@ -61,6 +61,8 @@ bool particles::init(float lifetime, float scale, vec2 position, vec2 initial_ve
 
 	m_position = position;
 	m_scale = { scale,scale };
+    float g = (float) rand() / (RAND_MAX);
+    m_color = { 1.f, g, 0.1f };
 	velocity = initial_velocity;
 	elapsed_time = 0.f;
 	life_time = lifetime;
@@ -137,7 +139,7 @@ void particles::draw(const mat3 & projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = { m_color.x, m_color.y, m_color.z };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
