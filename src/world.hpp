@@ -148,6 +148,9 @@ private:
 	Mix_Chunk* m_ice_sound;
 	Mix_Chunk* m_fireball_sound;
 	Mix_Chunk* m_laser_sound;
+	Mix_Chunk* m_transition_sound;
+	Mix_Chunk* m_amplify_sound;
+
 
 
 	// C++ rng

@@ -131,11 +131,14 @@ bool World::init(vec2 screen)
 	m_ice_sound = Mix_LoadWAV(audio_path("ice.wav"));
 	m_fireball_sound = Mix_LoadWAV(audio_path("fireball.wav"));
 	m_laser_sound = Mix_LoadWAV(audio_path("laser.wav"));
+	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
+	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
 
 	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr 
 		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr 
 		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
 		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
+		|| m_transition_sound == nullptr || m_amplify_sound == nullptr
 		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -146,7 +149,9 @@ bool World::init(vec2 screen)
 			audio_path("lightning.wav"),
 			audio_path("ice.wav"),
 			audio_path("fireball.wav"),
-			audio_path("laser.wav")
+			audio_path("laser.wav"),
+			audio_path("transition.wav"),
+			audio_path("amplify.wav")
 		);
 		return false;
 	}
@@ -242,6 +247,10 @@ void World::destroy()
 		Mix_FreeChunk(m_fireball_sound);
 	if (m_laser_sound != nullptr)
 		Mix_FreeChunk(m_laser_sound);
+	if (m_transition_sound != nullptr)
+		Mix_FreeChunk(m_transition_sound);
+	if (m_amplify_sound != nullptr)
+		Mix_FreeChunk(m_amplify_sound);
 
 	Mix_CloseAudio();
 
@@ -365,6 +374,7 @@ bool World::update(float elapsed_ms)
 				m_portal.setIsPortal(true);
 				passed_level = true;
 				m_portal.killAll(thunders);
+				Mix_PlayChannel(-1, m_transition_sound, 0);
 				m_hero.light_up();
 				m_hero.hp = m_hero.max_hp;
 				m_hero.mp = m_hero.max_mp;
@@ -385,6 +395,7 @@ bool World::update(float elapsed_ms)
 			if (enemy.needFireProjectile == true)
 			{
 				enemy.set_wave();
+				Mix_PlayChannel(-1, m_amplify_sound, 0);
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
 				if (rand_factor == 0)
 				{
