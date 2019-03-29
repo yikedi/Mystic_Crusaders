@@ -129,7 +129,7 @@ void SkillSwitch::draw(const mat3& projection)
 
 void SkillSwitch::update(int skill, float zoom) {
 
-	float animSpeed = 0.1f;
+	float animSpeed = 0.2f;
 	zoom_factor = zoom;
 
 	if (prevSkill != skill) {
