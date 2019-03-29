@@ -1,11 +1,14 @@
 #include "Thunder.h"
 
 float string_time = 300.f;
-bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale)
+bool Thunder::init(vec2 position, float m_impactTime, float damage,vec2 m_scale, vec3 color, bool isFireRing)
 {
 	// Load shared texture
-	thunderString.init(position);
-	thunderBall.init(position, m_scale);
+	if (!isFireRing){
+		thunderString.init(position, color);
+	}
+	thunderBall.init(position, m_scale, color, isFireRing);
+	m_isFireRing = isFireRing;
 	impactTime = m_impactTime;
 	elapsedTime = 0.f;
 	m_position = position;
@@ -26,25 +29,33 @@ void Thunder::set_position(vec2 position)
 void Thunder::update(float ms)
 {
 	elapsedTime += ms;
-	if (elapsedTime < string_time)
-	{
-		thunderString.update(elapsedTime);
-	}
-	else if (elapsedTime < impactTime)
-	{
+	if (m_isFireRing) {
 		thunderBall.update(elapsedTime);
+	} else {
+		if (elapsedTime < string_time)
+		{
+			thunderString.update(elapsedTime);
+		}
+		else if (elapsedTime < impactTime)
+		{
+			thunderBall.update(elapsedTime);
+		}
 	}
 }
 
 void Thunder::draw(const mat3 &projection)
 {
-	if (elapsedTime < string_time)
-	{
-		thunderString.draw(projection);
-	}
-	else if (elapsedTime < impactTime)
-	{
+	if (m_isFireRing) {
 		thunderBall.draw(projection);
+	} else {
+		if (elapsedTime < string_time)
+		{
+			thunderString.draw(projection);
+		}
+		else if (elapsedTime < impactTime)
+		{
+			thunderBall.draw(projection);
+		}
 	}
 }
 
@@ -68,4 +79,9 @@ void Thunder::apply_effect(Enemies & e)
 {
 	e.take_damage(m_damage);
 	e.set_stunded(true);
+}
+
+void Thunder::set_color(vec3 color)
+{
+	custom_color = color;
 }

@@ -30,10 +30,11 @@ public :
     // Returns the fish' bounding box for collision detection, called by collides_with()
     vec2 get_bounding_box()const;
 
+    clock_t timePassed;
+
     private:
 
     float variation;
-    clock_t timePassed;
 };
 
 

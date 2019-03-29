@@ -2,15 +2,15 @@
 
 #include "common.hpp"
 #include "sprite_sheet.hpp"
-class ThunderString : Renderable
+class EnemyPowerupWave : Renderable
 {
 	static SpriteSheet texture;
 public:
-	ThunderString()
+	EnemyPowerupWave()
 	{
 	}
 
-	ThunderString(vec2 position, vec3 color)
+	EnemyPowerupWave(vec2 position, vec3 color)
 	{
 		init(position, color);
 	}
@@ -25,19 +25,17 @@ public:
 
 	void setTextureLocs(int index);
 
+	vec2 m_position; // Window coordinates
+
+	vec3 custom_color;
 
 protected:
 
-	vec2 m_position; // Window coordinates
-	vec2 end_position; //The end position of the thunderstring
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
-	vec2 velocity;
-	float initial_speed;
 	float animation_time;
 	TexturedVertex texVertices[4];
 	std::vector<float> texture_locs;
 	bool first_time;
-	vec3 custom_color;
 };
 

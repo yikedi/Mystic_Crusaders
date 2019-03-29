@@ -11,7 +11,7 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const int INIT_MAX_ENEMIES = 2;
+	const int INIT_MAX_ENEMIES = 1;
 	const int INIT_MAX_ENEMY_03 = 1;
 	size_t MAX_ENEMIES_01 = INIT_MAX_ENEMIES;
 	size_t MAX_ENEMIES_02 = INIT_MAX_ENEMIES;
@@ -147,6 +147,7 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
+	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
@@ -157,7 +158,10 @@ bool World::init(vec2 screen)
 	m_window_height = screen.y;
 	stree.init(screen, 1);
 	m_hero.init(screen);
+	m_portal.init(screen);
+	passed_level = false;
 	shootingFireBall = false;
+	cur_points_needed = pass_points - m_points;
 
 	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -170,7 +174,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
-	
+
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
 	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
@@ -260,7 +264,15 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 
-	if (start_is_over && !game_is_paused) {
+	if (passed_level && m_hero.justFinishedTransition) {
+		passed_level = !passed_level;
+		m_hero.justFinishedTransition = false;
+		m_portal.setIsPortal(false);
+		pass_points += m_points + 5;
+		cur_points_needed = pass_points - m_points;
+	}
+
+	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
 		if (m_hero.is_alive()) {
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -326,6 +338,14 @@ bool World::update(float elapsed_ms)
 				m_level++;
 				Mix_PlayChannel(-1, m_levelup_sound, 0);
 			}
+			if (m_points >= pass_points && !passed_level) {
+				m_portal.setIsPortal(true);
+				passed_level = true;
+				m_portal.killAll(thunders);
+				m_hero.light_up();
+				m_hero.hp = m_hero.max_hp;
+				m_hero.mp = m_hero.max_mp;
+			}
 		}
 
 		for (Enemy_01 enemy : m_enemys_01)
@@ -336,21 +356,24 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-		for (Enemy_03 enemy : m_enemys_03)
+		for (auto & enemy : m_enemys_03)
 		{
 			if (enemy.needFireProjectile == true)
 			{
+				enemy.set_wave();
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
 				if (rand_factor == 0)
 				{
 					if (m_enemys_01.size() > 0) {
 						int factor = m_enemys_01.size();
 						if (factor == 0) {
-							m_enemys_01[0].powerup();
+							enemy.recentPowerupType = m_enemys_01[0].powerup();
+							m_enemys_01[0].set_wave();
 						}
 						else {
 							rand_factor = std::rand() % factor + 0;
-							m_enemys_01[rand_factor].powerup();
+							enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
+							m_enemys_01[rand_factor].set_wave();
 						}
 					}
 				}
@@ -358,11 +381,13 @@ bool World::update(float elapsed_ms)
 					if (m_enemys_02.size() > 0) {
 						int factor = m_enemys_02.size();
 						if (factor == 0) {
-							m_enemys_02[0].powerup();
+							enemy.recentPowerupType = m_enemys_02[0].powerup();
+							m_enemys_02[0].set_wave();
 						}
 						else {
 							rand_factor = std::rand() % factor + 0;
-							m_enemys_02[rand_factor].powerup();
+							enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
+							m_enemys_02[rand_factor].set_wave();
 						}
 					}
 				}
@@ -383,10 +408,87 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
+
+		//check portal collision
+		for (auto &e1 : m_enemys_01)
+		{
+			if (m_portal.collides_with(e1))
+			{
+				vec2 cur_position = e1.get_position();
+				int facing = e1.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e1.set_position(new_position);
+			}
+		}
+
+		for (auto &e2 : m_enemys_02)
+		{
+			if (m_portal.collides_with(e2))
+			{
+				vec2 cur_position = e2.get_position();
+				int facing = e2.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e2.set_position(new_position);
+			}
+		}
+
+		for (auto &e3 : m_enemys_03)
+		{
+			if (m_portal.collides_with(e3))
+			{
+				vec2 cur_position = e3.get_position();
+				int facing = e3.m_face_left_or_right;
+				facing = (facing == 0) ? facing - 1 : facing;
+				facing = facing * -10;
+				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				e3.set_position(new_position);
+			}
+		}
+
+		if (m_portal.collides_with(m_hero)) {
+			vec2 cur_direction = m_hero.get_direction();
+			vec2 cur_position = m_hero.get_position();
+			float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
+			vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
+			m_hero.set_position(new_position);
+			if(passed_level && !m_hero.isInTransition) {
+				m_hero.next_level();
+			}
+		}
+
+		int p_len = (int)hero_projectiles.size() - 1;
+		for (int i = p_len; i >= 0; i--)
+		{
+			Projectile* h_proj = hero_projectiles.at(i);
+			if (m_portal.collides_with(*h_proj))
+			{
+				h_proj->destroy();
+				hero_projectiles.erase(hero_projectiles.begin() + i);
+			}
+		}
+
+		//same for enemy projectile
+		int l_len = (int)enemy_projectiles.size() - 1;
+		for (int i = l_len; i >= 0; i--)
+		{
+			EnemyLaser laser = enemy_projectiles.at(i);
+			if (m_portal.collides_with(laser))
+			{
+				laser.destroy();
+				enemy_projectiles.erase(enemy_projectiles.begin() + i);
+			}
+		}
+
+
 
 		//check treetrunk collision
 		//some bugs in collision detection need to be fixed latter, but it is not related to here
@@ -525,7 +627,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy->is_alive()) {
 						//enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 23);
 					}
 					break;
@@ -554,7 +658,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy->is_alive()) {
 						//enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 23;
 					}
 					break;
@@ -584,7 +690,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy2->is_alive()) {
 						//enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 17);
 					}
 					break;
@@ -611,7 +719,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy2->is_alive()) {
 						//enemy->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
 					}
 					break;
@@ -641,7 +751,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy3->is_alive()) {
 						//enemy2->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_03 = INIT_MAX_ENEMY_03 + (m_points / 41);
 					}
 					break;
@@ -668,7 +780,9 @@ bool World::update(float elapsed_ms)
 					if (!enemy3->is_alive()) {
 						//enemy->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
-						++m_points;
+						if (!passed_level){
+							++m_points;
+						}
 						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 41;
 					}
 					break;
@@ -684,72 +798,74 @@ bool World::update(float elapsed_ms)
 
 
 		// Spawning new enemys
-		m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
-		if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f)
-		{
-			if (!spawn_enemy_01())
-				return false;
+		if (!passed_level){
+			m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
+			if (m_enemys_01.size() < MAX_ENEMIES_01 && m_next_enemy1_spawn < 0.f && m_points >= 3)
+			{
+				if (!spawn_enemy_01())
+					return false;
 
-			Enemy_01& new_enemy = m_enemys_01.back();
+				Enemy_01& new_enemy = m_enemys_01.back();
 
-			int left_or_right_spawn = rand() % 2;
+				int left_or_right_spawn = rand() % 2;
 
-			float screen_x = 0;
+				float screen_x = 0;
 
-			if (left_or_right_spawn == 0) {
-				screen_x = screen.x + 150.f;
+				if (left_or_right_spawn == 0) {
+					screen_x = screen.x + 150.f;
+				}
+
+				// Setting random initial position
+				new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+				// Next spawn
+				m_next_enemy1_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
+			}
+			m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
+			if (m_enemys_02.size() < MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
+			{
+				if (!spawn_enemy_02())
+					return false;
+
+				Enemy_02& new_enemy = m_enemys_02.back();
+
+				int left_or_right_spawn = rand() % 2;
+
+				float screen_x = 0;
+
+				if (left_or_right_spawn == 0) {
+					screen_x = screen.x + 150.f;
+				}
+
+				// Setting random initial position
+				new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+				// Next spawn
+				m_next_enemy2_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
 			}
 
-			// Setting random initial position
-			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+			m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
+			if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f && m_points >= 15)
+			{
+				if (!spawn_enemy_03())
+					return false;
 
-			// Next spawn
-			m_next_enemy1_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
-		}
-		m_next_enemy2_spawn -= elapsed_ms * m_current_speed;
-		if (m_enemys_02.size() < MAX_ENEMIES_02 && m_next_enemy2_spawn < 0.f)
-		{
-			if (!spawn_enemy_02())
-				return false;
+				Enemy_03& new_enemy = m_enemys_03.back();
 
-			Enemy_02& new_enemy = m_enemys_02.back();
+				int left_or_right_spawn = rand() % 2;
 
-			int left_or_right_spawn = rand() % 2;
+				float screen_x = 0;
 
-			float screen_x = 0;
+				if (left_or_right_spawn == 0) {
+					screen_x = screen.x + 150.f;
+				}
 
-			if (left_or_right_spawn == 0) {
-				screen_x = screen.x + 150.f;
+				// Setting random initial position
+				new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
+
+				// Next spawn
+				m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS)-log(m_points + 1) * 300;
 			}
-
-			// Setting random initial position
-			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
-
-			// Next spawn
-			m_next_enemy2_spawn = m_dist(m_rng) * (ENEMY_DELAY_MS)-log(m_points + 1) * 300;
-		}
-
-		m_next_enemy3_spawn -= elapsed_ms * m_current_speed;
-		if (m_enemys_03.size() < MAX_ENEMIES_03 && m_next_enemy3_spawn < 0.f && m_points > 20)
-		{
-			if (!spawn_enemy_03())
-				return false;
-
-			Enemy_03& new_enemy = m_enemys_03.back();
-
-			int left_or_right_spawn = rand() % 2;
-
-			float screen_x = 0;
-
-			if (left_or_right_spawn == 0) {
-				screen_x = screen.x + 150.f;
-			}
-
-			// Setting random initial position
-			new_enemy.set_position({ screen_x, 50 + m_dist(m_rng) * (screen.y - 100) });
-
-			// Next spawn
-			m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS)-log(m_points + 1) * 300;
 		}
 	}
 
@@ -784,6 +900,8 @@ bool World::update(float elapsed_ms)
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_portal.setIsPortal(false);
+		passed_level = false;
 		m_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
@@ -791,9 +909,11 @@ bool World::update(float elapsed_ms)
 		thunder_skill_set = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
+		pass_points = 5;
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		cur_points_needed = pass_points - m_points;
 	}
 
 
@@ -873,16 +993,16 @@ void World::draw()
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
 	}
-	
+
 	if (display_tutorial) {
 		// button_play2.draw(projection_2D);
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
-	
+
 	// Drawing entities
 	map.draw(projection_2D);
-
+	m_hero.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -895,7 +1015,6 @@ void World::draw()
 		e_proj.draw(projection_2D);
 	for (auto& thunder : thunders)
 		thunder->draw(projection_2D);
-	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
 
@@ -904,6 +1023,7 @@ void World::draw()
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
 		m_interface.draw(projection_2D);
+		m_portal.draw(projection_2D);
 	}
 
 	if (game_is_paused){
@@ -1052,16 +1172,20 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
 		m_points = 0;
+		m_portal.setIsPortal(false);
+		passed_level = false;
 		m_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		previous_point = 0;
+		pass_points = 5;
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
 		display_tutorial = false;
+		cur_points_needed = pass_points - m_points;
 	}
 
 	// Control the current speed with `<` `>`
@@ -1189,7 +1313,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		else {
 			button_back_to_menu.check_click(mouse_pos);
 		}
-		
+
 	}
 
 	if (!game_is_paused && start_is_over) {
@@ -1321,7 +1445,7 @@ void World::startGame()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	
+
 	// input code from key input, "G"
 	if (start_is_over == false) {
 		map.init(screen);

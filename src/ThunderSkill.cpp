@@ -2,8 +2,8 @@
 
 void ThunderSkill::init()
 {
-	mp_cost = 7.f;
-	damage = 0.3f;
+	mp_cost = 6.f;
+	damage = 0.4f;
 	damage_level = 0;
 	effect_level = 0;
 	mp_cost_level = 0;
