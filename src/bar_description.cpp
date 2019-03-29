@@ -146,6 +146,6 @@ void Bar_description::update_hme(vec2 hero_pos, float world_zoom, vec2 screen)		
 
 void Bar_description::set_position(vec2 position, int sh, int offsetx)
 {
-	m_position = { (position.x + 30.f) / zoom_factor + (float)3 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)58 / (1.f * zoom_factor) };
+	m_position = { (position.x + 30.f) / zoom_factor + (float)6 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)60 / (1.f * zoom_factor) };
 }
 

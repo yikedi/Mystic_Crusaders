@@ -153,7 +153,7 @@ bool World::init(vec2 screen)
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
 	kill_num = { 0.f,0.f,0.f };
-	level_num = { 0.f,0.f,0.f };
+	level_num = { 0.f,1.f,1.f };
 	game_is_paused = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
@@ -264,7 +264,6 @@ bool World::update(float elapsed_ms)
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
 
-	level_num = {0,6,1};
 	kill_num = {1,0,0};
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num, screen);
@@ -327,6 +326,7 @@ bool World::update(float elapsed_ms)
 			}
 			else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
 				vec2 force = { 10.f, 0.f };
+
 				m_hero.apply_momentum(force);
 			}
 			if (m_points - previous_point > 15 + (m_hero.level * 5))
@@ -801,7 +801,7 @@ bool World::update(float elapsed_ms)
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		kill_num = { 0.f,0.f,0.f };
-		level_num = { 0.f,0.f,0.f };
+		level_num = { 0.f,1.f,1.f };
 		game_is_paused = false;
 		previous_point = 0;
 		map.set_is_over(true);
@@ -1080,7 +1080,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		kill_num = { 0.f,0.f,0.f };
-		level_num = { 0.f,0.f,0.f };
+		level_num = { 0.f,1.f,1.f };
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;
