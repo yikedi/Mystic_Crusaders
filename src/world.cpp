@@ -165,6 +165,7 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
+	m_game_level = 0;
 	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
@@ -209,23 +210,37 @@ bool World::init(vec2 screen)
 }
 
 bool World::initTrees() {
-	for (auto & position : m_treetrunk_position)
-	{
-		if (!spawn_treetrunk())
-			return false;
+	if (m_game_level % 2 == 0) {
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_treetrunk())
+				return false;
 
-		Treetrunk& new_trunk = m_treetrunk.back();
-		new_trunk.set_position({ position.x,position.y + 200.f});
+			Treetrunk& new_trunk = m_treetrunk.back();
+			new_trunk.set_position({ position.x,position.y + 200.f });
+		}
+
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_tree())
+				return false;
+
+			Tree& new_tree = m_tree.back();
+			new_tree.set_position({ position.x + 10.f ,position.y });
+		}
 	}
-
-	for (auto & position : m_treetrunk_position)
+	else
 	{
-		if (!spawn_tree())
-			return false;
+		for (auto & position : m_treetrunk_position)
+		{
+			if (!spawn_vine())
+				return false;
 
-		Tree& new_tree = m_tree.back();
-		new_tree.set_position({ position.x +10.f ,position.y });
+			Vine& new_vine = m_vine.back();
+			new_vine.set_position({ position.x,position.y - 30.f });
+		}
 	}
+	
 }
 
 // Releases all the associated resources
@@ -269,6 +284,8 @@ void World::destroy()
 		tree.destroy();
 	for (auto& treetrunk : m_tree)
 		treetrunk.destroy();
+	for (auto& vine : m_vine)
+		vine.destroy();
 	for (auto& thunder : thunders)
 		thunder->destroy();
 
@@ -295,9 +312,22 @@ bool World::update(float elapsed_ms)
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 
 	if (passed_level && m_hero.justFinishedTransition) {
+		map.destroy();
 		passed_level = !passed_level;
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
+		m_game_level++;
+		m_tree.clear();
+		m_treetrunk.clear();
+		m_vine.clear();
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.destroy();
+		for (auto& tree : m_tree)
+			tree.destroy();
+		for (auto& vine : m_vine)
+			vine.destroy();
+		initTrees();
+		map.init(screen, m_game_level);
 		pass_points += m_points + 5;
 		cur_points_needed = pass_points - m_points;
 	}
@@ -323,6 +353,26 @@ bool World::update(float elapsed_ms)
 						break;
 					}
 				}
+			}
+
+
+
+			auto vine = m_vine.begin();
+			while (vine != m_vine.end())
+			{
+				if (m_hero.collides_with(*vine))
+				{
+					m_hero.take_damage(vine->get_damage());
+					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+
+					if (!m_hero.is_alive()) {
+						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
+						m_water.set_salmon_dead();
+						m_hero.kill();
+					}
+					break;
+				}
+				++vine;
 			}
 
 			// Checking hero - Enemy collisions
@@ -443,6 +493,8 @@ bool World::update(float elapsed_ms)
 			h_proj->update(elapsed_ms * m_current_speed);
 		for (auto& e_proj : enemy_projectiles)
 			e_proj.update(elapsed_ms * m_current_speed);
+		for (auto& vine : m_vine)
+			vine.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
@@ -930,6 +982,7 @@ bool World::update(float elapsed_ms)
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
 		m_tree.clear();
+		m_vine.clear();
 		initTrees();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -938,6 +991,7 @@ bool World::update(float elapsed_ms)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -968,7 +1022,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_level;
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_game_level ;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -1057,6 +1111,8 @@ void World::draw()
 			treetrunk.draw(projection_2D);
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
+		for (auto& vine : m_vine)
+			vine.draw(projection_2D);
 		m_interface.draw(projection_2D);
 		m_portal.draw(projection_2D);
 	}
@@ -1158,6 +1214,17 @@ bool World::spawn_tree()
 	return false;
 }
 
+bool World::spawn_vine()
+{
+	Vine vine;
+	if (vine.init({ m_window_width,m_window_height }))
+	{
+		m_vine.emplace_back(vine);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn vine");
+	return false;
+}
 
 
 // On key callback
@@ -1181,10 +1248,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		map.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
+		m_vine.clear();
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -1210,6 +1279,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -1275,7 +1345,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
@@ -1492,7 +1562,7 @@ void World::startGame()
 
 	// input code from key input, "G"
 	if (start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}

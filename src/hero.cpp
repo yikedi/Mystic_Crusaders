@@ -395,6 +395,21 @@ bool Hero::collides_with(Projectile &projectile)
 
 }
 
+bool Hero::collides_with(Vine &vine)
+{
+	float dx = m_position.x - vine.get_position().x;
+	float dy = m_position.y - vine.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(vine.get_bounding_box().x, vine.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+
+}
+
 bool Hero::collides_with(const Fish& fish)
 {
 	float dx = m_position.x - fish.get_position().x;
