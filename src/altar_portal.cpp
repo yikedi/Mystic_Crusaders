@@ -17,7 +17,7 @@ bool AltarPortal::init(vec2 screen)
 		}
 	}
 
-	altar_texture.totalTiles = 34; // custom to current sprite sheet
+	altar_texture.totalTiles = 30; // custom to current sprite sheet
 	altar_texture.subWidth = 256; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
@@ -87,12 +87,12 @@ bool AltarPortal::update(float ms, int points, int max_points) {
 		if(justChangedToPortal){
 			curidx = 17;
 			animation_time += animation_speed * 2;
-			curidx += (int)animation_time % 17;
-			if (curidx == 33) {
+			curidx += (int)animation_time % 13;
+			if (curidx == 29) {
 				justChangedToPortal = false;
 			}
 		} else {
-			curidx = 30;
+			curidx = 26;
 			animation_time += animation_speed * 2;
 			curidx += (int)animation_time % 4;
 		}
