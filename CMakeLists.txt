@@ -60,11 +60,14 @@ set(SOURCE_FILES
 	src/skillup.cpp
 	src/thunder_skill_tex.cpp
 	src/fire_skill_tex.cpp
-	src/ThunderSKill.cpp
+	src/ThunderSkill.cpp
 	src/Thunder.cpp
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
 	src/Skill.cpp
+	src/phoenix_skill.cpp
+	src/phoenix.cpp
+	src/particles.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -96,11 +99,14 @@ set(SOURCE_FILES
 	src/skillup.hpp
 	src/thunder_skill_tex.hpp
 	src/fire_skill_tex.hpp
-	src/ThunderSKill.h
+	src/ThunderSkill.h
 	src/Thunder.h
 	src/ThunderString.h
 	src/ThunderBall.h
 	src/Skill.h
+	src/phoenix_skill.h
+	src/phoenix.h
+	src/particles.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
