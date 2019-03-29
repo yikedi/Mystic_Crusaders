@@ -13,10 +13,10 @@ class phoenix : public Renderable
 	static SpriteSheet texture;
 public:
 	phoenix() {};
-	phoenix(float hp, float damage,vec2 position,vec2 scale);
+	phoenix(float hp, float damage,vec2 position,vec2 scale,float angle);
 	~phoenix();
 
-	bool init(float hp,float damage,vec2 position,vec2 scale);
+	bool init(float hp,float damage,vec2 position,vec2 scale, float angle);
 
 	void set_position(vec2 position);
 
@@ -26,9 +26,13 @@ public:
 
 	void attack(std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_02> &m_enemys_02, std::vector<Enemy_03> &m_enemys_03, std::vector<Projectile*> & hero_projectiles);
 
-	void update(float ms);
+	void update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_02> &m_enemys_02, std::vector<Enemy_03> &m_enemys_03, std::vector<Projectile*> & hero_projectiles);
 
 	void draw(const mat3 &projection);
+
+	bool collide_with(Enemies &e);
+
+	bool collide_with(Projectile & p);
 
 	void destroy();
 	
@@ -42,6 +46,8 @@ public:
 
 	void setTextureLocs(int index);
 
+	bool is_alive();
+
 protected:
 	float m_hp;
 	float max_hp;
@@ -51,11 +57,12 @@ protected:
 	vec2 m_scale;
 	float m_rotation;
 	float speed;
-	float elapsedTime;
 	float animation_time;
 	TexturedVertex texVertices[4];
 	std::vector<float> texture_locs;
 	bool first_time;
 	std::vector<particles> m_particles;
+	float elapsedTime;
+	float m_angle;
 };
 

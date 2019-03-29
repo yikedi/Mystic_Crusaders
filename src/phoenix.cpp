@@ -5,12 +5,12 @@
 
 
 SpriteSheet phoenix::texture;
-phoenix::phoenix(float hp, float damage, vec2 position, vec2 scale)
+phoenix::phoenix(float hp, float damage, vec2 position, vec2 scale, float angle)
 {
-	init(hp, damage, position, scale);
+	init(hp, damage, position, scale,angle);
 }
 
-bool phoenix::init(float hp, float damage, vec2 position, vec2 scale)
+bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angle)
 {
 	if (!texture.is_valid())
 	{
@@ -22,8 +22,8 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale)
 	}
 
 	// The position corresponds to the center of the texture
-	texture.totalTiles = 15; // custom to current sprite sheet
-	texture.subWidth = 128; // custom to current sprite sheet
+	texture.totalTiles = 11; // custom to current sprite sheet
+	texture.subWidth = 192; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
 	float wr = texture.subWidth * 0.5f;
@@ -73,14 +73,13 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale)
 	m_scale = scale;
 	m_rotation = 0;
 	m_position = position;
-	elapsedTime = 0;
 	animation_time = 0.0f;
-	first_time = true;
 	m_hp = hp;
 	first_time = true;
-	projectile_damage = 20.f;
+	projectile_damage = damage;
 	particle_damage = 0.02f;
-
+	elapsedTime = 0.f;
+	m_angle = angle;
 
 	return true;
 }
@@ -242,6 +241,107 @@ void phoenix::change_hp(float d_hp)
 phoenix::~phoenix()
 {
 }
+
+bool phoenix::collide_with(Enemies &enemy)
+{
+	float dx = m_position.x - enemy.get_position().x;
+	float dy = m_position.y - enemy.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
+	vec2 temp = get_bounding_box();
+	float my_r = std::max(temp.x, temp.y);
+	float r = std::max(other_r, my_r);
+
+	r *= 0.8f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
+bool phoenix::collide_with(Projectile & p) 
+{
+	float dx = m_position.x - p.get_position().x;
+	float dy = m_position.y - p.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(p.get_bounding_box().x, p.get_bounding_box().y);
+	vec2 temp = get_bounding_box();
+	float my_r = std::max(temp.x, temp.y);
+	float r = std::max(other_r, my_r);
+
+	r *= 0.5f;
+	if (d_sq < r * r)
+		return true;
+	return false;
+}
+
+void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_02> &m_enemys_02, std::vector<Enemy_03> &m_enemys_03, std::vector<Projectile*> & hero_projectiles)
+{
+	//update the state of the phoenix
+	float d_hp = -ms / 1000; //Decrease 1 hp per second
+	change_hp(d_hp); //decrease some amount of hp overtime
+	float fire = float(rand() % 100);
+	if (fire < 5.f)
+	{
+		attack(m_enemys_01, m_enemys_02, m_enemys_03, hero_projectiles);
+	}
+	//update phoenix position so that it follows the hero
+
+	//vec2 dif = { hero_position.x - m_position.x, hero_position.y - m_position.y };
+	//float current_distance = sqrtf(dot(dif, dif));
+	//float wanted_distance = 100.f;
+
+	//chase hero when they are too far away
+	float radius = 100.f;
+
+	float dx = cos(m_angle) * radius;
+	float dy = sin(m_angle) * radius;
+	m_position = { hero_position.x + dx, hero_position.y + dy };
+
+	//if (current_distance > wanted_distance)
+	//{
+	//	dif = { dif.x / current_distance, dif.y / current_distance };
+	//	float speed = 200.f;
+	//	float step = ms / 1000 * speed;
+	//	vec2 displacement = { step * dif.x , step * dif.y };
+	//	m_position = { m_position.x + displacement.x, m_position.y + displacement.y };
+	//}
+	
+	//TODO: emit some number of particles
+
+	//maintain the particle list
+
+	//animation
+	float animation_speed = 0.2f;
+	animation_time += animation_speed * 2;
+	if (elapsedTime < 200)
+	{
+		int curidx = 0;
+		int numTiles = 5;
+		curidx += (int)animation_time % numTiles;
+		setTextureLocs(curidx);
+	}
+	else if (!is_alive())
+	{
+		int curidx = 8;
+		int numTiles = 3;
+		curidx += (int)animation_time % numTiles;
+		setTextureLocs(curidx);
+	}
+	else 
+	{
+		int curidx = 4;
+		int numTiles = 4;
+		curidx += (int)animation_time % numTiles;
+		setTextureLocs(curidx);
+	}
+	elapsedTime += ms;
+}
+
+bool phoenix::is_alive()
+{
+	return m_hp > 0.05f;
+}
+
 
 void phoenix::draw(const mat3 &projection)
 {

@@ -23,6 +23,7 @@
 #include "Thunder.h"
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
+#include "phoenix.h"
 
 // stlib
 #include <vector>
@@ -126,6 +127,7 @@ private:
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<Thunder*> thunders;
+	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;

@@ -389,6 +389,8 @@ bool World::update(float elapsed_ms)
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
+		for (auto& phoenix : phoenix_list)
+			phoenix->update(elapsed_ms,m_hero.get_position(),m_enemys_01, m_enemys_02, m_enemys_03,hero_projectiles);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 
 		//check treetrunk collision
@@ -481,6 +483,9 @@ bool World::update(float elapsed_ms)
 				}
 			}
 		}
+
+		//check collision between phoenix and enemies
+
 		//remove out of screen fireball
 
 		int len = (int)hero_projectiles.size() - 1;
@@ -525,6 +530,20 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
+		//remove overtime phoenix
+		len = (int)phoenix_list.size() - 1;
+		for (int i = len; i >= 0; i--)
+		{
+			phoenix* p = phoenix_list.at(i);
+
+			if (!p->is_alive())
+			{
+				p->destroy();
+				phoenix_list.erase(phoenix_list.begin() + i);
+				continue;
+			}
+		}
+
 		auto enemy = m_enemys_01.begin();
 
 		while (enemy != m_enemys_01.end())
@@ -536,10 +555,10 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*h_proj))
 				{
 					enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
-					//h_proj->destroy();
+					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy->is_alive()) {
-						//enemy->destroy();
+						enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + (m_points / 23);
@@ -568,7 +587,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy);
 
 					if (!enemy->is_alive()) {
-						//enemy->destroy();
+						enemy->destroy();
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 23;
@@ -595,10 +614,10 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*h_proj))
 				{
 					enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
-					//h_proj->destroy();
+					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy2->is_alive()) {
-						//enemy2->destroy();
+						enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 17);
@@ -625,7 +644,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy2);
 
 					if (!enemy2->is_alive()) {
-						//enemy->destroy();
+						enemy2->destroy();
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
@@ -652,10 +671,10 @@ bool World::update(float elapsed_ms)
 				if (enemy3->collide_with(*h_proj))
 				{
 					enemy3->take_damage(h_proj->get_damage(), h_proj->get_velocity());
-					//h_proj->destroy();
+					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy3->is_alive()) {
-						//enemy2->destroy();
+						enemy3->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
 						MAX_ENEMIES_03 = INIT_MAX_ENEMY_03 + (m_points / 41);
@@ -682,7 +701,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy3);
 
 					if (!enemy3->is_alive()) {
-						//enemy->destroy();
+						enemy3->destroy();
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
 						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 41;
@@ -698,6 +717,119 @@ bool World::update(float elapsed_ms)
 			++enemy3;
 		}
 
+		//check collision with phoenix
+
+		enemy = m_enemys_01.begin();
+
+		while (enemy != m_enemys_01.end())
+		{
+			int len = (int)phoenix_list.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				phoenix* p = phoenix_list.at(i);
+				if (p->collide_with(*enemy))
+				{
+					p->change_hp(-2.f);
+					enemy->take_damage(6.f);
+
+					if (!enemy->is_alive()) {
+						enemy->destroy();
+						enemy = m_enemys_01.erase(enemy);
+						++m_points;
+						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 23;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy == m_enemys_01.end() || m_enemys_01.size() == 0) {
+				break;
+			}
+			++enemy;
+		}
+
+		enemy2 = m_enemys_02.begin();
+
+		while (enemy2 != m_enemys_02.end())
+		{
+			int len = (int)phoenix_list.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				phoenix* p = phoenix_list.at(i);
+				if (p->collide_with(*enemy2))
+				{
+					p->change_hp(-2.f);
+					enemy2->take_damage(6.f);
+
+					if (!enemy2->is_alive()) {
+						enemy2->destroy();
+						enemy2 = m_enemys_02.erase(enemy2);
+						++m_points;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
+				break;
+			}
+			++enemy2;
+		}
+
+		enemy3 = m_enemys_03.begin();
+
+		while (enemy3 != m_enemys_03.end())
+		{
+			int len = (int)phoenix_list.size() - 1;
+			for (int i = len; i >= 0; i--)
+			{
+				phoenix* p = phoenix_list.at(i);
+				if (p->collide_with(*enemy3))
+				{
+					p->change_hp(-2.f);
+					enemy3->take_damage(6.f);
+
+					if (!enemy3->is_alive()) {
+						enemy3->destroy();
+						enemy3 = m_enemys_03.erase(enemy3);
+						++m_points;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 17;
+					}
+					break;
+				}
+
+			}
+
+			if (enemy3 == m_enemys_03.end() || m_enemys_03.size() == 0) {
+				break;
+			}
+			++enemy3;
+		}
+
+		//check collision between phoenix and enemy laser
+		int l_len = (int)enemy_projectiles.size() - 1;
+		for (int i = l_len; i >= 0; i--)
+		{
+			EnemyLaser &laser = enemy_projectiles.at(i);
+			int j_len = (int)phoenix_list.size() - 1;
+			for (int j = j_len; j >= 0; j--)
+			{
+				phoenix* p = phoenix_list.at(j);
+				if (p->collide_with(laser))
+				{
+					p->change_hp(-10.f);
+					laser.destroy();
+					enemy_projectiles.erase(enemy_projectiles.begin() + i);
+
+				}
+			}
+			
+		}
+
+		
 
 		// Spawning new enemys
 		m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
@@ -912,6 +1044,8 @@ void World::draw()
 		e_proj.draw(projection_2D);
 	for (auto& thunder : thunders)
 		thunder->draw(projection_2D);
+	for (auto& phoenix : phoenix_list)
+		phoenix->draw(projection_2D);
 	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
@@ -1060,6 +1194,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
+		phoenix_list.clear();
 		m_interface.init({ 300.f, 50.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -1189,6 +1324,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
 		m_hero.set_active_skill(1);
 	}
+	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(2);
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
@@ -1233,7 +1371,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+			m_hero.use_skill(hero_projectiles,thunders,phoenix_list,mouse_position);
 	}
 	else if (game_is_paused && start_is_over) {
 
@@ -1338,7 +1476,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
-			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
 		}
 	}
 }
@@ -1348,12 +1486,12 @@ void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (yoffset < -0.f)
 	{
-		int level_up_skill = (m_hero.get_active_skill() - 1 + 2) % 2;
+		int level_up_skill = (m_hero.get_active_skill() - 1 + 3) % 3;
 		m_hero.set_active_skill(level_up_skill);
 	}
 	else if (yoffset > 0.f)
 	{
-		int level_up_skill = (m_hero.get_active_skill() + 1) % 2;
+		int level_up_skill = (m_hero.get_active_skill() + 1) % 3;
 		m_hero.set_active_skill(level_up_skill);
 	}
 
