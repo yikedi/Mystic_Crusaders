@@ -80,7 +80,7 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angl
 	particle_damage = 0.02f;
 	elapsedTime = 0.f;
 	m_angle = angle;
-
+	death_animation_time = 0.f;
 	return true;
 }
 
@@ -235,7 +235,7 @@ void phoenix::change_hp(float d_hp)
 {
 	m_hp += d_hp;
 	m_hp = std::min(m_hp, max_hp);
-	m_hp = std::max(0.5f, m_hp);
+	m_hp = std::max(0.1f, m_hp);
 }
 
 phoenix::~phoenix()
@@ -252,7 +252,7 @@ bool phoenix::collide_with(Enemies &enemy)
 	float my_r = std::max(temp.x, temp.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 0.8f;
+	r *= 0.6f;
 	if (d_sq < r * r)
 		return true;
 	return false;
@@ -268,7 +268,7 @@ bool phoenix::collide_with(Projectile & p)
 	float my_r = std::max(temp.x, temp.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 0.5f;
+	r *= 0.6f;
 	if (d_sq < r * r)
 		return true;
 	return false;
@@ -277,7 +277,7 @@ bool phoenix::collide_with(Projectile & p)
 void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_02> &m_enemys_02, std::vector<Enemy_03> &m_enemys_03, std::vector<Projectile*> & hero_projectiles)
 {
 	//update the state of the phoenix
-	float d_hp = -ms / 1000; //Decrease 1 hp per second
+	float d_hp = -ms / 1000 * 5; //Decrease hp every second
 	change_hp(d_hp); //decrease some amount of hp overtime
 	float fire = float(rand() % 100);
 	if (fire < 5.f)
@@ -291,7 +291,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
 	//float wanted_distance = 100.f;
 
 	//chase hero when they are too far away
-	float radius = 100.f;
+	float radius = 150.f;
 
 	float dx = cos(m_angle) * radius;
 	float dy = sin(m_angle) * radius;
@@ -312,19 +312,20 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
 
 	//animation
 	float animation_speed = 0.2f;
-	animation_time += animation_speed * 2;
-	if (elapsedTime < 200)
+	animation_time += animation_speed;
+	if (elapsedTime < 500)
 	{
 		int curidx = 0;
 		int numTiles = 5;
 		curidx += (int)animation_time % numTiles;
 		setTextureLocs(curidx);
 	}
-	else if (!is_alive())
+	else if (m_hp < 0.5f)
 	{
+		death_animation_time += animation_speed;
 		int curidx = 8;
 		int numTiles = 3;
-		curidx += (int)animation_time % numTiles;
+		curidx += (int)death_animation_time % numTiles;
 		setTextureLocs(curidx);
 	}
 	else 
@@ -339,12 +340,14 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
 
 bool phoenix::is_alive()
 {
-	return m_hp > 0.05f;
+	return m_hp > 0.5f || death_animation_time < 3;
 }
 
 
 void phoenix::draw(const mat3 &projection)
 {
+	//if it's in draw and the phoenix is not alive then its must be playing the death animation
+
 	transform_begin();
 	transform_translate(m_position);
 	transform_rotate(m_rotation);

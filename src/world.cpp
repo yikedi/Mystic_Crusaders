@@ -508,7 +508,7 @@ bool World::update(float elapsed_ms)
 			float w = e_proj->get_bounding_box().x / 2;
 			if (e_proj->get_position().x + w < 0.f)
 			{
-				//e_proj->destroy();
+				e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
 				continue;
 			}
@@ -923,6 +923,7 @@ bool World::update(float elapsed_ms)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
+		phoenix_list.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();

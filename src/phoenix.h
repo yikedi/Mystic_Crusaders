@@ -58,11 +58,13 @@ protected:
 	float m_rotation;
 	float speed;
 	float animation_time;
+	float death_animation_time;
 	TexturedVertex texVertices[4];
 	std::vector<float> texture_locs;
 	bool first_time;
 	std::vector<particles> m_particles;
 	float elapsedTime;
 	float m_angle;
+	
 };
 

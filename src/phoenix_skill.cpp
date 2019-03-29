@@ -6,7 +6,7 @@ void phoenix_skill::init()
 {
 	m_hp = 150.f;
 	damage = 20.f;
-	m_scale = {1.f,1.f};
+	m_scale = {0.8f,0.8f};
 	mp_cost = 25.f;
 }
 
@@ -15,7 +15,7 @@ float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 her
 	int max_phoenix = 3;
 	int current_size = phoenix_list.size();
 	float initial_angle = 2 * M_PI / max_phoenix;
-	float radius = 100.f;
+	float radius = 150.f;
 	if (current_size < max_phoenix)
 	{
 		float angle = angle = current_size * 2 *M_PI / max_phoenix + initial_angle;
