@@ -1,20 +1,20 @@
-#include "ThunderString.h"
+#include "enemyPowerupWave.h"
 
-SpriteSheet ThunderString::texture;
-bool ThunderString::init(vec2 position, vec3 color)
+SpriteSheet EnemyPowerupWave::texture;
+bool EnemyPowerupWave::init(vec2 position, vec3 color)
 {
 	// Load shared texture
 	if (!texture.is_valid())
 	{
-		if (!texture.load_from_file(textures_path("lightning_top.png")))
+		if (!texture.load_from_file(textures_path("power_wave.png")))
 		{
-			fprintf(stderr, "Failed to load thunderString texture!");
+			fprintf(stderr, "Failed to load EnemyPowerupWave texture!");
 			return false;
 		}
 	}
 
-	texture.totalTiles = 28; // custom to current sprite sheet
-	texture.subWidth = 64; // custom to current sprite sheet
+	texture.totalTiles = 3; // custom to current sprite sheet
+	texture.subWidth = 99; // custom to current sprite sheet
 
 	// The position corresponds to the center of the texture
 	float wr = texture.subWidth * 0.5f;
@@ -60,39 +60,29 @@ bool ThunderString::init(vec2 position, vec3 color)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 2.f;
-	m_scale.y = 2.f;
+	m_scale.x = 1.f;
+	m_scale.y = 1.f;
 	m_rotation = 0;
 
-	initial_speed = 1000.f;
-
-	m_position = {position .x,0};
-	end_position = { position.x,position.y - hr * m_scale.y };
-	velocity.x = 0;
-	velocity.y = initial_speed;
+	m_position = {position.x, position.y};
 	animation_time = 0.0f;
 	custom_color = color;
+	first_time = true;
 
 	return true;
 }
 
-void ThunderString::destroy()
+void EnemyPowerupWave::destroy()
 {
-	//glDeleteBuffers(1, &mesh.vbo);
-	//glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteVertexArrays(1, &mesh.vao);
-	//effect.release();
-
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 }
 
-void ThunderString::setTextureLocs(int index)
+void EnemyPowerupWave::setTextureLocs(int index)
 {
 	texVertices[0].texcoord = { texture_locs[index], 1.f }; //top left
 	texVertices[1].texcoord = { texture_locs[index + 1], 1.f }; //top right
@@ -106,7 +96,7 @@ void ThunderString::setTextureLocs(int index)
 	gl_flush_errors();
 
 	// Clear memory allocation
-	if (first_time) {
+	if (!first_time) {
 		destroy();
 	}
 
@@ -122,24 +112,19 @@ void ThunderString::setTextureLocs(int index)
 	first_time = false;
 }
 
-void ThunderString::update(float ms)
+void EnemyPowerupWave::update(float ms)
 {
-	float stepy = velocity.y * (ms / 1000);
-	float animation_speed = 1.f;
+	float animation_speed = 0.3f;
 	animation_time += animation_speed * 2;
 	int curidx = 0;
 	curidx += (int)animation_time % texture.totalTiles;
 	setTextureLocs(curidx);
-	if (m_position.y + stepy <= end_position.y)
-		m_position.y += stepy;
-	else
-		m_position = end_position;
 }
 
-void ThunderString::draw(const mat3 &projection)
+void EnemyPowerupWave::draw(const mat3 &projection)
 {
 	transform_begin();
-	transform_translate(m_position);
+	transform_translate({m_position.x, m_position.y - 50.f});
 	transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();

@@ -35,6 +35,8 @@ public:
 
 	double attackCooldown;
 
+	int recentPowerupType;
+
 	private:
 	float m_range;
 	clock_t lastFireProjectileTime;

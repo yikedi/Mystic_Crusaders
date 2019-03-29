@@ -1,6 +1,7 @@
 // Header
 #include "enemies.hpp"
 #include "Thunder.h"
+#include "altar_portal.hpp"
 #include <cmath>
 #include <algorithm>
 
@@ -114,4 +115,11 @@ float Enemies::get_speed()
 void Enemies::set_stunded(bool hit)
 {
 	stunned = hit;
+}
+
+void Enemies::set_wave()
+{
+	waveTime = clock();
+	wave.custom_color = enemyColor;
+	waved = true;
 }
