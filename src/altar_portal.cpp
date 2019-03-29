@@ -4,7 +4,6 @@
 #include <algorithm>
 
 SpriteSheet AltarPortal::altar_texture;
-SpriteSheet AltarPortal::portal_texture;
 
 bool AltarPortal::init(vec2 screen)
 {

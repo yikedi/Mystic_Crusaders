@@ -11,7 +11,6 @@ class Enemies;
 class AltarPortal: public Renderable
 {
 	static SpriteSheet altar_texture;
-	static SpriteSheet portal_texture;
 
 public:
 
