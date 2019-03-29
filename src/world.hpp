@@ -24,6 +24,7 @@
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
 #include "altar_portal.hpp"
+#include "vine.h"
 
 // stlib
 #include <vector>
@@ -63,6 +64,7 @@ private:
 	bool spawn_enemy_03();
 	bool spawn_treetrunk();
 	bool spawn_tree();
+	bool spawn_vine();
 
 	bool shootingFireBall;
 
@@ -127,6 +129,7 @@ private:
 	std::vector<Enemy_03> m_enemys_03;
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
+	std::vector<Vine> m_vine;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
