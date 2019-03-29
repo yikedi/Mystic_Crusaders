@@ -1428,6 +1428,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.x = fire_skill_set.x + 1.f;
+					m_hero.level_up(2, 0);
 				}
 			}
 			else {
@@ -1449,6 +1450,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.y = fire_skill_set.y + 1.f;
+					m_hero.level_up(2, 1);
 				}
 			}
 			else {
@@ -1470,6 +1472,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.z = fire_skill_set.z + 1.f;
+					m_hero.level_up(2, 2);
 				}
 			}
 			else {
