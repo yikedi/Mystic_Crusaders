@@ -60,7 +60,7 @@ bool SkillSwitch::init(vec2 position)
 	// Set properties here! In future
 	m_is_in_use = true;
 	hasTransitionStarted = false;
-	m_scale = { 0.8f, 0.8f };
+	m_scale = { 0.6f, 0.6f };
 	zoom_factor = 1.f;
 	set_position(position);
 	prevSkill = ICEBLADES;

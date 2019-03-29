@@ -983,6 +983,7 @@ void World::draw()
 
 	// for our UI bar
 	m_interface.set_position({ screen_left, screen_top });
+	m_skill_switch.set_position({ screen_left + 400.f, screen_top + 550.f });
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
