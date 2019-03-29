@@ -296,6 +296,7 @@ bool World::update(float elapsed_ms)
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num);
 
 	if (passed_level && m_hero.justFinishedTransition) {
+		map.destroy();
 		passed_level = !passed_level;
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
