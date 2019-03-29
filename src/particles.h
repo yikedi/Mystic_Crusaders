@@ -23,6 +23,7 @@ protected:
 
 	float life_time;
 	float elapsed_time;
+    unsigned char r, g, b, a; // color
 	vec2 m_position;
 	vec2 m_scale;
 	vec2 velocity;
