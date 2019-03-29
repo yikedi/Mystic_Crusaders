@@ -880,6 +880,7 @@ bool World::update(float elapsed_ms)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		m_skill_switch.destroy();
 		m_hero.destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -895,6 +896,7 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
+		m_skill_switch.init({ 500.f, 500.f });
 		m_treetrunk.clear();
 		m_tree.clear();
 		initTrees();
@@ -1148,6 +1150,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		m_skill_switch.destroy();
 		m_tutorial.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
@@ -1167,6 +1170,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		enemy_projectiles.clear();
 		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
+		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;

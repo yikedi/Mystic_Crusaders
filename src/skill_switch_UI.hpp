@@ -50,6 +50,8 @@ private:
 
 	vec2 m_position;
 
+	vec2 m_scale;
+
 	float m_animTime = 0.f;
 
 	bool movePositiveDirection;

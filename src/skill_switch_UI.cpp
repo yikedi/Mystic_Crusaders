@@ -60,6 +60,7 @@ bool SkillSwitch::init(vec2 position)
 	// Set properties here! In future
 	m_is_in_use = true;
 	hasTransitionStarted = false;
+	m_scale = { 0.8f, 0.8f };
 	zoom_factor = 1.f;
 	set_position(position);
 	prevSkill = ICEBLADES;
@@ -83,6 +84,7 @@ void SkillSwitch::draw(const mat3& projection)
 {
 	transform_begin();
 	transform_translate(m_position);
+	transform_scale(m_scale);
 	transform_end();
 
 	// Setting shaders
