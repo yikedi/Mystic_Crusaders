@@ -134,8 +134,8 @@ bool World::init(vec2 screen)
 	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
 	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr 
-		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr 
+	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr
+		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr
 		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
 		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
 		|| m_transition_sound == nullptr || m_amplify_sound == nullptr
@@ -375,7 +375,6 @@ bool World::update(float elapsed_ms)
 				passed_level = true;
 				m_portal.killAll(thunders);
 				Mix_PlayChannel(-1, m_transition_sound, 0);
-				m_hero.light_up();
 				m_hero.hp = m_hero.max_hp;
 				m_hero.mp = m_hero.max_mp;
 			}
@@ -1354,7 +1353,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	if (!game_is_paused && start_is_over) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
-			
+
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 			shootingFireBall = false;
@@ -1368,7 +1367,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				Mix_PlayChannel(-1, m_ice_sound, 0);
 
 		}
-			
+
 
 	}
 	else if (game_is_paused && start_is_over) {
