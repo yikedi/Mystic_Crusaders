@@ -100,6 +100,7 @@ private:
 	unsigned int m_points;
 	unsigned int previous_point;
 
+	int m_game_level;
 	int m_level;
 	int pass_points;
 	int cur_points_needed;

@@ -165,6 +165,7 @@ bool World::init(vec2 screen)
 	zoom_factor = 1.f;
 	start_is_over = start.is_over();
 	m_level = 0;
+	m_game_level = 0;
 	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
@@ -298,6 +299,8 @@ bool World::update(float elapsed_ms)
 		passed_level = !passed_level;
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
+		m_game_level++;
+		map.init(screen, m_game_level);
 		pass_points += m_points + 5;
 		cur_points_needed = pass_points - m_points;
 	}
@@ -938,6 +941,7 @@ bool World::update(float elapsed_ms)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -968,7 +972,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_level;
+	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_game_level ;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -1181,6 +1185,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		map.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
 		m_treetrunk.clear();
@@ -1275,7 +1280,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		}
 	}
 	else if (key == GLFW_KEY_G && start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
@@ -1492,7 +1497,7 @@ void World::startGame()
 
 	// input code from key input, "G"
 	if (start_is_over == false) {
-		map.init(screen);
+		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
