@@ -3,14 +3,13 @@
 #include "sprite_sheet.hpp"
 class ThunderBall : Renderable
 {
-
-	static SpriteSheet texture;
 public:
+	SpriteSheet texture;
 	ThunderBall()
 	{
 	}
 
-	bool init(vec2 position, vec2 scale = {2.5f,2.5f});
+	bool init(vec2 position, vec2 scale = {2.5f,2.5f}, vec3 color={1.f,1.f,1.f}, bool isFireRing = false);
 
 	void set_position(vec2 position);
 
@@ -37,5 +36,7 @@ protected:
 	TexturedVertex texVertices[4];
 	std::vector<float> texture_locs;
 	bool first_time;
+	vec3 custom_color;
+	bool m_isFireRing;
 };
 

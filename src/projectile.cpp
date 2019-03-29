@@ -48,3 +48,7 @@ void Projectile::destroy()
     glDeleteVertexArrays(1, &mesh.vao);
     effect.release();
 }
+
+void Projectile::set_scale(vec2 scale){
+    m_scale = scale;
+}

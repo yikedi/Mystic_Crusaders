@@ -23,6 +23,7 @@
 #include "Thunder.h"
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
+#include "altar_portal.hpp"
 
 // stlib
 #include <vector>
@@ -100,6 +101,8 @@ private:
 	unsigned int previous_point;
 
 	int m_level;
+	int pass_points;
+	int cur_points_needed;
 
 	//zoom
 	float zoom_factor;
@@ -117,6 +120,7 @@ private:
 
 	// Game entities
 	Hero m_hero;
+	AltarPortal m_portal;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Enemy_03> m_enemys_03;
@@ -124,6 +128,7 @@ private:
 	std::vector<Tree> m_tree;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
@@ -157,6 +162,8 @@ private:
 	Button button_back_to_menu;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
+
+	bool passed_level;
 
 
 };
