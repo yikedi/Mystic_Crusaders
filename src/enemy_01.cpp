@@ -229,8 +229,15 @@ void Enemy_01::update(float ms, vec2 target_pos)
 	if (distance <= 100.f) {
 		needFireProjectile = false;
 		float step = m_speed * (ms / 1000);
-		m_position.x += cos(enemy_angle)*step;
-		m_position.y += sin(enemy_angle)*step;
+		float x_d = cos(enemy_angle)*step;
+		float y_d = sin(enemy_angle)*step;
+		if (std::sqrt(x_d * x_d + y_d * y_d) > distance) {
+			m_position.x = target_pos.x;
+			m_position.y = target_pos.y;
+		} else {
+			m_position.x += x_d;
+			m_position.y += y_d;
+		}
 	} else if (distance <= m_range && checkIfCanFire(currentTime)) {
 		needFireProjectile = true;
 		setLastFireProjectileTime(currentTime);
