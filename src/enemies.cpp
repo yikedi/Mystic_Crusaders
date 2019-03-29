@@ -120,6 +120,6 @@ void Enemies::set_stunded(bool hit)
 void Enemies::set_wave()
 {
 	waveTime = clock();
-	wave.init(m_position, enemyColor);
+	wave.custom_color = enemyColor;
 	waved = true;
 }

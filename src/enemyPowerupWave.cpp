@@ -67,14 +67,13 @@ bool EnemyPowerupWave::init(vec2 position, vec3 color)
 	m_position = {position.x, position.y};
 	animation_time = 0.0f;
 	custom_color = color;
-	first_time = false;
+	first_time = true;
 
 	return true;
 }
 
 void EnemyPowerupWave::destroy()
 {
-	first_time = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 
@@ -97,7 +96,7 @@ void EnemyPowerupWave::setTextureLocs(int index)
 	gl_flush_errors();
 
 	// Clear memory allocation
-	if (first_time) {
+	if (!first_time) {
 		destroy();
 	}
 

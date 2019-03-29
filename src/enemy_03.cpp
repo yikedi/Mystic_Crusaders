@@ -84,6 +84,7 @@ bool Enemy_03::init(int level)
 	m_level = level;
 	waved = false;
 	enemyColor = {1.f,1.f,1.f};
+	wave.init(m_position, enemyColor);
 
 	return true;
 }
@@ -96,7 +97,7 @@ void Enemy_03::destroy()
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
 	effect.release();
-	if(waved) {
+	if(waved && !m_is_alive) {
 		wave.destroy();
 	}
 }
@@ -251,7 +252,6 @@ void Enemy_03::update(float ms, vec2 target_pos)
 	if (waved) {
 		if (clock() - waveTime > 1500.f){
 			waved = false;
-			wave.destroy();
 		} else {
 			wave.update(ms);
 			wave.m_position = {m_position.x, m_position.y - 30.f};

@@ -82,6 +82,7 @@ bool Enemy_01::init(int level)
 	m_level = level;
 	poweredup = false;
 	waved = false;
+	wave.init(m_position, {1.f, 1.f, 1.f});
 
 	return true;
 }
@@ -96,7 +97,7 @@ void Enemy_01::destroy()
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
-	if(waved) {
+	if(waved && !m_is_alive) {
 		wave.destroy();
 	}
 }
@@ -288,7 +289,6 @@ void Enemy_01::update(float ms, vec2 target_pos)
 	if (waved) {
 		if (clock() - waveTime > 1500.f){
 			waved = false;
-			wave.destroy();
 		} else {
 			wave.update(ms);
 			wave.m_position = m_position;
