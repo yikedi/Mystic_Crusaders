@@ -320,6 +320,12 @@ bool World::update(float elapsed_ms)
 		m_tree.clear();
 		m_treetrunk.clear();
 		m_vine.clear();
+		for (auto& treetrunk : m_treetrunk)
+			treetrunk.destroy();
+		for (auto& tree : m_tree)
+			tree.destroy();
+		for (auto& vine : m_vine)
+			vine.destroy();
 		initTrees();
 		map.init(screen, m_game_level);
 		pass_points += m_points + 5;
@@ -1273,6 +1279,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_portal.setIsPortal(false);
 		passed_level = false;
 		m_level = 0;
+		m_game_level = 0;
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
