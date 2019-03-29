@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "Skill.h"
+#include "phoenix.h"
 
 class phoenix_skill : public Skill
 {
@@ -13,8 +14,11 @@ public:
 
 	//float drop_thunder(std::vector<Thunder*> &thunders, vec2 position);
 
-	// phoneix create_phoenix()
+	float create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 position);
 
-	float get_mpcost();
+protected:
+	float m_hp;
+	vec2 m_scale;
+
 };
 
