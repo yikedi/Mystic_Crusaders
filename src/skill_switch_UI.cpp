@@ -3,8 +3,8 @@
 #include <gl3w.h>
 
 #define ICEBLADES 0
+#define LIGHTNINGSTORM 1
 #define PHOENIX 2
-#define LIGHTNINGSTORM 4
 #define TRANSITIONSTEPS 2
 
 SpriteSheet SkillSwitch::skill_texture;
@@ -62,6 +62,7 @@ bool SkillSwitch::init(vec2 position)
 	hasTransitionStarted = false;
 	zoom_factor = 1.f;
 	set_position(position);
+	prevSkill = ICEBLADES;
 
 	return true;
 		
@@ -134,6 +135,7 @@ void SkillSwitch::update(int skill, float zoom) {
 		if (!hasTransitionStarted) {
 			transitionToSkill = skill;	// Prevents switching over, mid-transition
 			if (transitionToSkill > prevSkill) {
+				fprintf(stderr, "triggering transition \n");
 				if ((transitionToSkill == LIGHTNINGSTORM) && (prevSkill == ICEBLADES)) { // end of loop, special handling
 					movePositiveDirection = false;
 				}
@@ -151,47 +153,49 @@ void SkillSwitch::update(int skill, float zoom) {
 			}
 			hasTransitionStarted = true;
 			m_animTime = 0.f;
-			numTilesTransition = TRANSITIONSTEPS;	// to make sure we don't go out of bounds
+			tilesLeftToTransition = TRANSITIONSTEPS;	// to make sure we don't go out of bounds
+			transitionHelper();
 		}
 	}
 	if (hasTransitionStarted) {
-		/*
-		if (skill == 0) {
-			// Ice Blade
+		m_animTime += animSpeed * 2;
+		if (m_animTime > 2.f) {
+			transitionHelper();
+			if (skill != transitionToSkill) {
+				fprintf(stderr, "Mouse wheel travelling too fast! skill %i not equal to skill %i \n", skill, transitionToSkill);
+				if (skill == 0) {
+					currIndex = 0;
+					setTextureLocs(0);
+				}
+				else if (skill == 1) {
+					currIndex = 4;
+					setTextureLocs(4);
+				}
+			}
+			prevSkill = skill;
+			hasTransitionStarted = false;
 		}
-
-		if (skill == 1) {
-			// Thunderstorm
-		}
-
-		if (skill == 2) {
-			// Phoenix
-		}
-		*/
-		transitionHelper(animSpeed);
 	}
 
 
 }
 
-void SkillSwitch::transitionHelper(float animSpeed) {
+void SkillSwitch::transitionHelper() {
 	// update animation loop
-	m_animTime += animSpeed * 2;
-	
-	if (movePositiveDirection) {
-		currIndex += (int)m_animTime % (numTilesTransition + 1);	// increment current index with the animation time, but not out of bounds
-		numTilesTransition -= (int)m_animTime % (numTilesTransition + 1);	// numTilesTransition is the amount of tiles we have left before we get to final state
+	// fprintf(stderr, "In skillswitch! Transitioning to %i, currently on tile %i. Tiles left to transition: %i.\n", transitionToSkill, currIndex, tilesLeftToTransition);
+	if (tilesLeftToTransition) {
+		currIndex = currIndex + skill_texture.totalTiles;
+		if (movePositiveDirection) {
+			currIndex++;	// increment current index with the animation time, but not out of bounds
+			tilesLeftToTransition--;	// numTilesTransition is the amount of tiles we have left before we get to final state
+		}
+		else {
+			currIndex--;	// opposite direction
+			tilesLeftToTransition--;
+		}
+		currIndex = currIndex % skill_texture.totalTiles;
 	}
-	else {
-		currIndex -= (int)m_animTime % (numTilesTransition + 1);	// opposite direction
-		numTilesTransition -= (int)m_animTime % (numTilesTransition + 1);
-	}
-	currIndex = currIndex % skill_texture.totalTiles;
 	setTextureLocs(currIndex);
-	if (numTilesTransition <= 0) {
-		numTilesTransition = 0;
-		hasTransitionStarted = false;	// now we can stop the whole transitioning thing, because we're where we want to be
-	}
 }
 
 void SkillSwitch::setTextureLocs(int index) {

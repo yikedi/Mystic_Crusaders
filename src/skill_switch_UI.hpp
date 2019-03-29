@@ -23,7 +23,7 @@ public:
 
 	void update(int skill, float zoom);
 
-	void transitionHelper(float animSpeed);
+	void transitionHelper();
 
 	void setTextureLocs(int index);
 
@@ -44,7 +44,7 @@ private:
 
 	CurrentSkillState m_skillState;
 
-	int numTilesTransition;
+	int tilesLeftToTransition;
 
 	bool m_is_in_use;
 
