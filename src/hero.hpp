@@ -143,4 +143,5 @@ private:
     float momentum_factor;
 	clock_t transition_time;
 	float transition_duration;
+	bool just_took_damage;
 };

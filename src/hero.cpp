@@ -91,6 +91,7 @@ bool Hero::init(vec2 screen)
 	transition_duration = 3000.f;
 	isInTransition = false;
 	justFinishedTransition = false;
+	just_took_damage = false;
 	return true;
 }
 
@@ -281,6 +282,12 @@ void Hero::draw(const mat3& projection)
 			color[1] = color[1] + color[1] * (5 - 5 * ratio);
 			color[2] = color[2] + color[2] * (5 - 5 * ratio);
 		}
+	}
+	if(just_took_damage) {
+		color[0] = 2.f;
+		color[1] = 0.1f;
+		color[2] = 0.1f;
+		just_took_damage = false;
 	}
 	transform_begin();
 	transform_translate(cur_pos);
@@ -569,6 +576,7 @@ void Hero::set_color(vec3 in_color)
 
 void Hero::take_damage(float damage)
 {
+	just_took_damage = true;
 	change_hp(-1.f * damage);
 	if (hp <= 0.5f) {
 		m_is_alive = false;

@@ -240,7 +240,7 @@ bool World::initTrees() {
 			new_vine.set_position({ position.x,position.y - 30.f });
 		}
 	}
-	
+
 }
 
 // Releases all the associated resources
@@ -317,6 +317,8 @@ bool World::update(float elapsed_ms)
 		m_hero.justFinishedTransition = false;
 		m_portal.setIsPortal(false);
 		m_game_level++;
+		m_hero.hp = m_hero.max_hp;
+		m_hero.mp = m_hero.max_mp;
 		m_tree.clear();
 		m_treetrunk.clear();
 		m_vine.clear();
@@ -363,7 +365,6 @@ bool World::update(float elapsed_ms)
 				if (m_hero.collides_with(*vine))
 				{
 					m_hero.take_damage(vine->get_damage());
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 
 					if (!m_hero.is_alive()) {
 						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
@@ -382,7 +383,6 @@ bool World::update(float elapsed_ms)
 				if (m_hero.collides_with(*e_proj))
 				{
 					m_hero.take_damage(e_proj->get_damage());
-					Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
 					//comment back later
 					//e_proj->destroy();
 					e_proj = enemy_projectiles.erase(e_proj);
@@ -425,8 +425,6 @@ bool World::update(float elapsed_ms)
 				passed_level = true;
 				m_portal.killAll(thunders);
 				Mix_PlayChannel(-1, m_transition_sound, 0);
-				m_hero.hp = m_hero.max_hp;
-				m_hero.mp = m_hero.max_mp;
 			}
 		}
 
