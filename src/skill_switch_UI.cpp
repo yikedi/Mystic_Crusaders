@@ -141,12 +141,18 @@ void SkillSwitch::update(int skill, float zoom) {
 				if ((transitionToSkill == LIGHTNINGSTORM) && (prevSkill == ICEBLADES)) { // end of loop, special handling
 					movePositiveDirection = false;
 				}
+				else if ((transitionToSkill == LIGHTNINGSTORM) && (prevSkill == PHOENIX)) {
+					movePositiveDirection = false;
+				}
 				else {
 					movePositiveDirection = true;
 				}
 			}
 			else {
 				if ((transitionToSkill == ICEBLADES) && (prevSkill == LIGHTNINGSTORM)) {
+					movePositiveDirection = true;
+				}
+				else if ((transitionToSkill == PHOENIX) && (prevSkill == LIGHTNINGSTORM)) {
 					movePositiveDirection = true;
 				}
 				else {
