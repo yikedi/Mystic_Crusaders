@@ -342,7 +342,6 @@ bool World::update(float elapsed_ms)
 				m_portal.setIsPortal(true);
 				passed_level = true;
 				m_portal.killAll(thunders);
-				m_hero.light_up();
 				m_hero.hp = m_hero.max_hp;
 				m_hero.mp = m_hero.max_mp;
 			}
