@@ -15,7 +15,7 @@ bool In_game::init(vec2 screen)
 {
 	if (!basic_texture.is_valid())
 	{
-		if (!basic_texture.load_from_file(textures_path("lightning_skill3.png")))
+		if (!basic_texture.load_from_file(textures_path("ui_text.png")))
 		{
 			fprintf(stderr, "Failed to load basic info texture!");
 			return false;
@@ -148,7 +148,7 @@ void In_game::update_ingame(bool start_is_over, vec3 level_num, vec3 kill_num, v
 {
 	if (start_is_over) {
 		zoom_factor = world_zoom;
-		m_scale = { 1.3f / world_zoom, 1.3f / world_zoom };
+		m_scale = { 0.7f / world_zoom, 0.7f / world_zoom };
 	}
 	num11.update_numbers(start_is_over, level_num.x, world_zoom, hero_pos);
 	num12.update_numbers(start_is_over, level_num.y, world_zoom, hero_pos);
@@ -164,10 +164,10 @@ void In_game::set_position(vec2 position, int sh, int offsetx)
 	osx = offsetx;
 	osh = sh;
 	m_position = { (position.x + 30.f) / zoom_factor + (float)0 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)51 / (1.f * zoom_factor) };
-	num11.set_position(position, sh - 115, offsetx + 15);
-	num12.set_position(position, sh - 130, offsetx + 30);
-	num13.set_position(position, sh - 45, offsetx + 45);
-	num21.set_position(position, sh - 55, offsetx - 55);
-	num22.set_position(position, sh - 65, offsetx - 65);
+	//num11.set_position(position, sh - 115, offsetx + 15);
+	//num12.set_position(position, sh - 130, offsetx + 30);
+	//num13.set_position(position, sh - 45, offsetx + 45);
+	//num21.set_position(position, sh - 55, offsetx - 55);
+	//num22.set_position(position, sh - 65, offsetx - 65);
 	num23.set_position(position, sh - 15, offsetx - 75);
 }

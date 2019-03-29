@@ -875,7 +875,7 @@ void World::draw()
 	// for our UI bar
 	m_interface.set_position({ screen_left, screen_top }, h, 15);
 	hme.set_position({ screen_left, screen_top }, h, 12);
-	ingame.set_position({ screen_left, screen_top }, h, 12);
+	ingame.set_position({ screen_left, screen_top }, 150, w-200);
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
