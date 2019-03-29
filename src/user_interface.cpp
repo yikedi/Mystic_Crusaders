@@ -137,6 +137,7 @@ void UserInterface::draw(const mat3& projection)
 	transform_rotate(m_rotation);
 	vec2 whiteBarScale = m_scale;
 	whiteBarScale.y = whiteBarScale.y * 1.7f;
+	whiteBarScale.x = whiteBarScale.x * 1.1f;
 	transform_scale(whiteBarScale);
 	transform_end();
 
@@ -190,7 +191,7 @@ void UserInterface::draw(const mat3& projection)
 	if (HP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 hp_position = { m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y - 29.f / zoom_factor };
+		vec2 hp_position = { 15 + m_position.x - 0.5f * w * (1.f - HP_scale_factor) / zoom_factor, m_position.y - 29.f / zoom_factor };
 		transform_begin();
 		transform_translate(hp_position);
 		transform_rotate(m_rotation);
@@ -244,7 +245,7 @@ void UserInterface::draw(const mat3& projection)
 	if (MP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 mp_position = { m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y - 6.f / zoom_factor };
+		vec2 mp_position = {15 + m_position.x - 0.5f * w * (1.f - MP_scale_factor) / zoom_factor, m_position.y - 6.f / zoom_factor };
 		transform_begin();
 		transform_translate(mp_position);
 		transform_rotate(m_rotation);
@@ -298,7 +299,7 @@ void UserInterface::draw(const mat3& projection)
 	if (EXP_scale_factor > 0.f) {
 		// offset for width: 0.5 because we only want to push one way. w and 1 - scale_factor is for
 		// finding how far it goes. zoom_factor is for making sure it fits on screen.
-		vec2 exp_position = { m_position.x - 0.5f * w * (1.f - EXP_scale_factor) / zoom_factor, m_position.y + 17.f / zoom_factor };
+		vec2 exp_position = { 15 + m_position.x - 0.5f * w * (1.f - EXP_scale_factor) / zoom_factor, m_position.y + 17.f / zoom_factor };
 		transform_begin();
 		transform_translate(exp_position);
 		transform_rotate(m_rotation);

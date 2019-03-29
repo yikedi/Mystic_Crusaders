@@ -38,21 +38,21 @@ set(SOURCE_FILES
 	src/turtle.cpp
 	src/water.cpp
 	src/world.cpp
-    src/hero.cpp
-    src/enemies.cpp
-    src/enemy_01.cpp
-    src/enemy_02.cpp
-    src/enemy_03.cpp
-    src/fireball.cpp
-    src/projectile.cpp
-    src/start_screen.cpp
-    src/user_interface.cpp
-    src/screen_button.cpp
-    src/tutorial_screen.cpp
-    src/enemy_laser.cpp
+  src/hero.cpp
+  src/enemies.cpp
+  src/enemy_01.cpp
+  src/enemy_02.cpp
+  src/enemy_03.cpp
+  src/fireball.cpp
+  src/projectile.cpp
+  src/start_screen.cpp
+  src/user_interface.cpp
+  src/screen_button.cpp
+  src/tutorial_screen.cpp
+  src/enemy_laser.cpp
 	src/map_screen.cpp
-    src/Ice_arrow.cpp
-    src/Ice_arrow_skill.cpp
+  src/Ice_arrow.cpp
+  src/Ice_arrow_skill.cpp
 	src/treetrunk.cpp
 	src/tree.cpp
 	src/skilltree.cpp
@@ -66,30 +66,33 @@ set(SOURCE_FILES
 	src/ThunderBall.cpp
 	src/Skill.cpp
 	src/description_tex.cpp
+	src/bar_description.cpp
+  src/in_game.cpp
+  src/numbers.cpp
 
-    src/project_path.hpp
+  src/project_path.hpp
 	src/common.hpp
 	src/fish.hpp
 	src/salmon.hpp
 	src/turtle.hpp
 	src/water.hpp
 	src/world.hpp
-    src/hero.hpp
-    src/enemies.hpp
-    src/enemy_01.hpp
-    src/enemy_02.hpp
-    src/enemy_03.hpp
-    src/fireball.h
-    src/projectile.h
-    src/start_screen.hpp
-    src/user_interface.hpp
-    src/screen_button.hpp
-    src/tutorial_screen.hpp
-    src/enemy_laser.h
+  src/hero.hpp
+  src/enemies.hpp
+  src/enemy_01.hpp
+  src/enemy_02.hpp
+  src/enemy_03.hpp
+  src/fireball.h
+  src/projectile.h
+  src/start_screen.hpp
+  src/user_interface.hpp
+  src/screen_button.hpp
+  src/tutorial_screen.hpp
+  src/enemy_laser.h
 	src/sprite_sheet.hpp
 	src/map_screen.hpp
-    src/Ice_arrow.h
-    src/Ice_arrow_skill.h
+  src/Ice_arrow.h
+  src/Ice_arrow_skill.h
 	src/treetrunk.hpp
 	src/tree.hpp
 	src/skilltree.hpp
@@ -103,6 +106,9 @@ set(SOURCE_FILES
 	src/ThunderBall.h
 	src/Skill.h
 	src/description_tex.hpp
+	src/bar_description.hpp
+  src/in_game.hpp
+  src/numbers.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

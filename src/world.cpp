@@ -152,12 +152,16 @@ bool World::init(vec2 screen)
 	skill_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
+	kill_num = { 0.f,0.f,0.f };
+	level_num = { 0.f,0.f,0.f };
 	game_is_paused = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
 	stree.init(screen, 1);
 	m_hero.init(screen);
+	hme.init(screen);
+	ingame.init(screen);
 	shootingFireBall = false;
 
 	// std::function<void> f1 = &World::startGame;
@@ -183,7 +187,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
 	//m_hero.init(screen) && m_water.init();
 }
 
@@ -244,7 +248,10 @@ void World::destroy()
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
 	m_interface.destroy();
+	ingame.destroy();
 	start.destroy();
+	stree.destroy();
+	hme.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
@@ -260,7 +267,8 @@ bool World::update(float elapsed_ms)
 
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, skill_num, screen);
-
+	hme.update_hme(m_hero.get_position(), zoom_factor, screen);
+	ingame.update_ingame(start_is_over, level_num, kill_num, screen, m_hero.get_position(), zoom_factor);
 	if (start_is_over && !game_is_paused) {
 		if (m_hero.is_alive()) {
 
@@ -778,6 +786,10 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
+		hme.destroy();
+		hme.init(screen);
+		ingame.destroy();
+		ingame.init(screen);
 		m_treetrunk.clear();
 		m_tree.clear();
 		initTrees();
@@ -790,6 +802,8 @@ bool World::update(float elapsed_ms)
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
+		kill_num = { 0.f,0.f,0.f };
+		level_num = { 0.f,0.f,0.f };
 		game_is_paused = false;
 		previous_point = 0;
 		map.set_is_over(true);
@@ -859,7 +873,9 @@ void World::draw()
 	screen_bottom = screen_top + h_not_scaled;
 
 	// for our UI bar
-	m_interface.set_position({ screen_left, screen_top }, h, 0);
+	m_interface.set_position({ screen_left, screen_top }, h, 15);
+	hme.set_position({ screen_left, screen_top }, h, 12);
+	ingame.set_position({ screen_left, screen_top }, h, 12);
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
@@ -905,6 +921,8 @@ void World::draw()
 		for (auto& tree : m_tree)
 			tree.draw(projection_2D);
 		m_interface.draw(projection_2D);
+		hme.draw(projection_2D);
+		ingame.draw(projection_2D);
 	}
 
 	if (game_is_paused){
@@ -1029,6 +1047,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tutorial.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
+		ingame.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
 		start.init(screen);
@@ -1045,6 +1064,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		enemy_projectiles.clear();
 		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
+		ingame.init(screen);
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;
@@ -1058,6 +1078,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
+		kill_num = { 0.f,0.f,0.f };
+		level_num = { 0.f,0.f,0.f };
 		previous_point = 0;
 		map.set_is_over(true);
 		start_is_over = false;

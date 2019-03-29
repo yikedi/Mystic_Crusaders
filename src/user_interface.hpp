@@ -7,6 +7,7 @@
 #include "enemy_02.hpp"
 #include "hero.hpp"
 
+
 class Enemy_01;
 class Fish;
 
