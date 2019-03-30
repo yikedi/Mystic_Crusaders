@@ -1638,7 +1638,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-			m_hero.use_skill(hero_projectiles, thunders, mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
 			if (m_hero.get_active_skill() == THUNDER_SKILL)
 				Mix_PlayChannel(-1, m_lightning_sound, 0);
 			else if(m_hero.get_active_skill() == ICE_SKILL)
