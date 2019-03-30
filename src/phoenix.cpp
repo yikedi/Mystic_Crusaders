@@ -180,7 +180,7 @@ vec2 phoenix::find_target(std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_
 void phoenix::destroy()
 {
     if (!is_alive()) {
-        for (int i = 0; i < num_particles; i++) {
+        for (int i = 0; i < m_particles.size(); i++) {
             m_particles[i].destroy();
         }
         m_particles.clear();
@@ -346,6 +346,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
     //chase hero when they are too far away
     float radius = 150.f;
 
+    m_angle += (ms / 1000) * M_PI * 0.2;
     float dx = cos(m_angle) * radius;
     float dy = sin(m_angle) * radius;
     m_position = { hero_position.x + dx, hero_position.y + dy };
@@ -356,11 +357,6 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
         int unusedParticle = find_first_unused_particle();
         respawn_particle(m_particles[unusedParticle]);
     }
-    /*
-    for (int i = 0; i < num_particles; i++) {
-        m_particles[i].update(ms, m_position);
-    }
-    */
 
     
     for (int i = 0; i < num_particles; i++)
