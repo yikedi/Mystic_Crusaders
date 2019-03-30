@@ -77,8 +77,8 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
-	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 
 	if (m_window == nullptr)
 		return false;
