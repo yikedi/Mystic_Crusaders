@@ -178,11 +178,11 @@ bool World::init(vec2 screen)
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	m_portal.init(screen);
+	m_skill_switch.init({ 500.f, 500.f });
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 
-	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 	button_play.set_hoverable(true);
 	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
@@ -298,6 +298,7 @@ void World::destroy()
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
+	m_skill_switch.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -497,6 +498,7 @@ bool World::update(float elapsed_ms)
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
+		m_skill_switch.update(m_hero.get_active_skill(), zoom_factor);
 
 		//check portal collision
 		for (auto &e1 : m_enemys_01)
@@ -962,6 +964,7 @@ bool World::update(float elapsed_ms)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		m_skill_switch.destroy();
 		m_hero.destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -977,6 +980,7 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
+		m_skill_switch.init({ 500.f, 500.f });
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
@@ -1065,6 +1069,7 @@ void World::draw()
 
 	// for our UI bar
 	m_interface.set_position({ screen_left, screen_top });
+	m_skill_switch.set_position({ screen_left + 400.f, screen_top + 550.f });
 
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
@@ -1112,6 +1117,7 @@ void World::draw()
 			vine.draw(projection_2D);
 		m_interface.draw(projection_2D);
 		m_portal.draw(projection_2D);
+		m_skill_switch.draw(projection_2D);
 	}
 
 	if (game_is_paused){
@@ -1244,6 +1250,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		m_skill_switch.destroy();
 		m_tutorial.destroy();
 		map.destroy();
 		m_hero.destroy();
@@ -1265,6 +1272,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		enemy_projectiles.clear();
 		thunders.clear();
 		m_interface.init({ 300.f, 50.f });
+		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;

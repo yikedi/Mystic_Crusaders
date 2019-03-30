@@ -65,6 +65,7 @@ set(SOURCE_FILES
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
 	src/Skill.cpp
+	src/skill_switch_UI.cpp
     src/altar_portal.cpp
     src/enemyPowerupWave.cpp
 	src/vine.cpp
@@ -104,6 +105,7 @@ set(SOURCE_FILES
 	src/ThunderString.h
 	src/ThunderBall.h
 	src/Skill.h
+	src/skill_switch_UI.hpp
     src/altar_portal.hpp
     src/enemyPowerupWave.h
 	src/vine.h
