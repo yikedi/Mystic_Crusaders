@@ -18,14 +18,15 @@ float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 her
 	float radius = 150.f;
 	if (current_size < max_phoenix)
 	{
-		float angle = angle = current_size * 2 *M_PI / max_phoenix + initial_angle;
-		
+		float angle = angle = current_size * 2 * M_PI / max_phoenix + initial_angle;
 		float dx = cos(angle) * radius;
 		float dy = sin(angle) * radius;
-		vec2 position = {hero_position.x + dx, hero_position.y + dy};
-		phoenix* p = new phoenix(m_hp, damage, position, m_scale,angle);
+		vec2 position = { hero_position.x + dx, hero_position.y + dy };
+		phoenix* p = new phoenix(m_hp, damage, position, m_scale, angle);
 		phoenix_list.emplace_back(p);
 	}
+	else
+		return 0.f;
 	return mp_cost;
 }
 
@@ -46,7 +47,7 @@ bool phoenix_skill::level_up(int select)
 	case LEVEL_UP_EFFECT: //
 		if (effect_level < 5)
 		{
-			m_scale = { m_scale.x * 1.15f , m_scale.y * 1.15f };
+			m_hp *= 1.1f;
 			mp_cost += 1.5f;
 			success = true;
 			effect_level++;

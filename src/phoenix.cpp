@@ -2,6 +2,8 @@
 #include "FireBall.h"
 #include <algorithm>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 
 SpriteSheet phoenix::texture;
@@ -379,7 +381,6 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
             p.set_color_green(g);
         }
     }
-    
 
 	//animation
 	float animation_speed = 0.2f;
