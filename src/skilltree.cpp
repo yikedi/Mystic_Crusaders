@@ -178,7 +178,7 @@ void Skilltree::draw(const mat3 & projection)
 		skillup.draw(projection);
 }
 
-void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num)
+void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, int skill_num)
 {
 	if (paused) {
 		if (front_element == "ice") {
@@ -192,9 +192,9 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec
 			thunder3.update_ice(paused, thunder_num.z);
 		}
 		else if (front_element == "fire") {
-			fire1.update_ice(paused, fire_num.x);
-			fire2.update_ice(paused, fire_num.y);
-			fire3.update_ice(paused, fire_num.z);
+			fire1.update_ice(paused, ice_num.x);
+			fire2.update_ice(paused, ice_num.y);
+			fire3.update_ice(paused, ice_num.z);
 		}
 		skillup.update_leveltex(paused, total - used, skill_num);
 	}

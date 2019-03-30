@@ -28,7 +28,7 @@ public:
 
 	void draw(const mat3& projection)override;
 
-	void update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num);
+	void update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, int skill_num);
 
 	std::string get_element();
 

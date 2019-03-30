@@ -25,7 +25,6 @@
 #include "tutorial_screen.hpp"
 #include "altar_portal.hpp"
 #include "skill_switch_UI.hpp"
-#include "phoenix.h"
 
 // stlib
 #include <vector>
@@ -119,7 +118,6 @@ private:
 	int used_skillpoints;
 	vec3 ice_skill_set;
 	vec3 thunder_skill_set;
-	vec3 fire_skill_set;
 	int skill_num;
 	std::string skill_element;
 
@@ -135,7 +133,6 @@ private:
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
-	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
