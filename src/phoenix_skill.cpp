@@ -15,6 +15,8 @@ float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 her
 	int max_phoenix = 3;
 	int current_size = phoenix_list.size();
 	float initial_angle = 2 * M_PI / max_phoenix;
+	if (current_size > 0)
+		initial_angle = phoenix_list[current_size - 1].get_angle();
 	float radius = 150.f;
 	if (current_size < max_phoenix)
 	{

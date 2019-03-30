@@ -48,6 +48,8 @@ public:
 
 	bool is_alive();
 
+	
+
 protected:
 	float m_hp;
 	float max_hp;
@@ -64,8 +66,7 @@ protected:
 	bool first_time;
 	std::vector<particles> m_particles;
 	float elapsedTime;
-	float m_angle;
-	vec2 random_move;
-	
+	float m_angle;	
+
 };
 
