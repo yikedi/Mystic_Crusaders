@@ -173,7 +173,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
-	
+
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
 	m_treetrunk_position.push_back({ 4* screen.x / 5 , screen.y / 3 - 50.f });
@@ -240,6 +240,8 @@ void World::destroy()
 		treetrunk.destroy();
 	for (auto& thunder : thunders)
 		thunder->destroy();
+	for (auto& phoenix : phoenix_list)
+		phoenix->destroy();
 
 	m_enemys_01.clear();
 	m_enemys_02.clear();
@@ -407,7 +409,7 @@ bool World::update(float elapsed_ms)
 				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
 				float size = sqrtf(dot(difference, difference));
-				difference = { difference.x / size, difference.y / size }; //scale the difference 
+				difference = { difference.x / size, difference.y / size }; //scale the difference
 				float stepback = elapsed_ms * 0.4; // -0.2 is 200 / 1000, which is in hero.cpp so 0.4 to stepback more so the hero does not stuck on it
 				vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback  };
 
@@ -495,7 +497,7 @@ bool World::update(float elapsed_ms)
 			float w = h_proj->get_bounding_box().x / 2;
 			if (h_proj->get_position().x + w < 0.f)
 			{
-				//h_proj->destroy();
+				h_proj->destroy();
 				hero_projectiles.erase(hero_projectiles.begin() + i);
 				continue;
 			}
@@ -826,10 +828,10 @@ bool World::update(float elapsed_ms)
 
 				}
 			}
-			
+
 		}
 
-		
+
 
 		// Spawning new enemys
 		m_next_enemy1_spawn -= elapsed_ms * m_current_speed;
@@ -911,6 +913,24 @@ bool World::update(float elapsed_ms)
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
 		m_hero.destroy();
+		for (auto& enemy : m_enemys_01)
+			enemy.destroy();
+		for (auto& enemy : m_enemys_02)
+			enemy.destroy();
+		for (auto& enemy : m_enemys_03)
+			enemy.destroy();
+		for (auto& h_proj : hero_projectiles)
+			h_proj->destroy();
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.destroy();
+		for (auto& tree : m_tree)
+			tree.destroy();
+		for (auto& treetrunk : m_tree)
+			treetrunk.destroy();
+		for (auto& thunder : thunders)
+			thunder->destroy();
+		for (auto& phoenix : phoenix_list)
+			phoenix->destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -1023,13 +1043,13 @@ void World::draw()
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
 	}
-	
+
 	if (display_tutorial) {
 		// button_play2.draw(projection_2D);
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
-	
+
 	// Drawing entities
 	map.draw(projection_2D);
 
@@ -1180,6 +1200,24 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tutorial.destroy();
 		m_hero.destroy();
 		m_interface.destroy();
+		for (auto& enemy : m_enemys_01)
+			enemy.destroy();
+		for (auto& enemy : m_enemys_02)
+			enemy.destroy();
+		for (auto& enemy : m_enemys_03)
+			enemy.destroy();
+		for (auto& h_proj : hero_projectiles)
+			h_proj->destroy();
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.destroy();
+		for (auto& tree : m_tree)
+			tree.destroy();
+		for (auto& treetrunk : m_tree)
+			treetrunk.destroy();
+		for (auto& thunder : thunders)
+			thunder->destroy();
+		for (auto& phoenix : phoenix_list)
+			phoenix->destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
 		start.init(screen);
@@ -1253,7 +1291,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_hero.set_direction({ 0.f,cur_direction.y });
 	}
 
-	
+
 	cur_direction = m_hero.get_direction();
 	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 		m_hero.set_direction({ cur_direction.x,-1.0 });
@@ -1360,7 +1398,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		else {
 			button_back_to_menu.check_click(mouse_pos);
 		}
-		
+
 	}
 
 	if (!game_is_paused && start_is_over) {
@@ -1428,6 +1466,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.x = fire_skill_set.x + 1.f;
+					m_hero.level_up(2, 0);
 				}
 			}
 			else {
@@ -1449,6 +1488,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.y = fire_skill_set.y + 1.f;
+					m_hero.level_up(2, 1);
 				}
 			}
 			else {
@@ -1470,6 +1510,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				else if (skill_element == "fire") {
 					//fire
 					fire_skill_set.z = fire_skill_set.z + 1.f;
+					m_hero.level_up(2, 2);
 				}
 			}
 			else {
@@ -1504,7 +1545,7 @@ void World::startGame()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	
+
 	// input code from key input, "G"
 	if (start_is_over == false) {
 		map.init(screen);
