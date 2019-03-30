@@ -347,13 +347,14 @@ bool Hero::collides_with(const Enemy_02& enemy)
 	float dy = m_position.y - enemy.get_position().y;
 	float d_sq = dx * dx + dy * dy;
 	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
+	vec2 hero_boundary = { std::fabs(m_scale.x) * hero_texture.subWidth/2, std::fabs(m_scale.y) * hero_texture.height/2 };
+	float my_r = std::max(hero_boundary.x, hero_boundary.y);
 	float r = std::max(other_r, my_r);
 
     if (!advanced) { //This is old code
-        r *= 0.6f;
+        r *= 1.f;
 		if (d_sq < r * r) {
-			take_damage(2.f);
+			take_damage(0.3f);
 			return true;
 		}
     }
