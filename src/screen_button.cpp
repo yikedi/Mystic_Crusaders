@@ -23,30 +23,30 @@ using namespace std;
 using ClickCallbackSTD = std::function<void()>;
 
 // Gets the top-left corner coordinates, width, height, and message for the button, and returns a button
-// Takes in: type is just for your own choosing (ie can later distinguish between "tutorial" and "quest speech")
-//		path is for the path of our texture
-//		onClick is for the function you'd like to put in; examples listed below for sample functions called in World.cpp
-//			[this]() { this->initTrees(); } <- initializes trees on button click. Don't actually do this though
-//			[this]() { this->m_hero.change_mp(80.f); } <- sets the mp of our hero to 80.f. 
-//					The "this" provides context that we're using our class "World.cpp" here, and we can then call things like we do in the document.
-//			[this]() { this->startGame(); } <- actually used in the game. Starts the game on button click
-//			[&]() { display_tutorial = false; } <- sets a global variable in World.cpp.
 void Button::makeButton(int x, int y, int w, int h, std::string path, std::string type, ClickCallbackSTD onClick) {// ClickCallback onClick) {
 	if (path == "") {
-		// Perhaps consider making just a regular white button in this case? Currently throws error
+		// empty string for path, therefore no path; regular button with only a type, and a white color probably
 		fprintf(stderr, "CANNOT FIND BUTTON PATH AT POSITION X= %i , Y= %i \n", x, y);
 	}
 	else {
+		// we wouldn't care what the text says, unless we come back and decide we do.
+		if (type == "") {
+			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %i , Y= %i \n", x, y);
+		}
 		init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
 	}
 }
 
-// Overloading with opacity
 void Button::makeButton(int x, int y, int w, int h, float opacity1, std::string path, std::string type, ClickCallbackSTD onClick) {// ClickCallback onClick) {
 	if (path == "") {
+		// empty string for path, therefore no path; regular button with only a type, and a white color probably
 		fprintf(stderr, "CANNOT FIND BUTTON PATH AT POSITION X= %i , Y= %i \n", x, y);
 	}
 	else {
+		// we wouldn't care what the text says, unless we come back and decide we do.
+		if (type == "") {
+			fprintf(stderr, "BUTTON HAS NO TYPE AT POSITION X= %i , Y= %i \n", x, y);
+		}
 		is_transparency_enabled = true;
 		opacity = opacity1;
 		init((double)x, (double)y, (double)w, (double)h, path, type, onClick);
@@ -54,8 +54,8 @@ void Button::makeButton(int x, int y, int w, int h, float opacity1, std::string 
 }
 
 // referenced help from https://codereview.stackexchange.com/questions/154623/custom-opengl-buttons
-bool Button::init(double x, double y, double w, double h, std::string path1, std::string type1, ClickCallbackSTD onClick1) {
-
+bool Button::init(double x, double y, double w, double h, std::string path1, std::string type1, ClickCallbackSTD onClick1) {// ClickCallback onClick1) {
+	//try {
 		left_corner = x;
 		top_corner = y;
 		width = w;
@@ -63,7 +63,10 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 		path = path1;
 		type = type1;
 		onClick = onClick1;
-
+	//} catch (const char* e) { // possibly of type std::exception& ?
+	//	fprintf(stderr, "ERROR OCCURRED IN SCREENBUTTON INIT!");
+	//	fprintf(stderr, "error message : %s", e);
+	//}
 
 	/* Generic loading code */
 	// Load shared texture
@@ -128,10 +131,13 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	set_position({ (float) x, (float) y });
+	m_rotation = 0.f;
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 	set_color({ 1.0f,1.0f,1.0f });
+	m_direction = { 0.f,0.f };
+	m_light_up = 0;
 	return true;
 }
 
@@ -173,6 +179,7 @@ void Button::draw(const mat3 &projection)
 	// if ((button_hoverable && mouse_hovering) || !button_hoverable) {
 	transform_begin();
 	transform_translate(m_position);
+	transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();
 
@@ -222,6 +229,7 @@ void Button::draw(const mat3 &projection)
 void Button::set_color(vec3 in_color)
 {
 	if (is_transparency_enabled) {
+		// fprintf(stderr, "USING TRANSPARENT BUTTON! BEWARE IF ERRORS OCCUR \n");
 		float color[4] = { in_color.x,in_color.y,in_color.z, opacity };
 		memcpy(m_color_transparent, color, sizeof(color));
 	}
@@ -240,3 +248,20 @@ void Button::set_position(vec2 position)
 void Button::set_hoverable(bool is_hoverable) {
 	button_hoverable = is_hoverable;
 }
+
+/*
+// Releases all associated resources
+void destroy();
+
+// If mouse is hovering above the button, we will light up the button.
+void update(vec2 hp_mp, float zoom_factor);
+
+// Renders the salmon
+void draw(const mat3& projection)override;
+
+// Light up the button when is_within_range()
+void lightup();
+
+// Checks to see if mouse is within range. To be used in update of mouse and mouse_onclick
+bool is_within_range();
+*/

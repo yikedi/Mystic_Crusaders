@@ -64,11 +64,14 @@ set(SOURCE_FILES
 	src/Thunder.cpp
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
-	src/Skill.cpp
-	src/skill_switch_UI.cpp
-    src/altar_portal.cpp
+	src/altar_portal.cpp
     src/enemyPowerupWave.cpp
 	src/vine.cpp
+	src/Skill.cpp
+	src/phoenix_skill.cpp
+	src/phoenix.cpp
+	src/particles.cpp
+	src/skill_switch_UI.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -109,6 +112,9 @@ set(SOURCE_FILES
     src/altar_portal.hpp
     src/enemyPowerupWave.h
 	src/vine.h
+	src/phoenix_skill.h
+	src/phoenix.h
+	src/particles.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

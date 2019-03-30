@@ -74,7 +74,7 @@ bool Treetrunk::init(vec2 screen)
 		return false;
 
 	// Setting initial values
-	m_scale.x = -60.f;
+	m_scale.x = -100.f;
 	m_scale.y = 60.f;
 	
 	m_num_indices = indices.size();
@@ -180,7 +180,7 @@ bool Treetrunk::collide_with(Hero &hero)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 0.8f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = 1.0f;
 	float content_ratio = 0.95f; // we have extra space at the sides of texture
@@ -190,19 +190,39 @@ bool Treetrunk::collide_with(Hero &hero)
 	left = -1.f * hero.get_bounding_box().x / scale_back * factor;
 	right = hero.get_bounding_box().x / scale_back * factor;
 	//points before transform
-	vec3 p_top, p_left, p_right, p_bottom;
+	vec3 p_top, p_left, p_right, p_bottom,p_top_left,p_top_right,p_bottom_left,p_bottom_right;
 
 	//could add a list of points to test for our game
 	p_top = mul_vec(hero.transform, { 0,top,1 });
 	p_bottom = mul_vec(hero.transform, { 0,bottom,1 });
 	p_left = mul_vec(hero.transform, { left,0,1 });
 	p_right = mul_vec(hero.transform, { right,0,1 });
+	p_top_left = mul_vec(hero.transform, { left,top,1 });
+	p_top_right = mul_vec(hero.transform, { right,top,1 });
+	p_bottom_left = mul_vec(hero.transform, { left,bottom,1 });
+	p_bottom_right = mul_vec(hero.transform, { right,bottom,1 });
+
+	std::vector<vec3> test_points;
+	test_points.emplace_back(p_top);
+	test_points.emplace_back(p_bottom);
+	test_points.emplace_back(p_left);
+	test_points.emplace_back(p_right);
+	test_points.emplace_back(p_top_left);
+	test_points.emplace_back(p_top_right);
+	test_points.emplace_back(p_bottom_left);
+	test_points.emplace_back(p_bottom_right);
 
 	std::vector<vec3> cur_vertices;
 	transform_current_vertex(cur_vertices);
 	if (d_sq < r * r) {
-		bool res =  mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
-			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+		//bool res =  mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
+		//	|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+
+		bool res = false;
+		for (auto &test_point : test_points)
+		{
+			res = res || mesh_collision(test_point, cur_vertices);
+		}
 		return res;
 	}
 
@@ -219,7 +239,7 @@ bool Treetrunk::collide_with(Projectile &p)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 1.0f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = abs(p.get_scale().x);
 	float factor = 0.95 * 0.5; 
@@ -228,7 +248,7 @@ bool Treetrunk::collide_with(Projectile &p)
 	left = -1.f * p.get_bounding_box().x / scale_back * factor;
 	right = p.get_bounding_box().x / scale_back * factor;
 	//points before transform
-	vec3 p_top, p_left, p_right, p_bottom;
+	vec3 p_top, p_left, p_right, p_bottom,p_top_left, p_top_right, p_bottom_left, p_bottom_right;
 
 	//could add a list of points to test for our game
 	p_top = mul_vec(p.transform, { 0,top,1 });
@@ -236,11 +256,30 @@ bool Treetrunk::collide_with(Projectile &p)
 	p_left = mul_vec(p.transform, { left,0,1 });
 	p_right = mul_vec(p.transform, { right,0,1 });
 
+	p_top_left = mul_vec(p.transform, { left,top,1 });
+	p_top_right = mul_vec(p.transform, { right,top,1 });
+	p_bottom_left = mul_vec(p.transform, { left,bottom,1 });
+	p_bottom_right = mul_vec(p.transform, { right,bottom,1 });
+
+	std::vector<vec3> test_points;
+	test_points.emplace_back(p_top);
+	test_points.emplace_back(p_bottom);
+	test_points.emplace_back(p_left);
+	test_points.emplace_back(p_right);
+	test_points.emplace_back(p_top_left);
+	test_points.emplace_back(p_top_right);
+	test_points.emplace_back(p_bottom_left);
+	test_points.emplace_back(p_bottom_right);
+
 	std::vector<vec3> cur_vertices;
 	transform_current_vertex(cur_vertices);
 	if (d_sq < r * r) {
-		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
-			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+		bool res = false;
+		for (auto &test_point : test_points)
+		{
+			res = res || mesh_collision(test_point, cur_vertices);
+		}
+		return res;
 	}
 
 	return false;
@@ -255,7 +294,7 @@ bool Treetrunk::collide_with(Enemies &e)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 1.0f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = abs(e.get_scale().x);
 	float factor = 0.95 * 0.5;
@@ -264,7 +303,7 @@ bool Treetrunk::collide_with(Enemies &e)
 	left = -1.f * e.get_bounding_box().x / scale_back * factor;
 	right = e.get_bounding_box().x / scale_back * factor;
 	//points before transform
-	vec3 p_top, p_left, p_right, p_bottom;
+	vec3 p_top, p_left, p_right, p_bottom,p_top_left, p_top_right, p_bottom_left, p_bottom_right;
 
 	//could add a list of points to test for our game
 	p_top = mul_vec(e.transform, { 0,top,1 });
@@ -272,11 +311,41 @@ bool Treetrunk::collide_with(Enemies &e)
 	p_left = mul_vec(e.transform, { left,0,1 });
 	p_right = mul_vec(e.transform, { right,0,1 });
 
+	p_top_left = mul_vec(e.transform, { left,top,1 });
+	p_top_right = mul_vec(e.transform, { right,top,1 });
+	p_bottom_left = mul_vec(e.transform, { left,bottom,1 });
+	p_bottom_right = mul_vec(e.transform, { right,bottom,1 });
+
+	vec3 p_top_left_middle = mul_vec(e.transform, {left + (right - left) * 0.25f,top,1});
+	vec3 p_top_right_middle = mul_vec(e.transform, { left + (right - left) * 0.75f,top,1 });
+	vec3 p_bottom_left_middle = mul_vec(e.transform, { left + (right - left) * 0.25f,bottom,1 });
+	vec3 p_bottom_right_middle = mul_vec(e.transform, { left + (right - left) * 0.75f,bottom,1 });
+
+
+	std::vector<vec3> test_points;
+	test_points.emplace_back(p_top);
+	test_points.emplace_back(p_bottom);
+	test_points.emplace_back(p_left);
+	test_points.emplace_back(p_right);
+	test_points.emplace_back(p_top_left);
+	test_points.emplace_back(p_top_right);
+	test_points.emplace_back(p_bottom_left);
+	test_points.emplace_back(p_bottom_right);
+	test_points.emplace_back(p_top_left_middle);
+	test_points.emplace_back(p_top_right_middle);
+	test_points.emplace_back(p_bottom_left_middle);
+	test_points.emplace_back(p_bottom_right_middle);
+
+
 	std::vector<vec3> cur_vertices;
 	transform_current_vertex(cur_vertices);
 	if (d_sq < r * r) {
-		return mesh_collision(p_top, cur_vertices) || mesh_collision(p_bottom, cur_vertices)
-			|| mesh_collision(p_left, cur_vertices) || mesh_collision(p_right, cur_vertices);
+		bool res = false;
+		for (auto &test_point : test_points)
+		{
+			res = res || mesh_collision(test_point, cur_vertices);
+		}
+		return res;
 	}
 
 	return false;
