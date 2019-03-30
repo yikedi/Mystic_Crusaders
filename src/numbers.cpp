@@ -1,4 +1,4 @@
-#include "fire_skill_tex.hpp"
+#include "numbers.hpp"
 
 #include <iostream>
 
@@ -9,30 +9,41 @@
 
 #include <gl3w.h>
 
-bool Fireskilltex::init(vec2 screen, int skill_num)	
+bool Numbers::init(vec2 screen, int which)
 {
-	switch (skill_num) {
-		case 1:
-			fire_texture.load_from_file(fire_skill1()); 
-			m_position.x = 0.71*screen.x;
-			m_position.y = 0.42*screen.y;
+	number_texture.load_from_file(textures_path("number.png"));
+
+	switch (which) {
+		case 11:							// level  
+			m_position.x = (float)0.71*screen.x;
+			m_position.y = (float)0.42*screen.y;
 			break;
-		case 2:
-			fire_texture.load_from_file(fire_skill1());
-			m_position.x = 0.76*screen.x;
-			m_position.y = 0.52*screen.y;
+		case 12:							// level
+			m_position.x = (float)0.76*screen.x;
+			m_position.y = (float)0.52*screen.y;
 			break;
-		case 3:
-			fire_texture.load_from_file(fire_skill1());
-			m_position.x = 0.71*screen.x;
-			m_position.y = 0.62*screen.y;
+		case 13:							// map
+			m_position.x = (float)0.71*screen.x;
+			m_position.y = (float)0.62*screen.y;
+			break;
+		case 21:							//kill hundred
+			m_position.x = (float)0.91*screen.x;
+			m_position.y = (float)0.62*screen.y;
+			break;
+		case 22:							//kill ten
+			m_position.x = (float)0.96*screen.x;
+			m_position.y = (float)0.72*screen.y;
+			break;
+		case 23:							//kill 
+			m_position.x = (float)0.91*screen.x;
+			m_position.y = (float)0.82*screen.y;
 			break;
 	}
-	float w = fire_texture.width;
-	float h = fire_texture.height;
+	float w = (float)number_texture.width;
+	float h = (float)number_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 120.f;
+	float width = 50.f;
 
 	vertices[0].position = { -width/2, +hr, 0.f };
 	vertices[1].position = { +width/2, +hr, 0.f };
@@ -57,7 +68,7 @@ bool Fireskilltex::init(vec2 screen, int skill_num)
 	return true;
 }
 
-void Fireskilltex::destroy()
+void Numbers::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -68,7 +79,7 @@ void Fireskilltex::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Fireskilltex::draw(const mat3 & projection)
+void Numbers::draw(const mat3 & projection)
 {
 		gl_flush_errors();
 
@@ -104,7 +115,7 @@ void Fireskilltex::draw(const mat3 & projection)
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fire_texture.id);
+		glBindTexture(GL_TEXTURE_2D, number_texture.id);
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -117,35 +128,21 @@ void Fireskilltex::draw(const mat3 & projection)
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Fireskilltex::update_ice(bool paused, float degree)
+void Numbers::update_numbers(bool start_is_over, float num, float world_zoom, vec2 hero_pos)
 {
-	if (paused) {
-		if (degree ==0.f) {
-			get_texture(0);
-		}
-		else if (degree == 1.f) {
-			get_texture(1);
-		}
-		else if (degree == 2.f) {
-			get_texture(2);
-		}
-		else if (degree == 3.f) {
-			get_texture(3);
-		}
-		else if (degree == 4.f) {
-			get_texture(4);
-		}
-		else if (degree == 5.f) {
-			get_texture(5);
-		}
+	zoom_factor = world_zoom;
+	m_scale = { 1.1f / world_zoom, 1.1f / world_zoom };
+	int number = (int)num;
+	if (start_is_over) {
+		get_texture(number);
 	}
 }
 
-void Fireskilltex::get_texture(int loc)
+void Numbers::get_texture(int loc)
 {
-	float sw = 120.f;
-	float w = 720.f;
-	float texture_locs[] = { 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 1.f };
+	float sw = 50.f;
+	float w = 500.f;
+	float texture_locs[] = { 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 6 * sw / w, 7 * sw / w, 8 * sw / w, 9 * sw / w, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
@@ -167,15 +164,11 @@ void Fireskilltex::get_texture(int loc)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-vec2 Fireskilltex::get_position()const
+vec2 Numbers::get_position()const
 {
 	return m_position;
 }
-
-void Fireskilltex::light_up() {
-	m_light_up = 1;
-}
-
-void Fireskilltex::blue_up() {
-	m_light_up = 0;
+void Numbers::set_position(vec2 position, int sh, int offsetx)
+{
+	m_position = { (position.x + 30.f) / zoom_factor + (float)0 / (2.f * zoom_factor) + offsetx / zoom_factor, position.y / zoom_factor + sh / zoom_factor - (float)51 / (1.f * zoom_factor) };
 }

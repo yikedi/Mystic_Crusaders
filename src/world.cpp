@@ -77,8 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
-	//m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 
 	if (m_window == nullptr)
 		return false;
@@ -174,6 +173,7 @@ bool World::init(vec2 screen)
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
 	fire_skill_set = { 0.f,0.f,0.f };
+	level_num = { 0.f,0.f,1.f };
 	game_is_paused = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
@@ -185,6 +185,7 @@ bool World::init(vec2 screen)
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
+	kill_num = number_to_vec(cur_points_needed, true);
 
 	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -209,8 +210,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 50.f }) && m_tutorial.init(screen);
-	//m_hero.init(screen) && m_water.init();
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -300,8 +300,11 @@ void World::destroy()
 	hero_projectiles.clear();
 	enemy_projectiles.clear();
 	m_interface.destroy();
+	ingame.destroy();
 	m_skill_switch.destroy();
 	start.destroy();
+	stree.destroy();
+	hme.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
@@ -316,7 +319,7 @@ bool World::update(float elapsed_ms)
 	vec2 screen = { (float)w, (float)h };
 
 	start.update(start_is_over);
-	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num);
+	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -339,6 +342,7 @@ bool World::update(float elapsed_ms)
 		map.init(screen, m_game_level);
 		pass_points += m_points + 5;
 		cur_points_needed = pass_points - m_points;
+		//kill_num = number_to_vec(cur_points_needed, true);
 	}
 
 	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
@@ -418,6 +422,7 @@ bool World::update(float elapsed_ms)
 			}
 			else if (m_hero.get_position().x < m_hero.m_scale.x * 2) {
 				vec2 force = { 10.f, 0.f };
+
 				m_hero.apply_momentum(force);
 			}
 			if (m_points - previous_point > 15 + (m_hero.level * 5))
@@ -506,9 +511,11 @@ bool World::update(float elapsed_ms)
 		for (auto& phoenix : phoenix_list)
 			phoenix->update(elapsed_ms,m_hero.get_position(),m_enemys_01, m_enemys_02, m_enemys_03,hero_projectiles);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
+		hme.update_hme(m_hero.get_position(), zoom_factor, screen);
+		level_num = number_to_vec(m_game_level, false);
+		kill_num = number_to_vec(pass_points - m_points, true);
+		ingame.update_ingame(start_is_over, level_num, kill_num, screen, m_hero.get_position(), zoom_factor);
 		m_skill_switch.update(m_hero.get_active_skill(), zoom_factor);
-		
-
 		//check portal collision
 		for (auto &e1 : m_enemys_01)
 		{
@@ -1112,6 +1119,11 @@ bool World::update(float elapsed_ms)
 		m_water.get_salmon_dead_time() > 5) {
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
+		stree.destroy();
+		start.destroy();
+		m_interface.destroy();
+		hme.destroy();
+		ingame.destroy();
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
@@ -1169,13 +1181,21 @@ bool World::update(float elapsed_ms)
 		ice_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
+		fire_skill_set = { 0.f,0.f,0.f };
+		level_num = { 0.f,0.f,1.f };
 		game_is_paused = false;
 		previous_point = 0;
 		pass_points = 5;
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		start.init(screen);
+		stree.init(screen, 1);
+		m_interface.init({ 300.f, 42.f });
+		ingame.init(screen);
+		hme.init(screen);
 		cur_points_needed = pass_points - m_points;
+		kill_num = number_to_vec(cur_points_needed, true);
 	}
 
 
@@ -1240,9 +1260,10 @@ void World::draw()
 	screen_bottom = screen_top + h_not_scaled;
 
 	// for our UI bar
-	m_interface.set_position({ screen_left, screen_top });
+	m_interface.set_position({ screen_left, screen_top }, h, 15);
+	hme.set_position({ screen_left, screen_top }, h, 12);
+	ingame.set_position({ screen_left, screen_top }, h + 15, w-200);
 	m_skill_switch.set_position({ screen_left + 400.f, screen_top + 550.f });
-
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
 
@@ -1290,6 +1311,8 @@ void World::draw()
 		for (auto& vine : m_vine)
 			vine.draw(projection_2D);
 		m_interface.draw(projection_2D);
+		hme.draw(projection_2D);
+		ingame.draw(projection_2D);
 		m_skill_switch.draw(projection_2D);
 		m_portal.draw(projection_2D);
 	}
@@ -1427,7 +1450,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tutorial.destroy();
 		map.destroy();
 		m_hero.destroy();
+		start.destroy();
+		stree.destroy();
 		m_interface.destroy();
+		ingame.destroy();
 		m_skill_switch.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy();
@@ -1463,8 +1489,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
+		m_interface.init({ 300.f, 42.f });
+		stree.init(screen, 1);
+		ingame.init(screen);
 		phoenix_list.clear();
-		m_interface.init({ 300.f, 50.f });
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -1483,6 +1511,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
+		level_num = { 0.f,0.f,1.f };
 		previous_point = 0;
 		pass_points = 5;
 		map.set_is_over(true);
@@ -1490,6 +1519,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		game_is_paused = false;
 		display_tutorial = false;
 		cur_points_needed = pass_points - m_points;
+		kill_num = number_to_vec(cur_points_needed, true);
 	}
 
 	// Control the current speed with `<` `>`
@@ -1709,7 +1739,6 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 					m_hero.level_up(1, 0);
 				}
 				else if (skill_element == "fire") {
-					//fire
 					fire_skill_set.x = fire_skill_set.x + 1.f;
 					m_hero.level_up(2, 0);
 				}
@@ -1731,7 +1760,6 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 					m_hero.level_up(1, 1);
 				}
 				else if (skill_element == "fire") {
-					//fire
 					fire_skill_set.y = fire_skill_set.y + 1.f;
 					m_hero.level_up(2, 1);
 				}
@@ -1753,7 +1781,6 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 					m_hero.level_up(1, 2);
 				}
 				else if (skill_element == "fire") {
-					//fire
 					fire_skill_set.z = fire_skill_set.z + 1.f;
 					m_hero.level_up(2, 2);
 				}
@@ -1801,6 +1828,51 @@ void World::startGame()
 		fprintf(stderr, "WORLD::STARTGAME CALLED WHEN start_is_over IS NOT FALSE!");
 	}
 	return;
+}
+
+vec3 World::number_to_vec(int number, bool kill)
+{
+	float g = 0.f;
+	float s = 0.f;
+	float b = 0.f;
+
+	if (kill) {
+		while (number > 99) {
+			b += 1.f;
+			number -= 100.f;
+		}
+
+		while (number > 9) {
+			s += 1.f;
+			number -= 10.f;
+		}
+
+		while (number > 0) {
+			g += 1.f;
+			number -= 1.f;
+		}
+
+		return { b,s,g };
+	}
+	else {
+		if (number % 2 == 0) {
+			g = 1.f;
+		}
+		else {
+			g = 2.f;
+		}
+		number = floor(number/2);
+		while (number > 9) {
+			b += 1.f;
+			number -= 10.f;
+		}
+
+		while (number > 0) {
+			s += 1.f;
+			number -= 1.f;
+		}
+		return { b,s,g };
+	}
 }
 
 void World::doNothing() {

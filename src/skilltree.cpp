@@ -91,6 +91,7 @@ bool Skilltree::init(vec2 screen, int element)
 		fire3.init(screen, 3);
 	}
 	skillup.init(screen);
+	description.init(screen);
 	return true;
 }
 
@@ -113,6 +114,7 @@ void Skilltree::destroy()
 	fire2.destroy();
 	fire3.destroy();
 	skillup.destroy();
+	description.destroy();
 }
 
 void Skilltree::draw(const mat3 & projection)
@@ -176,9 +178,10 @@ void Skilltree::draw(const mat3 & projection)
 			fire3.draw(projection);
 		}
 		skillup.draw(projection);
+		description.draw(projection);
 }
 
-void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num)
+void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num, vec2 screen)
 {
 	if (paused) {
 		if (front_element == "ice") {
@@ -197,6 +200,7 @@ void Skilltree::update_skill(bool paused, int total, int used, vec3 ice_num, vec
 			fire3.update_ice(paused, fire_num.z);
 		}
 		skillup.update_leveltex(paused, total - used, skill_num);
+		description.update_description(paused, skill_num, screen);
 	}
 	else {
 		ices1.blue_up();

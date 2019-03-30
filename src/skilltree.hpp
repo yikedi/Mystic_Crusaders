@@ -11,6 +11,7 @@
 #include "thunder_skill_tex.hpp"
 #include "fire_skill_tex.hpp"
 #include "skillup.hpp"
+#include "description_tex.hpp"
 
 class Skilltree : public Renderable
 {
@@ -28,7 +29,7 @@ public:
 
 	void draw(const mat3& projection)override;
 
-	void update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num);
+	void update_skill(bool paused, int total, int used, vec3 ice_num, vec3 thunder_num, vec3 fire_num, int skill_num, vec2 screen);
 
 	std::string get_element();
 
@@ -54,6 +55,7 @@ private:
 	Fireskilltex fire3;
 
 	Skillup skillup;
+	Description_tex description;
 	vec2 m_scale;
 	vec2 m_position;
 	std::string front_element;

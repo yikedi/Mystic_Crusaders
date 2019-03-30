@@ -7,6 +7,7 @@
 #include "enemy_02.hpp"
 #include "hero.hpp"
 
+
 class Enemy_01;
 class Fish;
 
@@ -58,7 +59,7 @@ public:
 	//hero functions
 	void change_hp(float d_hp);
 	void change_mp(float d_mp);
-	void set_position(vec2 position);
+	void set_position(vec2 position, int sh, int offset);
 
 private:
 	double w;

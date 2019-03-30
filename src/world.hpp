@@ -23,6 +23,8 @@
 #include "Thunder.h"
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
+#include "bar_description.hpp"
+#include "in_game.hpp"
 #include "altar_portal.hpp"
 #include "vine.h"
 #include "phoenix.h"
@@ -81,6 +83,9 @@ private:
 	void on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset);
 
 	void startGame();
+
+	vec3 number_to_vec(int number, bool kill);
+
 	void doNothing();
 
 
@@ -91,7 +96,8 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
-
+	Bar_description hme;
+	In_game ingame;
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -114,6 +120,8 @@ private:
 
 	//start screen
 	bool start_is_over;
+	vec3 level_num;
+	vec3 kill_num;
 
 	bool game_is_paused;
 	vec2 mouse_pos;
