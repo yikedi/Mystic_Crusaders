@@ -66,7 +66,7 @@ bool Vine::init(vec2 screen)
 	m_rotation = 0.f;
 	m_is_alive = true;
 	damage = 0.1f;
-	
+
 	return true;
 }
 void Vine::destroy()
@@ -137,7 +137,7 @@ void Vine::update(float ms)
 	int currIndex = 0;
 	currIndex += (int)m_animTime % numTiles;
 	setTextureLocs(currIndex);
-	
+
 }
 
 void Vine::setTextureLocs(int index) {
@@ -154,10 +154,10 @@ void Vine::setTextureLocs(int index) {
 	gl_flush_errors();
 
 	// Clear Memory
-	
+
 		if(m_is_alive)
 		destroy();
-	
+
 
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
@@ -186,7 +186,7 @@ void Vine::set_position(vec2 position)
 vec2 Vine::get_bounding_box()
 {
 
-	return { std::fabs(0.1f) * vine_texture.subWidth, std::fabs(0.1f) * vine_texture.height };
+	return { std::fabs(0.3f) * vine_texture.subWidth, std::fabs(0.3f) * vine_texture.height };
 }
 
 float Vine::get_damage() const { return damage; }
