@@ -68,7 +68,6 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angl
 	// Loading shaders
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
-
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 	max_hp = hp;
@@ -83,7 +82,10 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angl
 	elapsedTime = 0.f;
 	m_angle = angle;
 	death_animation_time = 0.f;
-	random_move = { 0.f,0.f };
+    num_particles = 50;
+    last_used_particle = 0;
+
+    emit_particles();
 	return true;
 }
 
@@ -177,6 +179,12 @@ vec2 phoenix::find_target(std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_
 
 void phoenix::destroy()
 {
+    if (!is_alive()) {
+        for (int i = 0; i < m_particles.size(); i++) {
+            m_particles[i].destroy();
+        }
+        m_particles.clear();
+    }
 
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -218,20 +226,62 @@ void phoenix::setTextureLocs(int index)
 
 void phoenix::emit_particles() 
 {
-	int num_particles = 10;
 	vec2 range = get_bounding_box();
-	float left = m_position.x - range.x / 2;
-	float step_to_right = range.x / num_particles;
+	float left = m_position.x;
+    float bottom = m_position.y;
+    float step_to_right = range.x / 20;
+    float step_to_top = range.y / 40;
 	for (int i = 0; i < num_particles; i++)
 	{
 		particles p;
 		float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle 
-		float scale = float(rand() % 100) / 1000.f;
-		vec2 initial_velocity = { 0.f,-2.f };
-		vec2 position = { left + step_to_right, m_position.y };
+		float scale = float(rand() % 100) / 2000.f;
+        int randomX = rand() % 10 - 5;
+        int randomY = rand() % 30 - 15;
+		vec2 initial_velocity = { 0.f,8.f };
+		vec2 position = { left + randomX*step_to_right, bottom + randomY*step_to_top };
 		p.init(lifetime, scale, position, initial_velocity);
-		m_particles.emplace_back();
+		m_particles.emplace_back(p);
 	}
+}
+
+void phoenix::respawn_particle(particles& particle)
+{
+    vec2 range = get_bounding_box();
+    float left = m_position.x;
+    float bottom = m_position.y;
+    float step_to_right = range.x / 20;
+    float step_to_top = range.y / 40;
+    int randomX = rand() % 10 - 5;
+    int randomY = rand() % 30 - 15;
+    float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle 
+    float scale = float(rand() % 100) / 2000.f;
+    vec2 initial_velocity = { 0.f,8.f };
+    vec2 position = { left + randomX * step_to_right, bottom + randomY * step_to_top };
+    particle.set_position(position);
+    particle.set_lifetime(lifetime);
+    particle.set_velocity(initial_velocity);
+    particle.set_scale(scale);
+    particle.set_color_green(0.8f);
+}
+
+int phoenix::find_first_unused_particle() {
+    for (int i = last_used_particle; i < num_particles; ++i) {
+        float lt = m_particles[i].get_lifetime();
+        if (lt <= 0.0f) {
+            last_used_particle = i;
+            return i;
+        }
+    }
+    for (GLuint i = 0; i < last_used_particle; ++i) {
+        float life = m_particles[i].get_lifetime();
+        if (life <= 0.0f) {
+            last_used_particle = i;
+            return i;
+        }
+    }
+    last_used_particle = 0;
+    return 0;
 }
 
 void phoenix::change_hp(float d_hp)
@@ -277,33 +327,61 @@ bool phoenix::collide_with(Projectile & p)
 	return false;
 }
 
+float phoenix::get_angle()
+{
+	return m_angle;
+}
+
 void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_02> &m_enemys_02, std::vector<Enemy_03> &m_enemys_03, std::vector<Projectile*> & hero_projectiles)
 {
-	//update the state of the phoenix
-	float d_hp = -ms / 1000 * 5; //Decrease hp every second
-	change_hp(d_hp); //decrease some amount of hp overtime
-	float fire = float(rand() % 100);
-	if (fire < 5.f)
-	{
-		attack(m_enemys_01, m_enemys_02, m_enemys_03, hero_projectiles);
-	}
-	//update phoenix position so that it follows the hero
+    //update the state of the phoenix
+    float d_hp = -ms / 1000 * 5; //Decrease hp every second
+    change_hp(d_hp); //decrease some amount of hp overtime
+    float fire = float(rand() % 100);
+    if (fire < 5.f)
+    {
+        attack(m_enemys_01, m_enemys_02, m_enemys_03, hero_projectiles);
+    }
+    //update phoenix position so that it follows the hero
 
-	//vec2 dif = { hero_position.x - m_position.x, hero_position.y - m_position.y };
-	//float current_distance = sqrtf(dot(dif, dif));
-	//float wanted_distance = 100.f;
+    //vec2 dif = { hero_position.x - m_position.x, hero_position.y - m_position.y };
+    //float current_distance = sqrtf(dot(dif, dif));
+    //float wanted_distance = 100.f;
 
-	//chase hero when they are too far away
-	float radius = 150.f;
-	m_angle += (ms / 1000) * M_PI * 0.2;
-	float dx = cos(m_angle) * radius;
-	float dy = sin(m_angle) * radius;
+    //chase hero when they are too far away
+    float radius = 150.f;
 
-	m_position = { hero_position.x + dx , hero_position.y + dy};
+    m_angle += (ms / 1000) * M_PI * 0.2;
+    float dx = cos(m_angle) * radius;
+    float dy = sin(m_angle) * radius;
+    m_position = { hero_position.x + dx, hero_position.y + dy };
 
-	//TODO: emit some number of particles
+    //maintain the particle list
+    for (int i = 0; i < num_particles; i++)
+    {
+        int unusedParticle = find_first_unused_particle();
+        respawn_particle(m_particles[unusedParticle]);
+    }
 
-	//maintain the particle list
+    
+    for (int i = 0; i < num_particles; i++)
+    {
+        particles &p = m_particles[i];
+        float lt = p.get_lifetime();
+        lt -= (ms / 1000);
+        p.set_lifetime(lt); // reduce life
+        if (p.get_lifetime() > 0.0f)
+        {	// particle is alive, thus update
+            vec2 vel = p.get_velocity();
+            vec2 pos = p.get_position();
+            float g = p.get_color_green();
+            pos.x -= vel.x * 5 * (ms / 1000);
+            pos.y -= vel.y * 5 * (ms / 1000);
+            g -= 0.4 * (ms / 1000);
+            p.set_position(pos);
+            p.set_color_green(g);
+        }
+    }
 
 	//animation
 	float animation_speed = 0.2f;
@@ -386,4 +464,8 @@ void phoenix::draw(const mat3 &projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+    for (int i = 0; i < num_particles; i++) {
+        m_particles[i].draw(projection);
+    }
 }

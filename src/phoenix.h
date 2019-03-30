@@ -40,6 +40,10 @@ public:
 
 	void emit_particles();
 
+    void respawn_particle(particles& p);
+
+    int find_first_unused_particle();
+
 	void change_hp(float d_hp);
 
 	vec2 get_bounding_box();
@@ -48,7 +52,7 @@ public:
 
 	bool is_alive();
 
-	
+	float get_angle();
 
 protected:
 	float m_hp;
@@ -65,6 +69,8 @@ protected:
 	std::vector<float> texture_locs;
 	bool first_time;
 	std::vector<particles> m_particles;
+    int num_particles;
+    int last_used_particle;
 	float elapsedTime;
 	float m_angle;	
 
