@@ -68,7 +68,7 @@ bool Tree::init(vec2 screen)
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	m_scale.x = 0.6f;
+	m_scale.x = 1.f;
 	m_scale.y = 0.8f;
 	m_rotation = 0.f;
 	//m_position = { screen.x / 3 , screen.y / 3 - 120.f };

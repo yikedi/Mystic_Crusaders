@@ -24,7 +24,6 @@
 #include "screen_button.hpp"
 #include "tutorial_screen.hpp"
 #include "altar_portal.hpp"
-#include "skill_switch_UI.hpp"
 #include "vine.h"
 #include "phoenix.h"
 
@@ -92,8 +91,6 @@ private:
 
 	Skilltree stree;
 
-	SkillSwitch m_skill_switch;
-
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -122,6 +119,7 @@ private:
 	int used_skillpoints;
 	vec3 ice_skill_set;
 	vec3 thunder_skill_set;
+	vec3 fire_skill_set;
 	int skill_num;
 	std::string skill_element;
 
@@ -138,6 +136,7 @@ private:
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
+	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
