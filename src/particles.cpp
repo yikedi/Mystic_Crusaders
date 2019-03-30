@@ -1,35 +1,28 @@
-// Header
-#include "tree.hpp"
-
-// internal
-#include "hero.hpp"
-#include "enemy_01.hpp"
-#include "enemy_02.hpp"
-#include "fish.hpp"
-#include "treetrunk.hpp"
+#include "particles.h"
 
 
-// stlib
-#include <vector>
-#include <string>
-#include <algorithm>
+Texture particles::texture;
 
-Texture Tree::tree_texture;
 
-bool Tree::init(vec2 screen)
+particles::particles(float lifetime, float scale, vec2 position, vec2 initial_velocity)
 {
-	if (!tree_texture.is_valid())
+	init(lifetime, scale, position, initial_velocity);
+}
+
+bool particles::init(float lifetime, float scale, vec2 position, vec2 initial_velocity)
+{
+	if (!texture.is_valid())
 	{
-		if (!tree_texture.load_from_file(textures_path("tree.png")))
+		if (!texture.load_from_file(textures_path("particle.png")))
 		{
-			fprintf(stderr, "Failed to load enemy texture!");
+			fprintf(stderr, "Failed to load particles texture!");
 			return false;
 		}
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = tree_texture.width * 0.5f;
-	float hr = tree_texture.height * 0.5f;
+	float wr = texture.width * 0.5f;
+	float hr = texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -63,45 +56,55 @@ bool Tree::init(vec2 screen)
 		return false;
 
 	// Loading shaders
-	if (!effect.load_from_file(shader_path("tree.vs.glsl"), shader_path("tree.fs.glsl")))
+	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	// Setting initial values, scale is negative to make it face the opposite way
-	// 1.0 would be as big as the original texture
-	m_scale.x = 1.f;
-	m_scale.y = 0.8f;
-	m_rotation = 0.f;
-	//m_position = { screen.x / 3 , screen.y / 3 - 120.f };
+	m_position = position;
+	m_scale = { scale,scale };
+    float g = (float) rand() / (RAND_MAX);
+    m_color = { 1.f, g, 0.1f };
+	velocity = initial_velocity;
+	elapsed_time = 0.f;
+	life_time = lifetime;
+	can_remove = false;
 	return true;
 }
 
-// Releases all graphics resources
-void Tree::destroy()
+void particles::update(float ms, vec2 source_position)
 {
-	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	if (elapsed_time < life_time)
+	{
+		int change_velocity = rand() % 10;
+		vec2 d_v = { 0.f,0.f };
+		if (change_velocity < 4)
+		{
+			int base = 100;
+			d_v.x = float(rand() % base) / base;
+			d_v.y = float(rand() % base) / base;
+		}
+		velocity.x = velocity.x + d_v.x;
+		velocity.y = velocity.y + d_v.y;
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+		m_position.x = m_position.x + velocity.x * (ms /1000);
+		m_position.y = m_position.y + velocity.y * (ms /1000);
+
+		elapsed_time += ms;
+	}
+	else
+	{
+		can_remove = true;
+	}
+
 }
 
-// Called on each frame by World::update()
-void Tree::update(float ms)
+void particles::draw(const mat3 & projection)
 {
+	if (can_remove)
+		return;
 
-
-}
-
-void Tree::draw(const mat3& projection)
-{
-
-	// Transformation code, see Rendering and Transformation in the template specification for more info
- // Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(m_position);
-	transform_rotate(m_rotation);
+	transform_rotate(0.f);
 	transform_scale(m_scale);
 	transform_end();
 
@@ -116,12 +119,6 @@ void Tree::draw(const mat3& projection)
 	GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
-	GLint species_uloc = glGetUniformLocation(effect.program, "light_up");
-
-
-	// Set clock
-	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
-	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Setting vertices and indices
 	glBindVertexArray(mesh.vao);
@@ -138,28 +135,25 @@ void Tree::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tree_texture.id);
+	glBindTexture(GL_TEXTURE_2D, texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = { m_color.x, m_color.y, m_color.z };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-
 }
 
-
-
-vec2 Tree::get_position()const
+void particles::destroy()
 {
-	return m_position;
+	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
+	effect.release();
 }
-
-
-void Tree::set_position(vec2 position)
+particles::~particles()
 {
-	m_position = position;
 }

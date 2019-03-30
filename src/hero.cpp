@@ -82,6 +82,7 @@ bool Hero::init(vec2 screen)
 	mp = max_mp;
     ice_arrow_skill.init();
 	thunder_skill.init();
+	phoenix_skill.init();
 	deceleration = 1.0f;
 	momentum_factor = 1.0f;
 	momentum.x = 0.f;
@@ -596,7 +597,6 @@ vec2 Hero::get_position()
 
 bool Hero::shoot_projectiles(std::vector<Projectile*> & hero_projectiles)
 {
-	//Fish fish;
 	Fireball* fireball = new Fireball(m_rotation, 400.f, 20.0f);
 	fireball->set_position(m_position);
 	hero_projectiles.emplace_back(fireball);
@@ -627,12 +627,24 @@ bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 	return false;
 }
 
+bool Hero::use_phoenix_skill(std::vector<phoenix*> & phoenix_list)
+{
+	if (mp > phoenix_skill.get_mpcost())
+	{
+		float mp_cost = phoenix_skill.create_phoenix(phoenix_list,m_position);
+		change_mp(-1 * mp_cost);
+		return true;
+	}
+	return false;
+}
 void Hero::level_up(int select_skill,int select_upgrade)
 {
 	if (select_skill == 0)
 		ice_arrow_skill.level_up(select_upgrade);
 	else if (select_skill == 1)
 		thunder_skill.level_up(select_upgrade);
+	else if (select_skill == 2)
+		phoenix_skill.level_up(select_upgrade);
 }
 
 void Hero::levelup()
@@ -648,7 +660,7 @@ void Hero::apply_momentum(vec2 f)
 	momentum.y += f.y;
 }
 
-bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position)
+bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position)
 {
 	bool success;
 	switch (activeSkill)
@@ -659,6 +671,8 @@ bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Th
 	case THUNDER_SKILL:
 		success = use_thunder_skill(thunders, position);
 		break;
+	case PHOENIX_SKILL:
+		success = use_phoenix_skill(phoenix_list);
 	default:
 		success = false;
 		break;
