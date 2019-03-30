@@ -27,6 +27,7 @@
 #include "in_game.hpp"
 #include "altar_portal.hpp"
 #include "vine.h"
+#include "phoenix.h"
 
 // stlib
 #include <vector>
@@ -143,6 +144,7 @@ private:
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
+	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;

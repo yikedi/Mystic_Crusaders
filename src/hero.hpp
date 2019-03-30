@@ -11,10 +11,13 @@
 #include "Ice_arrow.h"
 #include "Thunder.h"
 #include "ThunderSkill.h"
+#include "phoenix_skill.h"
+#include "phoenix.h"
 #include "time.h"
 
 #define ICE_SKILL 0
 #define THUNDER_SKILL 1
+#define PHOENIX_SKILL 2
 
 class Enemy_01;
 class Fish;
@@ -107,9 +110,9 @@ public:
 	bool shoot_projectiles(std::vector<Projectile*> & hero_projectiles);
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void levelup();
-	void ice_arrow_level_up();
 	bool use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position);
-	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, vec2 position);
+	bool use_phoenix_skill(std::vector<phoenix*> & phoenix);
+	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position);
     void level_up(int select_skill, int select_upgrade);
 	void set_active_skill(int active);
 	int get_active_skill();
@@ -136,6 +139,7 @@ private:
 	int m_light_up;
     Ice_arrow_skill ice_arrow_skill;
 	ThunderSkill thunder_skill;
+	phoenix_skill phoenix_skill;
 	int activeSkill;
 
 	vec2 momentum;
