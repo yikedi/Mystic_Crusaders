@@ -2,6 +2,8 @@
 #include "FireBall.h"
 #include <algorithm>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 
 SpriteSheet phoenix::texture;
@@ -81,6 +83,7 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angl
 	elapsedTime = 0.f;
 	m_angle = angle;
 	death_animation_time = 0.f;
+	random_move = { 0.f,0.f };
 	return true;
 }
 
@@ -292,20 +295,12 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
 
 	//chase hero when they are too far away
 	float radius = 150.f;
-
+	m_angle += (ms / 1000) * M_PI * 0.2;
 	float dx = cos(m_angle) * radius;
 	float dy = sin(m_angle) * radius;
-	m_position = { hero_position.x + dx, hero_position.y + dy };
 
-	//if (current_distance > wanted_distance)
-	//{
-	//	dif = { dif.x / current_distance, dif.y / current_distance };
-	//	float speed = 200.f;
-	//	float step = ms / 1000 * speed;
-	//	vec2 displacement = { step * dif.x , step * dif.y };
-	//	m_position = { m_position.x + displacement.x, m_position.y + displacement.y };
-	//}
-	
+	m_position = { hero_position.x + dx , hero_position.y + dy};
+
 	//TODO: emit some number of particles
 
 	//maintain the particle list

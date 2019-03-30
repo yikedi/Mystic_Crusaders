@@ -65,6 +65,7 @@ protected:
 	std::vector<particles> m_particles;
 	float elapsedTime;
 	float m_angle;
+	vec2 random_move;
 	
 };
 
