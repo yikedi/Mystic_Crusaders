@@ -66,7 +66,8 @@ set(SOURCE_FILES
 	src/ThunderBall.cpp
 	src/altar_portal.cpp
     src/enemyPowerupWave.cpp
-	src/vine.cpp/Skill.cpp
+	src/vine.cpp
+	src/Skill.cpp
 	src/phoenix_skill.cpp
 	src/phoenix.cpp
 	src/particles.cpp

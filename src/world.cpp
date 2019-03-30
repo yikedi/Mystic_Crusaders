@@ -389,7 +389,7 @@ bool World::update(float elapsed_ms)
 				{
 					m_hero.take_damage(e_proj->get_damage());
 					//comment back later
-					//e_proj->destroy();
+					e_proj->destroy();
 					e_proj = enemy_projectiles.erase(e_proj);
 					if (!m_hero.is_alive()) {
 						Mix_PlayChannel(-1, m_salmon_dead_sound, 0);
@@ -615,7 +615,7 @@ bool World::update(float elapsed_ms)
 			}
 
 			//same for enemy projectile
-			int l_len = (int)enemy_projectiles.size() - 1;
+			l_len = (int)enemy_projectiles.size() - 1;
 			for (int i = l_len; i >= 0; i--)
 			{
 				EnemyLaser laser = enemy_projectiles.at(i);
@@ -1010,7 +1010,7 @@ bool World::update(float elapsed_ms)
 		}
 
 		//check collision between phoenix and enemy laser
-		int l_len = (int)enemy_projectiles.size() - 1;
+		l_len = (int)enemy_projectiles.size() - 1;
 		for (int i = l_len; i >= 0; i--)
 		{
 			EnemyLaser &laser = enemy_projectiles.at(i);

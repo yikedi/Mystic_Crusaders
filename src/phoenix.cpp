@@ -82,7 +82,7 @@ bool phoenix::init(float hp, float damage, vec2 position, vec2 scale, float angl
 	elapsedTime = 0.f;
 	m_angle = angle;
 	death_animation_time = 0.f;
-    num_particles = 50;
+    num_particles = 20;
     last_used_particle = 0;
 
     emit_particles();
