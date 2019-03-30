@@ -68,6 +68,7 @@ set(SOURCE_FILES
 	src/skill_switch_UI.cpp
     src/altar_portal.cpp
     src/enemyPowerupWave.cpp
+	src/vine.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -107,6 +108,7 @@ set(SOURCE_FILES
 	src/skill_switch_UI.hpp
     src/altar_portal.hpp
     src/enemyPowerupWave.h
+	src/vine.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

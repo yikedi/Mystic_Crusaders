@@ -25,6 +25,7 @@
 #include "tutorial_screen.hpp"
 #include "altar_portal.hpp"
 #include "skill_switch_UI.hpp"
+#include "vine.h"
 
 // stlib
 #include <vector>
@@ -64,6 +65,7 @@ private:
 	bool spawn_enemy_03();
 	bool spawn_treetrunk();
 	bool spawn_tree();
+	bool spawn_vine();
 
 	bool shootingFireBall;
 
@@ -103,6 +105,7 @@ private:
 	unsigned int m_points;
 	unsigned int previous_point;
 
+	int m_game_level;
 	int m_level;
 	int pass_points;
 	int cur_points_needed;
@@ -129,6 +132,7 @@ private:
 	std::vector<Enemy_03> m_enemys_03;
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
+	std::vector<Vine> m_vine;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
@@ -147,6 +151,14 @@ private:
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
 	Mix_Chunk* m_levelup_sound;
+	Mix_Chunk* m_lightning_sound;
+	Mix_Chunk* m_ice_sound;
+	Mix_Chunk* m_fireball_sound;
+	Mix_Chunk* m_laser_sound;
+	Mix_Chunk* m_transition_sound;
+	Mix_Chunk* m_amplify_sound;
+
+
 
 	// C++ rng
 	std::default_random_engine m_rng;

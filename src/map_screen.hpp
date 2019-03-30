@@ -11,11 +11,11 @@
 
 class Mapscreen : public Renderable
 {
-	static Texture map_screen;
+	Texture map_screen;
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen);	//vec2 screen
+	bool init(vec2 screen, int game_level);	//vec2 screen
 
 	// Releases all associated resources
 	void destroy();

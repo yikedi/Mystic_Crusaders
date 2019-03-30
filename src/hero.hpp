@@ -5,6 +5,7 @@
 #include "fireball.h"
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
+#include "vine.h"
 #include "sprite_sheet.hpp"
 #include "Ice_arrow_skill.h"
 #include "Ice_arrow.h"
@@ -55,6 +56,7 @@ public:
 	bool collides_with(const Enemy_02& enemy);
 	bool collides_with(Projectile &projectile);
 	bool collides_with(const Fish& fish);
+	bool collides_with(Vine &vine);
 
 	// Returns the current salmon position
 	vec2 get_position()const;
@@ -141,4 +143,5 @@ private:
     float momentum_factor;
 	clock_t transition_time;
 	float transition_duration;
+	bool just_took_damage;
 };

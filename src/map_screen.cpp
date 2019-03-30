@@ -7,10 +7,12 @@
 #include <sstream>
 
 #include <gl3w.h>
-Texture Mapscreen::map_screen;
 
-bool Mapscreen::init(vec2 screen) {
-	map_screen.load_from_file(textures_path("grass3.png"));
+bool Mapscreen::init(vec2 screen, int game_level) {
+	if(game_level%2 ==0 )
+		map_screen.load_from_file(textures_path("grass3.png"));
+	else
+		map_screen.load_from_file(textures_path("desert.png"));
 	float w = map_screen.width;
 	float h = map_screen.height;
 	float wr = w * 0.5f;
@@ -59,7 +61,6 @@ bool Mapscreen::init(vec2 screen) {
 void Mapscreen::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);

@@ -61,7 +61,7 @@ bool Ice_arrow_skill::level_up(int select)
 		{
 			num_arrows += 1;
 			shoot_range_angle += (float)M_PI * 7.5 / 180;
-			mp_cost += 1.f;
+			mp_cost += 0.8f;
 			success = true;
 		}
 		break;
