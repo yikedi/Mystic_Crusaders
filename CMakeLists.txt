@@ -60,7 +60,7 @@ set(SOURCE_FILES
 	src/skillup.cpp
 	src/thunder_skill_tex.cpp
 	src/fire_skill_tex.cpp
-	src/ThunderSkill.cpp
+	src/ThunderSKill.cpp
 	src/Thunder.cpp
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
@@ -78,6 +78,7 @@ set(SOURCE_FILES
 	src/phoenix_skill.cpp
 	src/phoenix.cpp
 	src/particles.cpp
+	src/skill_switch_UI.cpp
 
   src/project_path.hpp
 	src/common.hpp
@@ -109,7 +110,7 @@ set(SOURCE_FILES
 	src/skillup.hpp
 	src/thunder_skill_tex.hpp
 	src/fire_skill_tex.hpp
-	src/ThunderSkill.h
+	src/ThunderSKill.h
 	src/Thunder.h
 	src/ThunderString.h
 	src/ThunderBall.h
@@ -121,6 +122,8 @@ set(SOURCE_FILES
   src/altar_portal.hpp
   src/enemyPowerupWave.h
 	src/altar_portal.hpp
+	src/skill_switch_UI.hpp
+    src/altar_portal.hpp
     src/enemyPowerupWave.h
 	src/vine.h
 	src/phoenix_skill.h

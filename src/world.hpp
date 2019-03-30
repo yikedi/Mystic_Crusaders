@@ -28,6 +28,7 @@
 #include "altar_portal.hpp"
 #include "vine.h"
 #include "phoenix.h"
+#include "skill_switch_UI.hpp"
 
 // stlib
 #include <vector>
@@ -185,6 +186,7 @@ private:
 	Button button_back_to_menu;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
+	SkillSwitch m_skill_switch;
 
 	bool passed_level;
 

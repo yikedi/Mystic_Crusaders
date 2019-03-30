@@ -181,6 +181,7 @@ bool World::init(vec2 screen)
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	m_portal.init(screen);
+	m_skill_switch.init({ 500.f, 500.f });
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
@@ -300,6 +301,7 @@ void World::destroy()
 	enemy_projectiles.clear();
 	m_interface.destroy();
 	ingame.destroy();
+	m_skill_switch.destroy();
 	start.destroy();
 	stree.destroy();
 	hme.destroy();
@@ -513,7 +515,7 @@ bool World::update(float elapsed_ms)
 		level_num = number_to_vec(m_game_level, false);
 		kill_num = number_to_vec(pass_points - m_points, true);
 		ingame.update_ingame(start_is_over, level_num, kill_num, screen, m_hero.get_position(), zoom_factor);
-
+		m_skill_switch.update(m_hero.get_active_skill(), zoom_factor);
 		//check portal collision
 		for (auto &e1 : m_enemys_01)
 		{
@@ -1158,12 +1160,14 @@ bool World::update(float elapsed_ms)
 		enemy_projectiles.clear();
 		thunders.clear();
 		phoenix_list.clear();
+		m_skill_switch.destroy();
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
 		initTrees();
+		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
@@ -1259,7 +1263,7 @@ void World::draw()
 	m_interface.set_position({ screen_left, screen_top }, h, 15);
 	hme.set_position({ screen_left, screen_top }, h, 12);
 	ingame.set_position({ screen_left, screen_top }, h + 15, w-200);
-
+	m_skill_switch.set_position({ screen_left + 400.f, screen_top + 550.f });
 	float tx = -1 * (screen_right + screen_left) / (screen_right - screen_left);
 	float ty = -1 * (screen_top + screen_bottom) / (screen_top - screen_bottom);
 
@@ -1309,6 +1313,7 @@ void World::draw()
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
+		m_skill_switch.draw(projection_2D);
 		m_portal.draw(projection_2D);
 	}
 
@@ -1449,6 +1454,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		stree.destroy();
 		m_interface.destroy();
 		ingame.destroy();
+		m_skill_switch.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy();
 		for (auto& enemy : m_enemys_02)
@@ -1487,6 +1493,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		stree.init(screen, 1);
 		ingame.init(screen);
 		phoenix_list.clear();
+		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		screen_left = 0.f;// *-0.5;
