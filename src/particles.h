@@ -17,6 +17,24 @@ public:
 
 	void draw(const mat3 &projection);
 
+    void set_lifetime(float t);
+
+    float get_lifetime();
+
+    void set_position(vec2 pos);
+
+    vec2 get_position();
+
+    void set_scale(float scale);
+
+    void set_velocity(vec2 v);
+
+    vec2 get_velocity();
+
+    void set_color_green(float green);
+
+    float get_color_green();
+
 	void destroy();
 
 protected:

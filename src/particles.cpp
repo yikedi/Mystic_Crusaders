@@ -61,8 +61,7 @@ bool particles::init(float lifetime, float scale, vec2 position, vec2 initial_ve
 
 	m_position = position;
 	m_scale = { scale,scale };
-    float g = (float) rand() / (RAND_MAX);
-    m_color = { 1.f, g, 0.1f };
+    m_color = { 1.f, 0.8f, 0.05f };
 	velocity = initial_velocity;
 	elapsed_time = 0.f;
 	life_time = lifetime;
@@ -72,7 +71,18 @@ bool particles::init(float lifetime, float scale, vec2 position, vec2 initial_ve
 
 void particles::update(float ms, vec2 source_position)
 {
-	if (elapsed_time < life_time)
+    life_time -= ms;
+    if (life_time > 0.0f)
+    {	// particle is alive, thus update
+        m_position = source_position;
+        m_position.x -= velocity.x * (ms / 1000);
+        m_position.y -= velocity.y * (ms / 1000);
+    }
+    else {
+        can_remove = true;
+    }
+
+	/*if (elapsed_time < life_time)
 	{
 		int change_velocity = rand() % 10;
 		vec2 d_v = { 0.f,0.f };
@@ -93,7 +103,7 @@ void particles::update(float ms, vec2 source_position)
 	else
 	{
 		can_remove = true;
-	}
+	}*/
 
 }
 
@@ -145,6 +155,42 @@ void particles::draw(const mat3 & projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+}
+
+void particles::set_lifetime(float t) {
+    life_time = t;
+}
+
+float particles::get_lifetime() {
+    return life_time;
+}
+
+void particles::set_position(vec2 pos) {
+    m_position = pos;
+}
+
+vec2 particles::get_position() {
+    return m_position;
+}
+
+void particles::set_scale(float scale) {
+    m_scale = { scale,scale };
+}
+
+void particles::set_velocity(vec2 v) {
+    velocity = v;
+}
+
+vec2 particles::get_velocity() {
+    return velocity;
+}
+
+void particles::set_color_green(float g) {
+    m_color = { 1.f, g, 0.05f };
+}
+
+float particles::get_color_green() {
+    return m_color.y;
 }
 
 void particles::destroy()
