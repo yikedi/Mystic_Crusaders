@@ -137,7 +137,7 @@ void SkillSwitch::update(int skill, float zoom) {
 		if (!hasTransitionStarted) {
 			transitionToSkill = skill;	// Prevents switching over, mid-transition
 			if (transitionToSkill > prevSkill) {
-				fprintf(stderr, "triggering transition \n");
+				// fprintf(stderr, "triggering transition \n");
 				if ((transitionToSkill == PHOENIX) && (prevSkill == ICEBLADES)) { // end of loop, special handling
 					movePositiveDirection = false;
 				}
@@ -164,7 +164,7 @@ void SkillSwitch::update(int skill, float zoom) {
 		if (m_animTime > 2.f) {
 			transitionHelper();
 			if (skill != transitionToSkill) {
-				fprintf(stderr, "Mouse wheel travelling too fast! skill %i not equal to skill %i \n", skill, transitionToSkill);
+				// fprintf(stderr, "Mouse wheel travelling too fast! skill %i not equal to skill %i \n", skill, transitionToSkill);
 				if (skill == 0) {
 					currIndex = 0;
 					setTextureLocs(0);
@@ -188,7 +188,6 @@ void SkillSwitch::update(int skill, float zoom) {
 
 void SkillSwitch::transitionHelper() {
 	// update animation loop
-	// fprintf(stderr, "In skillswitch! Transitioning to %i, currently on tile %i. Tiles left to transition: %i.\n", transitionToSkill, currIndex, tilesLeftToTransition);
 	if (tilesLeftToTransition) {
 		currIndex = currIndex + skill_texture.totalTiles;
 		if (movePositiveDirection) {
