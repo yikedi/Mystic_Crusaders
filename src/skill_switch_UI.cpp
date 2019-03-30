@@ -14,7 +14,7 @@ bool SkillSwitch::init(vec2 position)
 	// Load shared texture
 	if (!skill_texture.is_valid())
 	{
-		if (!skill_texture.load_from_file(textures_path("skill_ui.png")))
+		if (!skill_texture.load_from_file(textures_path("skill_ui_V2.png")))
 		{
 			fprintf(stderr, "Failed to load skillswitch texture!");
 			return false;
@@ -138,10 +138,7 @@ void SkillSwitch::update(int skill, float zoom) {
 			transitionToSkill = skill;	// Prevents switching over, mid-transition
 			if (transitionToSkill > prevSkill) {
 				fprintf(stderr, "triggering transition \n");
-				if ((transitionToSkill == LIGHTNINGSTORM) && (prevSkill == ICEBLADES)) { // end of loop, special handling
-					movePositiveDirection = false;
-				}
-				else if ((transitionToSkill == LIGHTNINGSTORM) && (prevSkill == PHOENIX)) {
+				if ((transitionToSkill == PHOENIX) && (prevSkill == ICEBLADES)) { // end of loop, special handling
 					movePositiveDirection = false;
 				}
 				else {
@@ -149,10 +146,7 @@ void SkillSwitch::update(int skill, float zoom) {
 				}
 			}
 			else {
-				if ((transitionToSkill == ICEBLADES) && (prevSkill == LIGHTNINGSTORM)) {
-					movePositiveDirection = true;
-				}
-				else if ((transitionToSkill == PHOENIX) && (prevSkill == LIGHTNINGSTORM)) {
+				if ((transitionToSkill == ICEBLADES) && (prevSkill == PHOENIX)) {
 					movePositiveDirection = true;
 				}
 				else {
@@ -176,6 +170,10 @@ void SkillSwitch::update(int skill, float zoom) {
 					setTextureLocs(0);
 				}
 				else if (skill == 1) {
+					currIndex = 2;
+					setTextureLocs(2);
+				}
+				else if (skill == 2) {
 					currIndex = 4;
 					setTextureLocs(4);
 				}
