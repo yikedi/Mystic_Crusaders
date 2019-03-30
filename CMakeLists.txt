@@ -64,7 +64,9 @@ set(SOURCE_FILES
 	src/Thunder.cpp
 	src/ThunderString.cpp
 	src/ThunderBall.cpp
-	src/Skill.cpp
+	src/altar_portal.cpp
+    src/enemyPowerupWave.cpp
+	src/vine.cpp/Skill.cpp
 	src/phoenix_skill.cpp
 	src/phoenix.cpp
 	src/particles.cpp
@@ -104,6 +106,9 @@ set(SOURCE_FILES
 	src/ThunderString.h
 	src/ThunderBall.h
 	src/Skill.h
+	src/altar_portal.hpp
+    src/enemyPowerupWave.h
+	src/vine.h
 	src/phoenix_skill.h
 	src/phoenix.h
 	src/particles.h

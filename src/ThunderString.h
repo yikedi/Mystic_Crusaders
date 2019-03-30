@@ -10,12 +10,12 @@ public:
 	{
 	}
 
-	ThunderString(vec2 position)
+	ThunderString(vec2 position, vec3 color)
 	{
-		init(position);
+		init(position, color);
 	}
 
-	bool init(vec2 position);
+	bool init(vec2 position, vec3 color);
 
 	void destroy();
 
@@ -38,6 +38,6 @@ protected:
 	TexturedVertex texVertices[4];
 	std::vector<float> texture_locs;
 	bool first_time;
-	
+	vec3 custom_color;
 };
 

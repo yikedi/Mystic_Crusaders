@@ -70,7 +70,7 @@ bool Enemy_01::init(int level)
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
 	m_speed = std::min(40.0f + (float)level * 0.4f * randAttributeFactor, 200.0f);
-	attackCooldown = std::max(2300.0 - (double)level * 4.0 * randAttributeFactor, 200.0);
+	attackCooldown = std::max(2300.0 - (double)level * 5.0 * randAttributeFactor, 200.0);
 	randMovementCooldown = std::max(1000.0 - (double)level * 2.0 * randAttributeFactor, 250.0);
 	projectileSpeed = std::min(150.0 + (double)level * 1.0 * randAttributeFactor, 450.0);
 	m_range = 50.0 * randAttributeFactor + 475.f;
@@ -81,6 +81,8 @@ bool Enemy_01::init(int level)
 	momentum.y = 0.f;
 	m_level = level;
 	poweredup = false;
+	waved = false;
+	wave.init(m_position, {1.f, 1.f, 1.f});
 
 	return true;
 }
@@ -95,6 +97,9 @@ void Enemy_01::destroy()
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
+	if(waved && !m_is_alive) {
+		wave.destroy();
+	}
 }
 
 vec2 Enemy_01::get_bounding_box() const
@@ -174,11 +179,17 @@ void Enemy_01::draw(const mat3& projection)
 				break;
 		}
 	}
+	enemyColor.x = color[0];
+	enemyColor.y = color[1];
+	enemyColor.z = color[2];
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	if(waved) {
+		wave.draw(projection);
+	}
 }
 
 void Enemy_01::update(float ms, vec2 target_pos)
@@ -222,8 +233,15 @@ void Enemy_01::update(float ms, vec2 target_pos)
 	if (distance <= 100.f) {
 		needFireProjectile = false;
 		float step = m_speed * (ms / 1000);
-		m_position.x += cos(enemy_angle)*step;
-		m_position.y += sin(enemy_angle)*step;
+		float x_d = cos(enemy_angle)*step;
+		float y_d = sin(enemy_angle)*step;
+		if (std::sqrt(x_d * x_d + y_d * y_d) > distance) {
+			m_position.x = target_pos.x;
+			m_position.y = target_pos.y;
+		} else {
+			m_position.x += x_d;
+			m_position.y += y_d;
+		}
 	} else if (distance <= m_range && checkIfCanFire(currentTime)) {
 		needFireProjectile = true;
 		setLastFireProjectileTime(currentTime);
@@ -279,6 +297,15 @@ void Enemy_01::update(float ms, vec2 target_pos)
         currIndex += (int)m_animTime % numTiles;
         setTextureLocs(currIndex);
     }
+	if (waved) {
+		if (clock() - waveTime > 1500.f){
+			waved = false;
+		} else {
+			wave.update(ms);
+			wave.m_position = m_position;
+			wave.custom_color = enemyColor;
+		}
+	}
 }
 
 void Enemy_01::setTextureLocs(int index)
@@ -353,7 +380,7 @@ void Enemy_01::setLastFireProjectileTime(clock_t c)
 	lastFireProjectileTime = c;
 }
 
-void Enemy_01::powerup()
+int Enemy_01::powerup()
 {
 	if (!poweredup) {
 		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
@@ -379,4 +406,5 @@ void Enemy_01::powerup()
 		}
 		poweredup = true;
 	}
+	return powerupType;
 }

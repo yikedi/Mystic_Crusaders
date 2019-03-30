@@ -65,7 +65,8 @@ bool Hero::init(vec2 screen)
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	m_is_alive = true;
-	m_position = { screen.x/2, screen.y/2 };
+	float altar_offset = 100.f;
+	m_position = { screen.x/2 - altar_offset, screen.y/2 };
 	m_rotation = 0.f;
 	m_light_up_countdown_ms = -1.f;
 
@@ -88,6 +89,10 @@ bool Hero::init(vec2 screen)
 	momentum.y = 0.f;
 	activeSkill = 0;
 	level = 0;
+	transition_duration = 3000.f;
+	isInTransition = false;
+	justFinishedTransition = false;
+	just_took_damage = false;
 	return true;
 }
 
@@ -222,8 +227,6 @@ void Hero::update(float ms)
 	}
 	else
 		m_light_up = 0;
-
-
 }
 
 void Hero::setTextureLocs(int index) {
@@ -259,10 +262,38 @@ void Hero::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
+	vec2 cur_scale = m_scale;
+	vec2 cur_pos = m_position;
+	float color[] = { 1.f, 1.f, 1.f };
+	if (isInTransition) {
+		if(clock() - transition_time <= 1500.f) {
+			if(clock() - transition_time > 600.f){
+				cur_pos.y -= (clock() - transition_time - 600.f) / 1.5f;
+			}
+			float ratio = std::max(1 - ((clock() - transition_time) / transition_duration), 0.1f);
+			cur_scale.x = m_scale.x * ratio;
+			color[0] = color[0] + color[0] * (5 - 5 * ratio);
+			color[1] = color[1] + color[1] * (5 - 5 * ratio);
+			color[2] = color[2] + color[2] * (5 - 5 * ratio);
+		} else {
+			cur_pos.y -= (3000.f - (clock() - transition_time)) / 1.5f;
+			float ratio = std::min(((clock() - transition_time) / transition_duration), 1.f);
+			cur_scale.x = m_scale.x * ratio;
+			color[0] = color[0] + color[0] * (5 - 5 * ratio);
+			color[1] = color[1] + color[1] * (5 - 5 * ratio);
+			color[2] = color[2] + color[2] * (5 - 5 * ratio);
+		}
+	}
+	if(just_took_damage) {
+		color[0] = 2.f;
+		color[1] = 0.1f;
+		color[2] = 0.1f;
+		just_took_damage = false;
+	}
 	transform_begin();
-	transform_translate(m_position);
+	transform_translate(cur_pos);
 	// transform_rotate(m_rotation);
-	transform_scale(m_scale);
+	transform_scale(cur_scale);
 	transform_end();
 
 	// Setting shaders
@@ -297,13 +328,17 @@ void Hero::draw(const mat3& projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 	glUniform1iv(light_up_uloc, 1, &m_light_up);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+	if (isInTransition && clock() - transition_time > transition_duration) {
+		isInTransition = false;
+		justFinishedTransition = true;
+	}
 }
 
 // Simple bounding box collision check,
@@ -313,13 +348,14 @@ bool Hero::collides_with(const Enemy_02& enemy)
 	float dy = m_position.y - enemy.get_position().y;
 	float d_sq = dx * dx + dy * dy;
 	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
-	float my_r = std::max(m_scale.x, m_scale.y);
+	vec2 hero_boundary = { std::fabs(m_scale.x) * hero_texture.subWidth/2, std::fabs(m_scale.y) * hero_texture.height/2 };
+	float my_r = std::max(hero_boundary.x, hero_boundary.y);
 	float r = std::max(other_r, my_r);
 
     if (!advanced) { //This is old code
-        r *= 0.6f;
+        r *= 1.f;
 		if (d_sq < r * r) {
-			take_damage(2.f);
+			take_damage(0.3f);
 			return true;
 		}
     }
@@ -364,6 +400,21 @@ bool Hero::collides_with(Projectile &projectile)
 	r *= 1.f;
 	if (d_sq < r * r)
 			return true;
+	return false;
+
+}
+
+bool Hero::collides_with(Vine &vine)
+{
+	float dx = m_position.x - vine.get_position().x;
+	float dy = m_position.y - vine.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(vine.get_bounding_box().x, vine.get_bounding_box().y);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	r *= 1.f;
+	if (d_sq < r * r)
+		return true;
 	return false;
 
 }
@@ -527,6 +578,7 @@ void Hero::set_color(vec3 in_color)
 
 void Hero::take_damage(float damage)
 {
+	just_took_damage = true;
 	change_hp(-1.f * damage);
 	if (hp <= 0.5f) {
 		m_is_alive = false;
@@ -655,4 +707,12 @@ bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Th
 void Hero::set_active_skill(int active)
 {
 	activeSkill = active;
+}
+
+void Hero::next_level()
+{
+	if(!isInTransition) {
+		transition_time = clock();
+		isInTransition = true;
+	}
 }

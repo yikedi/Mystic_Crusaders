@@ -1,7 +1,7 @@
 #include "ThunderString.h"
 
 SpriteSheet ThunderString::texture;
-bool ThunderString::init(vec2 position)
+bool ThunderString::init(vec2 position, vec3 color)
 {
 	// Load shared texture
 	if (!texture.is_valid())
@@ -65,12 +65,13 @@ bool ThunderString::init(vec2 position)
 	m_rotation = 0;
 
 	initial_speed = 1000.f;
-	
+
 	m_position = {position .x,0};
 	end_position = { position.x,position.y - hr * m_scale.y };
 	velocity.x = 0;
 	velocity.y = initial_speed;
 	animation_time = 0.0f;
+	custom_color = color;
 
 	return true;
 }
@@ -123,7 +124,7 @@ void ThunderString::setTextureLocs(int index)
 
 void ThunderString::update(float ms)
 {
-	float stepy = velocity.y * (ms / 1000);	
+	float stepy = velocity.y * (ms / 1000);
 	float animation_speed = 1.f;
 	animation_time += animation_speed * 2;
 	int curidx = 0;
@@ -174,7 +175,7 @@ void ThunderString::draw(const mat3 &projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = {custom_color.x, custom_color.y, custom_color.z};
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 

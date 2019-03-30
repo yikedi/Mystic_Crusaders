@@ -72,6 +72,8 @@ bool Enemy_02::init(int level)
 	poweredup = false;
 	variation = 0.f;
 	speedBoost = false;
+	waved = false;
+	wave.init(m_position, {1.f, 1.f, 1.f});
 
 	return true;
 }
@@ -86,6 +88,9 @@ void Enemy_02::destroy()
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
+	if(waved && !m_is_alive) {
+		wave.destroy();
+	}
 }
 
 
@@ -165,11 +170,17 @@ void Enemy_02::draw(const mat3& projection)
 				break;
 		}
 	}
+	enemyColor.x = color[0];
+	enemyColor.y = color[1];
+	enemyColor.z = color[2];
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	if(waved) {
+		wave.draw(projection);
+	}
 }
 
 void Enemy_02::update(float ms, vec2 target_pos)
@@ -248,7 +259,15 @@ void Enemy_02::update(float ms, vec2 target_pos)
     int currIndex = 0;
     currIndex += (int)m_animTime % numTiles;
     setTextureLocs(currIndex);
-
+	if (waved) {
+		if (clock() - waveTime > 1500.f){
+			waved = false;
+		} else {
+			wave.update(ms);
+			wave.m_position = m_position;
+			wave.custom_color = enemyColor;
+		}
+	}
 }
 
 void Enemy_02::setTextureLocs(int index) {
@@ -286,7 +305,7 @@ bool Enemy_02::checkIfCanFire(clock_t currentClock)
 	return false;
 }
 
-void Enemy_02::powerup()
+int Enemy_02::powerup()
 {
 	if (!poweredup) {
 		powerupType = 0 + ( std::rand() % ( 3 - 0 + 1 ));
@@ -314,4 +333,5 @@ void Enemy_02::powerup()
 		}
 		poweredup = true;
 	}
+	return powerupType;
 }

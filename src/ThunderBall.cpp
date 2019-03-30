@@ -1,12 +1,16 @@
 #include "ThunderBall.h"
 #include "algorithm"
 
-SpriteSheet ThunderBall::texture;
-bool ThunderBall::init(vec2 position,vec2 scale)
+bool ThunderBall::init(vec2 position,vec2 scale, vec3 color, bool isFireRing)
 {
 	// Load shared texture
-	if (!texture.is_valid())
-	{
+	if(isFireRing){
+		if (!texture.load_from_file(textures_path("fire_ring.png")))
+		{
+			fprintf(stderr, "Failed to load fireRing texture!");
+			return false;
+		}
+	} else {
 		if (!texture.load_from_file(textures_path("lightning_bottom.png")))
 		{
 			fprintf(stderr, "Failed to load thunderball texture!");
@@ -14,9 +18,14 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 		}
 	}
 
+
 	// The position corresponds to the center of the texture
 	texture.totalTiles = 15; // custom to current sprite sheet
 	texture.subWidth = 128; // custom to current sprite sheet
+	if(isFireRing) {
+		texture.totalTiles = 40;
+		texture.subWidth = 128;
+	}
 
 	// The position corresponds to the center of the texture
 	float wr = texture.subWidth * 0.5f;
@@ -68,6 +77,8 @@ bool ThunderBall::init(vec2 position,vec2 scale)
 	elapsedTime = 0;
 	animation_time = 0.0f;
 	first_time = true;
+	custom_color = color;
+	m_isFireRing = isFireRing;
 
 	return true;
 }
@@ -98,6 +109,9 @@ void ThunderBall::update(float ms)
 	//animation
 
 	float animation_speed = 0.2f;
+	if (m_isFireRing) {
+		animation_speed = 0.08f;
+	}
 	animation_time += animation_speed * 2;
 	int curidx = 0;
 	curidx += (int)animation_time % texture.totalTiles;
@@ -183,7 +197,7 @@ void ThunderBall::draw(const mat3 &projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	float color[] = { 1.f, 1.f, 1.f };
+	float color[] = {custom_color.x, custom_color.y, custom_color.z};
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
