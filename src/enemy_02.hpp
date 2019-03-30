@@ -32,9 +32,13 @@ public:
 
     void setTextureLocs(int index);
 
+<<<<<<<<< Temporary merge branch 1
+	int powerup();
+=========
 	vec2 get_bounding_box()const;
 
-	int powerup();
+	void powerup();
+>>>>>>>>> Temporary merge branch 2
 
 	bool poweredup;
 

@@ -43,8 +43,6 @@ public:
 
 	bool poweredup;
 
-	vec2 get_bounding_box()const;
-
 	private:
     std::vector<float> texture_rows;
     std::vector<float> texture_cols;

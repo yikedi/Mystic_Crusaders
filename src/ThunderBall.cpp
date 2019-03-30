@@ -95,9 +95,14 @@ void ThunderBall::set_position(vec2 position)
 
 void ThunderBall::destroy()
 {
+	//glDeleteBuffers(1, &mesh.vbo);
+	//glDeleteBuffers(1, &mesh.ibo);
+	//glDeleteVertexArrays(1, &mesh.vao);
+	//effect.release();
 
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
+	//glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);

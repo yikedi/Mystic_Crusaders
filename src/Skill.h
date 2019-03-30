@@ -10,7 +10,7 @@ public:
 
 	virtual bool level_up(int select) = 0;
 
-	virtual float get_mpcost();
+	float get_mpcost();
 
 	void set_mp_cost(float cost);
 
