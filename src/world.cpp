@@ -1484,6 +1484,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		enemy_projectiles.clear();
 		thunders.clear();
 		m_interface.init({ 300.f, 42.f });
+		stree.init(screen, 1);
 		ingame.init(screen);
 		phoenix_list.clear();
 		m_water.reset_salmon_dead_time();
