@@ -180,7 +180,7 @@ bool Treetrunk::collide_with(Hero &hero)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 10.f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = 1.0f;
 	float content_ratio = 0.95f; // we have extra space at the sides of texture
@@ -239,7 +239,7 @@ bool Treetrunk::collide_with(Projectile &p)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 10.f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = abs(p.get_scale().x);
 	float factor = 0.95 * 0.5; 
@@ -294,7 +294,7 @@ bool Treetrunk::collide_with(Enemies &e)
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 
-	r *= 10.f;
+	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = abs(e.get_scale().x);
 	float factor = 0.95 * 0.5;

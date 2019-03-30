@@ -596,7 +596,7 @@ bool World::update(float elapsed_ms)
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
 				float size = sqrtf(dot(difference, difference));
 				difference = { difference.x / size, difference.y / size }; //scale the difference
-				float stepback = elapsed_ms * 0.4; // -0.2 is 200 / 1000, which is in hero.cpp so 0.4 to stepback more so the hero does not stuck on it
+				float stepback = elapsed_ms * 0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.4 to stepback more so the hero does not stuck on it
 				vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback  };
 
 				m_hero.set_position(new_position);
@@ -1273,7 +1273,6 @@ void World::draw()
 		thunder->draw(projection_2D);
 	for (auto& phoenix : phoenix_list)
 		phoenix->draw(projection_2D);
-	m_hero.draw(projection_2D);
 
 	if (start_is_over) {
 
