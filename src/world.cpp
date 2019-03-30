@@ -928,7 +928,7 @@ bool World::update(float elapsed_ms)
 		}
 
 		//check collision between phoenix and enemy laser
-		int l_len = (int)enemy_projectiles.size() - 1;
+		l_len = (int)enemy_projectiles.size() - 1;
 		for (int i = l_len; i >= 0; i--)
 		{
 			EnemyLaser &laser = enemy_projectiles.at(i);
