@@ -25,6 +25,9 @@
 #include "tutorial_screen.hpp"
 #include "bar_description.hpp"
 #include "in_game.hpp"
+#include "altar_portal.hpp"
+#include "vine.h"
+
 // stlib
 #include <vector>
 #include <random>
@@ -63,6 +66,7 @@ private:
 	bool spawn_enemy_03();
 	bool spawn_treetrunk();
 	bool spawn_tree();
+	bool spawn_vine();
 
 	bool shootingFireBall;
 
@@ -77,6 +81,9 @@ private:
 	void on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset);
 
 	void startGame();
+
+	vec3 number_to_vec(int number, bool kill);
+
 	void doNothing();
 
 
@@ -101,7 +108,10 @@ private:
 	unsigned int m_points;
 	unsigned int previous_point;
 
+	int m_game_level;
 	int m_level;
+	int pass_points;
+	int cur_points_needed;
 
 	//zoom
 	float zoom_factor;
@@ -116,18 +126,22 @@ private:
 	int used_skillpoints;
 	vec3 ice_skill_set;
 	vec3 thunder_skill_set;
+	vec3 fire_skill_set;
 	int skill_num;
 	std::string skill_element;
 
 	// Game entities
 	Hero m_hero;
+	AltarPortal m_portal;
 	std::vector<Enemy_01> m_enemys_01;
 	std::vector<Enemy_02> m_enemys_02;
 	std::vector<Enemy_03> m_enemys_03;
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
+	std::vector<Vine> m_vine;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
+	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
 	UserInterface m_interface;
 	//Treetrunk m_treetrunk;
@@ -143,6 +157,14 @@ private:
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
 	Mix_Chunk* m_levelup_sound;
+	Mix_Chunk* m_lightning_sound;
+	Mix_Chunk* m_ice_sound;
+	Mix_Chunk* m_fireball_sound;
+	Mix_Chunk* m_laser_sound;
+	Mix_Chunk* m_transition_sound;
+	Mix_Chunk* m_amplify_sound;
+
+
 
 	// C++ rng
 	std::default_random_engine m_rng;
@@ -161,6 +183,8 @@ private:
 	Button button_back_to_menu;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
+
+	bool passed_level;
 
 
 };

@@ -5,11 +5,13 @@
 #include "fireball.h"
 #include "enemy_01.hpp"
 #include "enemy_02.hpp"
+#include "vine.h"
 #include "sprite_sheet.hpp"
 #include "Ice_arrow_skill.h"
 #include "Ice_arrow.h"
 #include "Thunder.h"
 #include "ThunderSkill.h"
+#include "time.h"
 
 #define ICE_SKILL 0
 #define THUNDER_SKILL 1
@@ -54,6 +56,7 @@ public:
 	bool collides_with(const Enemy_02& enemy);
 	bool collides_with(Projectile &projectile);
 	bool collides_with(const Fish& fish);
+	bool collides_with(Vine &vine);
 
 	// Returns the current salmon position
 	vec2 get_position()const;
@@ -110,8 +113,11 @@ public:
     void level_up(int select_skill, int select_upgrade);
 	void set_active_skill(int active);
 	int get_active_skill();
+	void next_level();
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	int level;
+	bool isInTransition;
+	bool justFinishedTransition;
 private:
     TexturedVertex texVertices[4];
     std::vector<float> texture_locs;
@@ -135,4 +141,6 @@ private:
 	vec2 momentum;
     float deceleration;
     float momentum_factor;
+	clock_t transition_time;
+	float transition_duration;
 };

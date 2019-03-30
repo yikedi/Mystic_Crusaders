@@ -82,6 +82,9 @@ bool Enemy_03::init(int level)
 	momentum.x = 0.f;
 	momentum.y = 0.f;
 	m_level = level;
+	waved = false;
+	enemyColor = {1.f,1.f,1.f};
+	wave.init(m_position, enemyColor);
 
 	return true;
 }
@@ -94,6 +97,9 @@ void Enemy_03::destroy()
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
 	effect.release();
+	if(waved && !m_is_alive) {
+		wave.destroy();
+	}
 }
 
 
@@ -145,11 +151,38 @@ void Enemy_03::draw(const mat3& projection)
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
 	float color[] = { 1.f, 1.f, 1.f };
+	if (waved){
+		enemyColor = {1.f, 1.f, 1.f};
+		switch (recentPowerupType)
+		{
+			case 0:
+				enemyColor.x = 0.2f;
+				enemyColor.z = 0.2f;
+				break;
+			case 1:
+				enemyColor.y = 0.2f;
+				enemyColor.z = 0.2f;
+				break;
+			case 2:
+				enemyColor.x = 1.f;
+				enemyColor.y = 0.f;
+				enemyColor.z = 1.f;
+				break;
+			case 3:
+				enemyColor.x = 0.f;
+				enemyColor.y = 0.f;
+				enemyColor.z = 1.f;
+				break;
+		}
+	}
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	if(waved) {
+		wave.draw(projection);
+	}
 }
 
 void Enemy_03::update(float ms, vec2 target_pos)
@@ -216,6 +249,15 @@ void Enemy_03::update(float ms, vec2 target_pos)
 	}
 
 	stunned = false;
+	if (waved) {
+		if (clock() - waveTime > 1500.f){
+			waved = false;
+		} else {
+			wave.update(ms);
+			wave.m_position = {m_position.x, m_position.y - 30.f};
+			wave.custom_color = enemyColor;
+		}
+	}
 }
 
 
@@ -231,3 +273,4 @@ void Enemy_03::setLastFireProjectileTime(clock_t c)
 {
 	lastFireProjectileTime = c;
 }
+

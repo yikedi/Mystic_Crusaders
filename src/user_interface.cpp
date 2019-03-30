@@ -137,7 +137,7 @@ void UserInterface::draw(const mat3& projection)
 	transform_rotate(m_rotation);
 	vec2 whiteBarScale = m_scale;
 	whiteBarScale.y = whiteBarScale.y * 3.f;
-	whiteBarScale.x = whiteBarScale.x * 1.1f;
+	whiteBarScale.x = whiteBarScale.x * 7.1f;
 	transform_scale(whiteBarScale);
 	transform_end();
 

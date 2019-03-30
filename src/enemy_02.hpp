@@ -32,7 +32,7 @@ public:
 
     void setTextureLocs(int index);
 
-	void powerup();
+	int powerup();
 
 	bool poweredup;
 
