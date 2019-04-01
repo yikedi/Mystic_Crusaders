@@ -1168,7 +1168,6 @@ bool World::update(float elapsed_ms)
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
-		initTrees();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -1178,6 +1177,7 @@ bool World::update(float elapsed_ms)
 		passed_level = false;
 		m_level = 0;
 		m_game_level = 0;
+		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
@@ -1487,7 +1487,6 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
 		m_tutorial.init(screen);
 		m_hero.init(screen);
-		initTrees();
 		m_enemys_01.clear();
 		m_enemys_02.clear();
 		m_enemys_03.clear();
@@ -1512,6 +1511,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		passed_level = false;
 		m_level = 0;
 		m_game_level = 0;
+		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
