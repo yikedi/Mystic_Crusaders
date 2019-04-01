@@ -15,19 +15,19 @@ bool Skilltree::init(vec2 screen, int element)
 {
 	switch (element) {
 	case 1:
-		screen_texture.load_from_file(element1());  
+		screen_texture.load_from_file(element1());
 		front_element = "ice";
 		upper_element = "fire";
 		lower_element = "thunder";
 		break;
 	case 2:
-		screen_texture.load_from_file(element2());  
+		screen_texture.load_from_file(element2());
 		front_element = "thunder";
 		upper_element = "ice";
 		lower_element = "fire";
 		break;
 	case 3:
-		screen_texture.load_from_file(element3()); 
+		screen_texture.load_from_file(element3());
 		front_element = "fire";
 		upper_element = "thunder";
 		lower_element = "ice";
@@ -98,12 +98,11 @@ bool Skilltree::init(vec2 screen, int element)
 void Skilltree::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 	ices1.destroy();
 	ices2.destroy();
 	ices3.destroy();
@@ -220,7 +219,7 @@ std::string Skilltree::get_element()
 	return front_element;
 }
 
-bool Skilltree::inside(vec2 h, vec2 w,vec2 pos) 
+bool Skilltree::inside(vec2 h, vec2 w,vec2 pos)
 {
 	float x = pos.x;
 	float y = pos.y;
@@ -262,7 +261,7 @@ bool Skilltree::level_position(vec2 mouse_pos)
 		fire3.blue_up();
 		return false;
 	}
- 
+
 }
 
 int Skilltree::icon_position(vec2 mouse_pos, std::string element)
@@ -374,7 +373,7 @@ std::string Skilltree::element_position(vec2 mouse_pos)
 
 	float lxpos3 = 520.f;
 	float lypos3 = 405.f;
-	
+
 	vec2 height1 = { lypos1 + 60.f,lypos1 - 60.f };
 	vec2 width1 = { lxpos1 + 60.f,lxpos1 - 60.f };
 
@@ -388,10 +387,10 @@ std::string Skilltree::element_position(vec2 mouse_pos)
 	bool click_lower = inside(height2, width2, mouse_pos);
 	bool click_front = inside(height3, width3, mouse_pos);
 
-	if (click_front) {	
+	if (click_front) {
 		return front_element;
 	}
-	else if (click_lower) { 
+	else if (click_lower) {
 		if (front_element == "ice") {
 			front_element = "fire";
 		}

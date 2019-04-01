@@ -41,7 +41,7 @@ bool Iceskilltex::init(vec2 screen, int skill_num)
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
-	
+
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -60,12 +60,11 @@ bool Iceskilltex::init(vec2 screen, int skill_num)
 void Iceskilltex::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Iceskilltex::draw(const mat3 & projection)

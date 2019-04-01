@@ -353,7 +353,7 @@ bool Hero::collides_with(const Enemy_02& enemy)
 	float r = std::max(other_r, my_r);
 
     if (!advanced) { //This is old code
-        r *= 1.f;
+        r *= 0.5f;
 		if (d_sq < r * r) {
 			take_damage(0.3f);
 			return true;

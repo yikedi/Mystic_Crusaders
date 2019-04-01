@@ -9,11 +9,11 @@
 
 #include <gl3w.h>
 
-bool Fireskilltex::init(vec2 screen, int skill_num)	
+bool Fireskilltex::init(vec2 screen, int skill_num)
 {
 	switch (skill_num) {
 		case 1:
-			fire_texture.load_from_file(fire_skill1()); 
+			fire_texture.load_from_file(fire_skill1());
 			m_position.x = 0.71*screen.x;
 			m_position.y = 0.42*screen.y;
 			break;
@@ -41,7 +41,7 @@ bool Fireskilltex::init(vec2 screen, int skill_num)
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
-	
+
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -60,12 +60,11 @@ bool Fireskilltex::init(vec2 screen, int skill_num)
 void Fireskilltex::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Fireskilltex::draw(const mat3 & projection)

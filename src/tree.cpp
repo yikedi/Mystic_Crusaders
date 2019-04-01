@@ -79,12 +79,11 @@ bool Tree::init(vec2 screen)
 void Tree::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 // Called on each frame by World::update()

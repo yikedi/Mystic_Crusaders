@@ -1147,6 +1147,8 @@ bool World::update(float elapsed_ms)
 			thunder->destroy();
 		for (auto& phoenix : phoenix_list)
 			phoenix->destroy();
+		for (auto& vine : m_vine)
+			vine.destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -1448,6 +1450,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		hme.destroy();
 		map.destroy();
 		m_hero.destroy();
 		start.destroy();
@@ -1473,6 +1476,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			thunder->destroy();
 		for (auto& phoenix : phoenix_list)
 			phoenix->destroy();
+		for (auto& vine : m_vine)
+			vine.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
@@ -1492,6 +1497,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_interface.init({ 300.f, 42.f });
 		stree.init(screen, 1);
 		ingame.init(screen);
+		hme.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
