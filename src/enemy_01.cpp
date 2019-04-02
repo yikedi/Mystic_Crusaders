@@ -89,7 +89,7 @@ bool Enemy_01::init(int level)
 
 // Call if init() was successful
 // Releases all graphics resources
-void Enemy_01::destroy()
+void Enemy_01::destroy(bool reset)
 {
     glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
@@ -97,7 +97,7 @@ void Enemy_01::destroy()
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
-	if(waved && !m_is_alive) {
+	if((waved && !m_is_alive) || reset) {
 		wave.destroy();
 	}
 }
@@ -325,7 +325,7 @@ void Enemy_01::setTextureLocs(int index)
 
     // Clear memory
     if (m_is_alive) {
-        destroy();
+        destroy(false);
     }
 
 

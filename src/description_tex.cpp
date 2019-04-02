@@ -43,12 +43,11 @@ bool Description_tex::init(vec2 screen)
 void Description_tex::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Description_tex::draw(const mat3 & projection)
@@ -90,7 +89,7 @@ void Description_tex::draw(const mat3 & projection)
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
-	
+
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
@@ -101,7 +100,7 @@ void Description_tex::draw(const mat3 & projection)
 void Description_tex::update_description(bool paused, int skill_num, vec2 screen)
 {
 	if (paused) {
-		
+
 		if (skill_num == 1) {
 			get_texture(0);
 			m_position.x = 0.89*screen.x;

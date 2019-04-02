@@ -34,8 +34,8 @@ public:
 
 	bool collide_with(Projectile & p);
 
-	void destroy();
-	
+	void destroy(bool reset);
+
 	void shoot_projectiles(vec2 target_position, std::vector<Projectile*> & hero_projectiles);
 
 	void emit_particles();
@@ -72,7 +72,7 @@ protected:
     int num_particles;
     int last_used_particle;
 	float elapsedTime;
-	float m_angle;	
+	float m_angle;
 
 };
 

@@ -177,9 +177,9 @@ vec2 phoenix::find_target(std::vector<Enemy_01> &m_enemys_01, std::vector<Enemy_
 
 }
 
-void phoenix::destroy()
+void phoenix::destroy(bool reset)
 {
-    if (!is_alive()) {
+    if (!is_alive() || reset) {
         for (int i = 0; i < m_particles.size(); i++) {
             m_particles[i].destroy();
         }
@@ -209,7 +209,7 @@ void phoenix::setTextureLocs(int index)
 
 	// Clear memory allocation
 	if (!first_time) {
-		destroy();
+		destroy(false);
 	}
 
 	// Vertex Buffer creation
@@ -224,7 +224,7 @@ void phoenix::setTextureLocs(int index)
 	first_time = false;
 }
 
-void phoenix::emit_particles() 
+void phoenix::emit_particles()
 {
 	vec2 range = get_bounding_box();
 	float left = m_position.x;
@@ -234,7 +234,7 @@ void phoenix::emit_particles()
 	for (int i = 0; i < num_particles; i++)
 	{
 		particles p;
-		float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle 
+		float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle
 		float scale = float(rand() % 100) / 2000.f;
         int randomX = rand() % 10 - 5;
         int randomY = rand() % 30 - 15;
@@ -254,7 +254,7 @@ void phoenix::respawn_particle(particles& particle)
     float step_to_top = range.y / 40;
     int randomX = rand() % 10 - 5;
     int randomY = rand() % 30 - 15;
-    float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle 
+    float lifetime = 1.5f + (rand() % 100) / 100.f; //a slightly different lifetime for each particle
     float scale = float(rand() % 100) / 2000.f;
     vec2 initial_velocity = { 0.f,8.f };
     vec2 position = { left + randomX * step_to_right, bottom + randomY * step_to_top };
@@ -311,7 +311,7 @@ bool phoenix::collide_with(Enemies &enemy)
 	return false;
 }
 
-bool phoenix::collide_with(Projectile & p) 
+bool phoenix::collide_with(Projectile & p)
 {
 	float dx = m_position.x - p.get_position().x;
 	float dy = m_position.y - p.get_position().y;
@@ -363,7 +363,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
         respawn_particle(m_particles[unusedParticle]);
     }
 
-    
+
     for (int i = 0; i < num_particles; i++)
     {
         particles &p = m_particles[i];
@@ -401,7 +401,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
 		curidx += (int)death_animation_time % numTiles;
 		setTextureLocs(curidx);
 	}
-	else 
+	else
 	{
 		int curidx = 4;
 		int numTiles = 4;

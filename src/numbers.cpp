@@ -14,7 +14,7 @@ bool Numbers::init(vec2 screen, int which)
 	number_texture.load_from_file(textures_path("number.png"));
 
 	switch (which) {
-		case 11:							// level  
+		case 11:							// level
 			m_position.x = (float)0.71*screen.x;
 			m_position.y = (float)0.42*screen.y;
 			break;
@@ -34,7 +34,7 @@ bool Numbers::init(vec2 screen, int which)
 			m_position.x = (float)0.96*screen.x;
 			m_position.y = (float)0.72*screen.y;
 			break;
-		case 23:							//kill 
+		case 23:							//kill
 			m_position.x = (float)0.91*screen.x;
 			m_position.y = (float)0.82*screen.y;
 			break;
@@ -52,7 +52,7 @@ bool Numbers::init(vec2 screen, int which)
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
-	
+
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
 	if (gl_has_errors())
@@ -71,12 +71,11 @@ bool Numbers::init(vec2 screen, int which)
 void Numbers::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Numbers::draw(const mat3 & projection)

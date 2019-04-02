@@ -20,7 +20,7 @@ public:
 
     virtual void update(float ms, vec2 target_pos) = 0;
 
-    virtual void destroy() = 0;
+    virtual void destroy(bool reset) = 0;
 
 	// Returns the current enemy position
 	vec2 get_position()const;

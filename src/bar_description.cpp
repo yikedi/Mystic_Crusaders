@@ -23,7 +23,7 @@ bool Bar_description::init(vec2 screen)
 			return false;
 		}
 	}
-	
+
 	float w = (float)hme_texture.width;
 	float h = (float)hme_texture.height;
 	float wr = w * 0.5f;
@@ -73,12 +73,11 @@ bool Bar_description::init(vec2 screen)
 void Bar_description::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Bar_description::draw(const mat3 & projection)
@@ -141,7 +140,7 @@ void Bar_description::update_hme(vec2 hero_pos, float world_zoom, vec2 screen)		
 	float dy = mapy - gamey;
 	zoom_factor = world_zoom;
 	m_scale = { 0.5f / world_zoom, 0.66f / world_zoom };
-	
+
 }
 
 void Bar_description::set_position(vec2 position, int sh, int offsetx)

@@ -15,7 +15,7 @@ class Enemy_02 :public Enemies
 public:
 
 	// Releases all the associated resources
-	void destroy() override;
+	void destroy(bool reset) override;
 
 	// Creates all the associated render resources and default transform
 	bool init(int level) override;

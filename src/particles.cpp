@@ -196,9 +196,11 @@ float particles::get_color_green() {
 void particles::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteVertexArrays(1, &mesh.vao);
-	effect.release();
+    glDeleteBuffers(1, &mesh.ibo);
+
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 particles::~particles()
 {

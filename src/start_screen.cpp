@@ -58,12 +58,11 @@ bool Startscreen::init(vec2 screen) {
 
 void Startscreen::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.ibo);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+    glDeleteShader(effect.vertex);
+    glDeleteShader(effect.fragment);
+    glDeleteShader(effect.program);
 }
 
 void Startscreen::draw(const mat3& projection) {
@@ -129,5 +128,5 @@ vec2 Startscreen::set_scale(float w, float h, vec2 screen)
 }
 bool Startscreen::is_over()
 {
-	return s_is_over; 
+	return s_is_over;
 }

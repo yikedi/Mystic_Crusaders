@@ -91,13 +91,13 @@ bool Enemy_03::init(int level)
 
 // Call if init() was successful
 // Releases all graphics resources
-void Enemy_03::destroy()
+void Enemy_03::destroy(bool reset)
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
 	effect.release();
-	if(waved && !m_is_alive) {
+	if((waved && !m_is_alive) || reset) {
 		wave.destroy();
 	}
 }

@@ -275,11 +275,11 @@ void World::destroy()
 
 	m_hero.destroy();
 	for (auto& enemy : m_enemys_01)
-		enemy.destroy();
+		enemy.destroy(true);
 	for (auto& enemy : m_enemys_02)
-		enemy.destroy();
+		enemy.destroy(true);
 	for (auto& enemy : m_enemys_03)
-		enemy.destroy();
+		enemy.destroy(true);
 	for (auto& h_proj : hero_projectiles)
 		h_proj->destroy();
 	for (auto& e_proj : enemy_projectiles)
@@ -293,7 +293,7 @@ void World::destroy()
 	for (auto& thunder : thunders)
 		thunder->destroy();
 	for (auto& phoenix : phoenix_list)
-		phoenix->destroy();
+		phoenix->destroy(true);
 
 	m_enemys_01.clear();
 	m_enemys_02.clear();
@@ -737,7 +737,7 @@ bool World::update(float elapsed_ms)
 
 			if (!p->is_alive())
 			{
-				p->destroy();
+				p->destroy(true);
 				phoenix_list.erase(phoenix_list.begin() + i);
 				continue;
 			}
@@ -757,7 +757,7 @@ bool World::update(float elapsed_ms)
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy->is_alive()) {
-						enemy->destroy();
+						enemy->destroy(true);
 						enemy = m_enemys_01.erase(enemy);
 						if (!passed_level){
 							++m_points;
@@ -788,7 +788,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy);
 
 					if (!enemy->is_alive()) {
-						enemy->destroy();
+						enemy->destroy(true);
 						enemy = m_enemys_01.erase(enemy);
 						if (!passed_level){
 							++m_points;
@@ -820,7 +820,7 @@ bool World::update(float elapsed_ms)
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy2->is_alive()) {
-						enemy2->destroy();
+						enemy2->destroy(true);
 						enemy2 = m_enemys_02.erase(enemy2);
 						if (!passed_level){
 							++m_points;
@@ -849,7 +849,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy2);
 
 					if (!enemy2->is_alive()) {
-						enemy2->destroy();
+						enemy2->destroy(true);
 						enemy2 = m_enemys_02.erase(enemy2);
 						if (!passed_level){
 							++m_points;
@@ -881,7 +881,7 @@ bool World::update(float elapsed_ms)
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy3->is_alive()) {
-						enemy3->destroy();
+						enemy3->destroy(true);
 						enemy3 = m_enemys_03.erase(enemy3);
 						if (!passed_level){
 							++m_points;
@@ -910,7 +910,7 @@ bool World::update(float elapsed_ms)
 					t->apply_effect(*enemy3);
 
 					if (!enemy3->is_alive()) {
-						enemy3->destroy();
+						enemy3->destroy(true);
 						enemy3 = m_enemys_03.erase(enemy3);
 						if (!passed_level){
 							++m_points;
@@ -944,7 +944,7 @@ bool World::update(float elapsed_ms)
 					enemy->take_damage(6.f);
 
 					if (!enemy->is_alive()) {
-						enemy->destroy();
+						enemy->destroy(true);
 						enemy = m_enemys_01.erase(enemy);
 						++m_points;
 						MAX_ENEMIES_01 = INIT_MAX_ENEMIES + m_points / 23;
@@ -974,7 +974,7 @@ bool World::update(float elapsed_ms)
 					enemy2->take_damage(6.f);
 
 					if (!enemy2->is_alive()) {
-						enemy2->destroy();
+						enemy2->destroy(true);
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
 						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
@@ -1004,7 +1004,7 @@ bool World::update(float elapsed_ms)
 					enemy3->take_damage(6.f);
 
 					if (!enemy3->is_alive()) {
-						enemy3->destroy();
+						enemy3->destroy(true);
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
 						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 17;
@@ -1130,11 +1130,11 @@ bool World::update(float elapsed_ms)
 		m_tutorial.destroy();
 		m_hero.destroy();
 		for (auto& enemy : m_enemys_01)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& enemy : m_enemys_03)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& h_proj : hero_projectiles)
 			h_proj->destroy();
 		for (auto& e_proj : enemy_projectiles)
@@ -1146,7 +1146,7 @@ bool World::update(float elapsed_ms)
 		for (auto& thunder : thunders)
 			thunder->destroy();
 		for (auto& phoenix : phoenix_list)
-			phoenix->destroy();
+			phoenix->destroy(true);
 		for (auto& vine : m_vine)
 			vine.destroy();
 		m_hero.init(screen);
@@ -1459,11 +1459,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ingame.destroy();
 		m_skill_switch.destroy();
 		for (auto& enemy : m_enemys_01)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& enemy : m_enemys_03)
-			enemy.destroy();
+			enemy.destroy(true);
 		for (auto& h_proj : hero_projectiles)
 			h_proj->destroy();
 		for (auto& e_proj : enemy_projectiles)
@@ -1475,7 +1475,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		for (auto& thunder : thunders)
 			thunder->destroy();
 		for (auto& phoenix : phoenix_list)
-			phoenix->destroy();
+			phoenix->destroy(true);
 		for (auto& vine : m_vine)
 			vine.destroy();
 		m_treetrunk.clear();
