@@ -33,6 +33,7 @@
 #define element3() textures_path("skill_tree3.png")
 #define audio_path(name) data_path  "/audio/" name
 #define mesh_path(name) data_path  "/meshes/" name
+#define font_path(name) data_path "/fonts/" name
 
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..

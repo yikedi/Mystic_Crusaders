@@ -5,7 +5,8 @@
 #include <string.h>
 #include <cassert>
 #include <sstream>
-
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <gl3w.h>
 
 // Same as static in c, local to compilation unit
@@ -101,6 +102,15 @@ bool World::init(vec2 screen)
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
 	glfwSetScrollCallback(m_window, mouse_wheel_callback);
+    
+    // Initialize font library and face
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+        printf("ERROR::FREETYPE: Could not init FreeType Library");
+
+    FT_Face face;
+    if (FT_New_Face(ft, font_path("ARCADECLASSIC.TTF"), 0, &face))
+        printf("ERROR::FREETYPE: Failed to load font");
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
