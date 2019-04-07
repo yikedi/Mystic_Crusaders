@@ -4,10 +4,10 @@
 
 void phoenix_skill::init()
 {
-	m_hp = 150.f;
-	damage = 20.f;
+	m_hp = 100.f;
+	damage = 10.f;
 	m_scale = {0.8f,0.8f};
-	mp_cost = 25.f;
+	mp_cost = 12.f;
 }
 
 float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 hero_position)
