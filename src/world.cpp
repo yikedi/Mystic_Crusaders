@@ -329,18 +329,18 @@ bool World::update(float elapsed_ms)
 		m_game_level++;
 		m_hero.hp = m_hero.max_hp;
 		m_hero.mp = m_hero.max_mp;
-		m_tree.clear();
-		m_treetrunk.clear();
-		m_vine.clear();
 		for (auto& treetrunk : m_treetrunk)
 			treetrunk.destroy();
 		for (auto& tree : m_tree)
 			tree.destroy();
 		for (auto& vine : m_vine)
 			vine.destroy();
+		m_tree.clear();
+		m_treetrunk.clear();
+		m_vine.clear();
 		initTrees();
 		map.init(screen, m_game_level);
-		pass_points += m_points + 5;
+		pass_points = m_points + (m_game_level + 1) * 5;
 		cur_points_needed = pass_points - m_points;
 		//kill_num = number_to_vec(cur_points_needed, true);
 	}
@@ -691,8 +691,7 @@ bool World::update(float elapsed_ms)
 		for (int i = len; i >= 0; i--)
 		{
 			Projectile* h_proj = hero_projectiles.at(i);
-			float w = h_proj->get_bounding_box().x / 2;
-			if (h_proj->get_position().x + w < 0.f)
+			if (h_proj->get_position().x < 0.f || h_proj->get_position().x > screen.x || h_proj->get_position().y < 0.f || h_proj->get_position().y > screen.y)
 			{
 				h_proj->destroy();
 				hero_projectiles.erase(hero_projectiles.begin() + i);
@@ -704,8 +703,7 @@ bool World::update(float elapsed_ms)
 		auto e_proj = enemy_projectiles.begin();
 		while (e_proj != enemy_projectiles.end())
 		{
-			float w = e_proj->get_bounding_box().x / 2;
-			if (e_proj->get_position().x + w < 0.f)
+			if (e_proj->get_position().x < 0.f || e_proj->get_position().x > screen.x || e_proj->get_position().y < 0.f || e_proj->get_position().y > screen.y)
 			{
 				e_proj->destroy();
 				e_proj = enemy_projectiles.erase(e_proj);
@@ -940,7 +938,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy))
 				{
-					p->change_hp(-2.f);
+					p->change_hp(-1.f);
 					enemy->take_damage(6.f);
 
 					if (!enemy->is_alive()) {
@@ -970,7 +968,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy2))
 				{
-					p->change_hp(-2.f);
+					p->change_hp(-1.f);
 					enemy2->take_damage(6.f);
 
 					if (!enemy2->is_alive()) {
@@ -1000,7 +998,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy3))
 				{
-					p->change_hp(-2.f);
+					p->change_hp(-1.f);
 					enemy3->take_damage(6.f);
 
 					if (!enemy3->is_alive()) {
@@ -1034,7 +1032,7 @@ bool World::update(float elapsed_ms)
 					p->change_hp(-10.f);
 					laser.destroy();
 					enemy_projectiles.erase(enemy_projectiles.begin() + i);
-
+					break;
 				}
 			}
 
@@ -1141,7 +1139,7 @@ bool World::update(float elapsed_ms)
 			e_proj.destroy();
 		for (auto& tree : m_tree)
 			tree.destroy();
-		for (auto& treetrunk : m_tree)
+		for (auto& treetrunk : m_treetrunk)
 			treetrunk.destroy();
 		for (auto& thunder : thunders)
 			thunder->destroy();
@@ -1470,7 +1468,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			e_proj.destroy();
 		for (auto& tree : m_tree)
 			tree.destroy();
-		for (auto& treetrunk : m_tree)
+		for (auto& treetrunk : m_treetrunk)
 			treetrunk.destroy();
 		for (auto& thunder : thunders)
 			thunder->destroy();
