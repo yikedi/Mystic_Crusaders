@@ -80,6 +80,7 @@ set(SOURCE_FILES
 	src/particles.cpp
 	src/skill_switch_UI.cpp
 	src/story.cpp
+	src/smooth_animation.cpp
 
   src/project_path.hpp
 	src/common.hpp
@@ -124,7 +125,8 @@ set(SOURCE_FILES
   src/enemyPowerupWave.h
 	src/altar_portal.hpp
 	src/skill_switch_UI.hpp
-	stc/story.hpp
+	src/story.hpp
+	src/smooth_animation.hpp
     src/altar_portal.hpp
     src/enemyPowerupWave.h
 	src/vine.h

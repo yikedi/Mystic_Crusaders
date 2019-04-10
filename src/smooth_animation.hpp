@@ -8,7 +8,7 @@
 class Story : public Renderable
 {
 
-	SpriteSheet story_texture;
+	static SpriteSheet skill_texture;
 
 public:
 
@@ -36,6 +36,4 @@ private:
 	TexturedVertex texVertices[4];
 
 	std::vector<float> texture_locs;
-
-	float opacity = 1.f;
 };
