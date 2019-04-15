@@ -1173,6 +1173,7 @@ bool World::update(float elapsed_ms)
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
+		shop.set_balance(shop.get_balance() + m_points);
 		m_points = 0;
 		m_portal.setIsPortal(false);
 		passed_level = false;
