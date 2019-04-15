@@ -186,6 +186,8 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
+	shop.init();
+	shop.update_hero(m_hero);
 
 	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -425,7 +427,7 @@ bool World::update(float elapsed_ms)
 
 				m_hero.apply_momentum(force);
 			}
-			if (m_points - previous_point > 15 + (m_hero.level * 5))
+			if (m_points * m_hero.exp_multiplier - previous_point > 15 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
 				m_hero.levelup();
@@ -1148,6 +1150,7 @@ bool World::update(float elapsed_ms)
 		for (auto& vine : m_vine)
 			vine.destroy();
 		m_hero.init(screen);
+		shop.update_hero(m_hero);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });

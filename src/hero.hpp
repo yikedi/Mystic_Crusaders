@@ -36,6 +36,10 @@ public:
 	float max_mp;
 	float hp;
 	float mp;
+	float fireball_damage;
+	float movement_speed;
+	float exp_multiplier;
+	bool second_life;
 	//std::vector<skill> skill_list;
 
     int numTiles = 1;
@@ -121,6 +125,8 @@ public:
 	int level;
 	bool isInTransition;
 	bool justFinishedTransition;
+
+
 private:
     TexturedVertex texVertices[4];
     std::vector<float> texture_locs;

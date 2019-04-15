@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 		world.update(elapsed_sec);
 		world.draw();
 	}
-
+	world.shop.save();
 	world.destroy();
 
 	return EXIT_SUCCESS;
