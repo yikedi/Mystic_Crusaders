@@ -456,32 +456,64 @@ bool World::update(float elapsed_ms)
 				enemy.set_wave();
 				Mix_PlayChannel(-1, m_amplify_sound, 0);
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
-				if (rand_factor == 0)
-				{
-					if (m_enemys_01.size() > 0) {
-						int factor = m_enemys_01.size();
-						if (factor == 0) {
-							enemy.recentPowerupType = m_enemys_01[0].powerup();
-							m_enemys_01[0].set_wave();
+				int group_behavior_chance = std::min(50, std::max(0 , (int) m_points / 2));
+				if (rand() % 100 < group_behavior_chance) {
+					if (rand_factor == 0)
+					{
+						enemy.recentPowerupType = 4;
+						auto enemy1 = m_enemys_01.begin();
+						while (enemy1 != m_enemys_01.end())
+						{
+							enemy1 -> shoot_projectiles(enemy_projectiles);
+							enemy1 -> set_wave();
+							if (enemy1 == m_enemys_01.end() || m_enemys_01.size() == 0) {
+								break;
+							}
+							++enemy1;
 						}
-						else {
-							rand_factor = std::rand() % factor + 0;
-							enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
-							m_enemys_01[rand_factor].set_wave();
+						Mix_PlayChannel(-1, m_laser_sound, 0);
+					}
+					else {
+						enemy.recentPowerupType = 4;
+						auto enemy2 = m_enemys_02.begin();
+						while (enemy2 != m_enemys_02.end())
+						{
+							enemy2 -> groupAtk = true;
+							enemy2 -> set_wave();
+							if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
+								break;
+							}
+							++enemy2;
 						}
 					}
-				}
-				else {
-					if (m_enemys_02.size() > 0) {
-						int factor = m_enemys_02.size();
-						if (factor == 0) {
-							enemy.recentPowerupType = m_enemys_02[0].powerup();
-							m_enemys_02[0].set_wave();
+				} else {
+					if (rand_factor == 0)
+					{
+						if (m_enemys_01.size() > 0) {
+							int factor = m_enemys_01.size();
+							if (factor == 0) {
+								enemy.recentPowerupType = m_enemys_01[0].powerup();
+								m_enemys_01[0].set_wave();
+							}
+							else {
+								rand_factor = std::rand() % factor + 0;
+								enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
+								m_enemys_01[rand_factor].set_wave();
+							}
 						}
-						else {
-							rand_factor = std::rand() % factor + 0;
-							enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
-							m_enemys_02[rand_factor].set_wave();
+					}
+					else {
+						if (m_enemys_02.size() > 0) {
+							int factor = m_enemys_02.size();
+							if (factor == 0) {
+								enemy.recentPowerupType = m_enemys_02[0].powerup();
+								m_enemys_02[0].set_wave();
+							}
+							else {
+								rand_factor = std::rand() % factor + 0;
+								enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
+								m_enemys_02[rand_factor].set_wave();
+							}
 						}
 					}
 				}

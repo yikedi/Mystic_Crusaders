@@ -61,8 +61,8 @@ bool Enemy_02::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(70.0f + (float)level * 0.7f * randAttributeFactor, 400.0f);
-	randMovementCooldown = std::max(1000.0 - (double)level * 2.0 * randAttributeFactor, 200.0);
+	m_speed = std::min(70.0f + (float)level * 0.6f * randAttributeFactor, 400.0f);
+	randMovementCooldown = std::max(1000.0 - (double)level * 1.5 * randAttributeFactor, 200.0);
 	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.3f;
@@ -74,6 +74,7 @@ bool Enemy_02::init(int level)
 	speedBoost = false;
 	waved = false;
 	wave.init(m_position, {1.f, 1.f, 1.f});
+	groupAtk = false;
 
 	return true;
 }
@@ -241,14 +242,24 @@ void Enemy_02::update(float ms, vec2 target_pos)
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
 	}
-	if (checkIfCanChangeDirectionOfMove(currentTime)){
+	if (checkIfCanChangeDirectionOfMove(currentTime) || groupAtk){
 		float LO = enemy_angle - 0.9f;
 		float HI = enemy_angle + 0.9f;
+		if (groupAtk) {
+			LO = enemy_angle - 0.2f;
+			HI = enemy_angle + 0.2f;
+		}
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 		if (powerupType == 2 || powerupType == 3) {
 			speedBoost = !speedBoost;
+		} else {
+			speedBoost = false;
 		}
+		if (groupAtk) {
+			speedBoost = true;
+		}
+		groupAtk = false;
 	}
 
 	stunned = false;
