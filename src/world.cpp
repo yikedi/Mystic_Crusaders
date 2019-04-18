@@ -77,7 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 
 	if (m_window == nullptr)
 		return false;
@@ -554,10 +554,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e1))
 			{
 				vec2 cur_position = e1.get_position();
-				int facing = e1.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e1.set_position(new_position);
 			}
 		}
@@ -567,10 +578,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e2))
 			{
 				vec2 cur_position = e2.get_position();
-				int facing = e2.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e2.set_position(new_position);
 			}
 		}
@@ -580,10 +602,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e3))
 			{
 				vec2 cur_position = e3.get_position();
-				int facing = e3.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e3.set_position(new_position);
 			}
 		}
@@ -677,9 +710,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e1.set_position(new_position);
 				}
 			}
@@ -692,9 +734,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e2.set_position(new_position);
 				}
 			}
@@ -707,9 +758,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e3.set_position(new_position);
 				}
 			}
