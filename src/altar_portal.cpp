@@ -237,7 +237,7 @@ bool AltarPortal::collides_with(Enemies &enemy)
 	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
 	float my_r = std::max(get_bounding_box().x, get_bounding_box().y);
 	float r = std::max(other_r, my_r);
-	r *= 0.6f;
+	r *= 0.8f;
 	if (d_sq < r * r)
 		return true;
 	return false;
