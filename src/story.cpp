@@ -2,6 +2,13 @@
 
 bool Story::init(vec2 position) {
 	// stub
+	// Setting initial values
+	// zoom_factor = 1.f;
+	m_scale.x = 1.f;
+	m_scale.y = 1.f;
+	// set_position({ (float)x, (float)y });
+	m_rotation = 0.f;
+
 	return true;
 }
 
@@ -15,7 +22,7 @@ void Story::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Button::draw(const mat3 &projection)
+void Story::draw(const mat3 &projection)
 {
 	// if ((button_hoverable && mouse_hovering) || !button_hoverable) {
 	transform_begin();
@@ -52,7 +59,7 @@ void Button::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, button_texture.id);
+	glBindTexture(GL_TEXTURE_2D, story_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
