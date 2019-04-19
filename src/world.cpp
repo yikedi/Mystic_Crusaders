@@ -1377,7 +1377,10 @@ void World::draw()
 	}
 
 	// Drawing entities
-	map.draw(projection_2D);
+	if(start_is_over)
+	{
+		map.draw(projection_2D);
+	}
 	m_hero.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
