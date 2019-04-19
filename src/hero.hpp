@@ -34,6 +34,7 @@ public:
 	//hero attributes
 	float max_hp;
 	float max_mp;
+	float mp_recovery_rate;
 	float hp;
 	float mp;
 	float fireball_damage;

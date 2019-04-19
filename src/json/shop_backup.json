@@ -1,13 +1,22 @@
 {
 	"items":
 	{
-		"hp": 
+		"max_hp": 
 		{
 			"description":"Increase the max hp of the hero by 30",
 			"stock": 5,
 			"max_stock": 5,
 			"price": 30,
 			"interest_value":30.0
+		},
+
+		"mp_recovery":
+		{
+			"description":"Increase the mp recovery rate by 30%",
+			"stock": 5,
+			"max_stock":5,
+			"price":30,
+			"interest_value":0.3
 		},
 
 		"fireball_damage": 

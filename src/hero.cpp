@@ -99,6 +99,7 @@ bool Hero::init(vec2 screen)
 	fireball_damage = 20.0f;
 	movement_speed = 200.f;
 	exp_multiplier = 1.0f;
+	mp_recovery_rate = 0.05;
 	second_life = false;
 
 	return true;
@@ -149,7 +150,7 @@ void Hero::update(float ms)
 
         if (mp < max_mp)
         {
-            mp += 0.05;
+            mp += mp_recovery_rate;
         }
 
         // setting player movement state

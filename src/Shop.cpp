@@ -17,6 +17,7 @@ bool Shop::init()
 	if (!reader.parse(ifs, shop_info, false))
 		return false;
 
+	buy_item("mp_recovery");
 	ifs.close();
 
 	return true;
@@ -70,8 +71,10 @@ void Shop::save()
 void Shop::update_hero(Hero& hero)
 {
 	Json::Value info_for_hero;
-	int purchased = get_purchased("hp");
-	hero.max_hp = 100 + purchased * get_interest_value("hp");
+	int purchased = get_purchased("max_hp");
+	hero.max_hp = 100 + purchased * get_interest_value("max_hp");
+	purchased = get_purchased("mp_recovery");
+	hero.mp_recovery_rate = 0.05 * (1 + purchased * get_interest_value("mp_recovery"));
 	purchased = get_purchased("fireball_damage");
 	hero.fireball_damage = 20.0f * (1.0 + float(purchased) * get_interest_value("fireball_damage"));
 	purchased = get_purchased("movement_speed");
