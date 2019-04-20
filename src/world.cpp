@@ -170,6 +170,7 @@ bool World::init(vec2 screen)
 	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
+	item_num = 0;
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
 	fire_skill_set = { 0.f,0.f,0.f };
@@ -323,7 +324,8 @@ bool World::update(float elapsed_ms)
 
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
-	shop_screen.update_shop(shopping, 5, 1, screen);
+	
+	shop_screen.update_shop(shopping, current_stock, balance - current_price, item_num, screen);
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -1186,6 +1188,7 @@ bool World::update(float elapsed_ms)
 		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
+		item_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
@@ -1282,7 +1285,7 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
-	if (!display_tutorial) {
+	if (!display_tutorial && !shopping) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
 	}
@@ -1298,24 +1301,25 @@ void World::draw()
 	}
 
 	// Drawing entities
-	map.draw(projection_2D);
-	m_hero.draw(projection_2D);
-	for (auto& enemy : m_enemys_01)
-		enemy.draw(projection_2D);
-	for (auto& enemy : m_enemys_02)
-		enemy.draw(projection_2D);
-	for (auto& enemy : m_enemys_03)
-		enemy.draw(projection_2D);
-	for (auto& h_proj : hero_projectiles)
-		h_proj->draw(projection_2D);
-	for (auto& e_proj : enemy_projectiles)
-		e_proj.draw(projection_2D);
-	for (auto& thunder : thunders)
-		thunder->draw(projection_2D);
-	for (auto& phoenix : phoenix_list)
-		phoenix->draw(projection_2D);
+
 
 	if (start_is_over && !shopping) {
+		map.draw(projection_2D);
+		m_hero.draw(projection_2D);
+		for (auto& enemy : m_enemys_01)
+			enemy.draw(projection_2D);
+		for (auto& enemy : m_enemys_02)
+			enemy.draw(projection_2D);
+		for (auto& enemy : m_enemys_03)
+			enemy.draw(projection_2D);
+		for (auto& h_proj : hero_projectiles)
+			h_proj->draw(projection_2D);
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.draw(projection_2D);
+		for (auto& thunder : thunders)
+			thunder->draw(projection_2D);
+		for (auto& phoenix : phoenix_list)
+			phoenix->draw(projection_2D);
 
 		for (auto& treetrunk : m_treetrunk)
 			treetrunk.draw(projection_2D);
@@ -1527,6 +1531,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
+		item_num = 0;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
@@ -1676,7 +1681,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over && !shopping) {
 		if (!display_tutorial) {
 			button_play.check_click(mouse_pos);
 			button_tutorial.check_click(mouse_pos);
@@ -1686,8 +1691,21 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 	}
+	if (shopping) {
+		item_num = shop_screen.item_position(mouse_pos, screen);
+		if (item_num != 0) {
+			std::string item_name = find_item(item_num);
+			current_stock = shop.get_stock(item_name);
+			current_price = shop.get_price(item_name);
+			balance = shop.get_balance();
+			bool buying = shop_screen.level_position(mouse_pos);
+			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && buying) {
+				shop.buy_item(item_name);
+			}
+		}
+	}
 
-	if (!game_is_paused && start_is_over && !shopping) {
+	else if (!game_is_paused && start_is_over && !shopping) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
 
@@ -1894,7 +1912,30 @@ vec3 World::number_to_vec(int number, bool kill)
 		return { b,s,g };
 	}
 }
-
+std::string World::find_item(int item_num) {
+	std::string result = "";
+	switch (item_num) {
+	case 1:
+		result = "max_hp";
+		break;
+	case 2:
+		result = "mp_recovery";
+		break;
+	case 3:
+		result = "exp_increase";
+		break;
+	case 4:
+		result = "fireball_damage";
+		break;
+	case 5:
+		result = "movement_speed";
+		break;
+	case 6:
+		result = "second_life";
+		break;
+	}
+	return result;
+}
 void World::doNothing() {
 	// NOT A STUB
 	return;

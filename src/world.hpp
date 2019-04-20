@@ -88,6 +88,8 @@ private:
 
 	vec3 number_to_vec(int number, bool kill);
 
+	std::string find_item(int item_num);
+
 	void doNothing();
 
 
@@ -128,6 +130,8 @@ private:
 
 	bool game_is_paused;
 	bool shopping;
+	int item_num;
+	//std::string item_name;
 	vec2 mouse_pos;
 	int used_skillpoints;
 	vec3 ice_skill_set;
@@ -195,5 +199,9 @@ private:
 
 	bool passed_level;
 
-
+	int current_stock;
+	//int total_stock;
+	int current_price;
+	float interest;
+	int balance;
 };

@@ -63,13 +63,14 @@ bool Shop_screen::init(vec2 screen)
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 
-	m_scale = {1.f, 1.f};
+	m_scale = set_scale(w, h, screen);
 	m_position.x = screen.x/2;
 	m_position.y = screen.y/2;
 	shopf.init(screen);
 	items.init(screen);
 	skillup.init(screen);
 	skillup.change_position(screen);
+	skillup.change_scale(screen);
 	return true;
 }
 
@@ -138,12 +139,12 @@ void Shop_screen::draw(const mat3 & projection)
 		items.draw(projection);
 }
 
-void Shop_screen::update_shop(bool shopping, int current_stock, int item_num, vec2 screen)
+void Shop_screen::update_shop(bool shopping, int current_stock, int afforable, int item_num, vec2 screen)
 {
 	if (shopping) {
-		//shopf.update_sframe(shopping, item_num, screen);
-		//items.update_item(shopping, item_num);
-		//skillup.update_leveltex(shopping, current_stock, item_num);
+		shopf.update_sframe(shopping, item_num, screen);
+		items.update_item(shopping, item_num);
+		skillup.update_itemlevel(shopping, current_stock, afforable, item_num);
 	}
 }
 
@@ -163,8 +164,8 @@ bool Shop_screen::level_position(vec2 mouse_pos)
 {
 	float lxpos = skillup.get_position().x;
 	float lypos = skillup.get_position().y;
-	vec2 height = { lypos + 40.f,lypos-40.f };
-	vec2 width = { lxpos + 192.5f, lxpos -192.5f};
+	vec2 height = { lypos + 30.f,lypos-30.f };
+	vec2 width = { lxpos + 182.5f, lxpos -182.5f};
 	if (inside(height,width,mouse_pos)) {
 		
 		return true;
@@ -176,15 +177,27 @@ bool Shop_screen::level_position(vec2 mouse_pos)
 
 }
 
-int Shop_screen::icon_position(vec2 mouse_pos)
+int Shop_screen::item_position(vec2 mouse_pos, vec2 screen)
 {
-	vec2 height1; vec2 width1;
-	vec2 height2; vec2 width2;
-	vec2 height3; vec2 width3;
-	vec2 height4; vec2 width4;
-	vec2 height5; vec2 width5;
-	vec2 height6; vec2 width6;
+	float x = screen.x;
+	float y = screen.y;
+	vec2 height1 = { y / 4 + 60.f, y / 4 - 60.f };
+	vec2 width1  = { 0.375*x + 60.f, 0.375*x - 60.f };
 
+	vec2 height2= { y / 4 + 60.f, y / 4 - 60.f };
+	vec2 width2 = { x / 2 + 60.f, x / 2 - 60.f };
+
+	vec2 height3 = { y / 4 + 60.f, y / 4 - 60.f };
+	vec2 width3 = { 0.68*x + 60.f, 0.68*x - 60.f };
+
+	vec2 height4 = { y / 2 + 60.f, y / 2 - 60.f };
+	vec2 width4  = { 0.375*x + 60.f, 0.375*x - 60.f };
+
+	vec2 height5 = { y / 2 + 60.f, y / 2 - 60.f };
+	vec2 width5  = { x / 2 + 60.f, x / 2 - 60.f };
+
+	vec2 height6 = { y / 2 + 60.f, y / 2 - 60.f };
+	vec2 width6  = { 0.68*x + 60.f, 0.68*x - 60.f };
 
 	if (inside(height1, width1, mouse_pos)) {
 		return 1;
@@ -207,4 +220,11 @@ int Shop_screen::icon_position(vec2 mouse_pos)
 	else {
 		return 0;
 	}
+}
+
+vec2 Shop_screen::set_scale(float w, float h, vec2 screen)
+{
+	float xscale = screen.x / w;
+	float yscale = screen.y / h;
+	return { xscale, yscale };
 }

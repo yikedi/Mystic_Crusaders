@@ -111,6 +111,19 @@ void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
 	}
 }
 
+void Skillup::update_itemlevel(bool paused, int stock, int afforable, int skill_num)
+{
+	if (paused) {
+		if (stock > 0 && skill_num != 0 && afforable>0) {
+			get_texture(0);
+		}
+		else {
+			get_texture(1);
+		}
+	}
+}
+
+
 void Skillup::get_texture(int loc)
 {
 	float h = 385.f;
@@ -145,6 +158,12 @@ vec2 Skillup::get_position()const
 
 void Skillup::change_position(vec2 screen)
 {
-	m_position.x = 0.5*screen.x;
-	m_position.y = 0.5*screen.y;
+	m_position.x = 0.875*screen.x;
+	m_position.y = 0.6*screen.y;
+}
+
+void Skillup::change_scale(vec2 screen)
+{
+	m_scale.x = 0.75;
+	m_scale.y = 0.75;
 }

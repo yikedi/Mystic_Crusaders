@@ -38,6 +38,8 @@ bool Shop_item::init(vec2 screen)
 
 	m_scale = { 1.0f,1.0f };
 
+	m_position.x = 0.125*screen.x;
+	m_position.y = 0.5 * screen.y;
 	m_light_up = 0;
 	return true;
 }
@@ -104,7 +106,7 @@ void Shop_item::draw(const mat3 & projection)
 void Shop_item::update_item(bool shopping, int item_num)
 {
 	if (shopping) {
-		get_texture(item_num-1);
+		get_texture(item_num);
 	}
 }
 
@@ -112,7 +114,7 @@ void Shop_item::get_texture(int loc)
 {
 	float sw = 120.f;
 	float w = 720.f;
-	float texture_locs[] = { 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 1.f };
+	float texture_locs[] = {0.f, 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right

@@ -17,7 +17,7 @@ bool Shop::init()
 	if (!reader.parse(ifs, shop_info, false))
 		return false;
 
-	buy_item("mp_recovery");
+	//buy_item("mp_recovery");
 	ifs.close();
 
 	return true;

@@ -28,9 +28,7 @@ public:
 
 	void draw(const mat3& projection)override;
 
-	void update_shop(bool shopping, int current_stock, int item_num, vec2 screen);
-
-	//void update_shop(bool shopping, int total, int used, int item_num, vec2 screen);
+	void update_shop(bool shopping, int current_stock, int afforable, int item_num, vec2 screen);
 
 	std::string get_element();
 
@@ -38,9 +36,11 @@ public:
 
 	bool level_position(vec2 mouse_pos);
 
-	int icon_position(vec2 mouse_pos);
+	int item_position(vec2 mouse_pos, vec2 screen);
 
-	int icon_position(vec2 mouse_pos, std::string element);
+	//int item_position(vec2 mouse_pos);
+
+	vec2 set_scale(float w, float h, vec2 screen);
 
 	std::string element_position(vec2 mouse_pos);
 

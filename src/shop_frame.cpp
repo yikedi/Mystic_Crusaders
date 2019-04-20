@@ -103,33 +103,33 @@ void Shop_frame::update_sframe(bool shopping, int item_num, vec2 screen)
 
 		if (item_num == 1) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.322*screen.y;
+			m_position.x = 0.375*screen.x;
+			m_position.y = 0.28*screen.y;
 		}
 		else if (item_num == 2) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.55*screen.y;
+			m_position.x = 0.52*screen.x;
+			m_position.y = 0.28*screen.y;
 		}
 		else if (item_num == 3) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.775*screen.y;
+			m_position.x = 0.67*screen.x;
+			m_position.y = 0.28*screen.y;
 		}
 		else if (item_num == 4) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.775*screen.y;
+			m_position.x = 0.36*screen.x;
+			m_position.y = 0.5*screen.y;
 		}
 		else if (item_num == 5) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.775*screen.y;
+			m_position.x = 0.52*screen.x;
+			m_position.y = 0.5*screen.y;
 		}
 		else if (item_num == 6) {
 			get_texture(0);
-			m_position.x = 0.89*screen.x;
-			m_position.y = 0.775*screen.y;
+			m_position.x = 0.67*screen.x;
+			m_position.y = 0.5*screen.y;
 		}
 		else {
 			get_texture(1);
