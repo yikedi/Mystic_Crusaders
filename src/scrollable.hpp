@@ -16,7 +16,7 @@ public:
 
 	void destroy();
 
-	void update(int skill, float zoom);
+	void update(float currTime);
 
 	void setTime(float curr_time);
 
@@ -44,5 +44,6 @@ private:
 	float zoom_factor;
 	float width;
 	float height;
+	float halfHeight;
 	float opacity = 1.f;
 };
