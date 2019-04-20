@@ -7,10 +7,9 @@
 #include <SDL_mixer.h>
 
 #include "common.hpp"
-#include "skillup.hpp"
+#include "purchase.hpp"
 #include "shop_frame.hpp"
 #include "shop_item.hpp"
-
 
 class Shop_screen : public Renderable
 {
@@ -30,24 +29,19 @@ public:
 
 	void update_shop(bool shopping, int current_stock, int afforable, int item_num, vec2 screen);
 
-	std::string get_element();
-
 	bool inside(vec2 h, vec2 w, vec2 pos);
 
-	bool level_position(vec2 mouse_pos);
+	bool level_position(vec2 mouse_pos, vec2 screen);
 
 	int item_position(vec2 mouse_pos, vec2 screen);
 
-	//int item_position(vec2 mouse_pos);
-
 	vec2 set_scale(float w, float h, vec2 screen);
 
-	std::string element_position(vec2 mouse_pos);
 
 private:
 
 
-	Skillup skillup;
+	Purchase purchase;
 	Shop_frame shopf;
 	Shop_item items;
 	vec2 m_scale;

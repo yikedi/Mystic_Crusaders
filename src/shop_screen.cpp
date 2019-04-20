@@ -9,9 +9,6 @@
 
 #include <gl3w.h>
 Texture Shop_screen::shop_texture;
-// shopping bool in world
-// add change position to the skillup.cpp
-// add another update to skillup.cpp
 
 bool Shop_screen::init(vec2 screen)
 {
@@ -68,9 +65,7 @@ bool Shop_screen::init(vec2 screen)
 	m_position.y = screen.y/2;
 	shopf.init(screen);
 	items.init(screen);
-	skillup.init(screen);
-	skillup.change_position(screen);
-	skillup.change_scale(screen);
+	purchase.init(screen);
 	return true;
 }
 
@@ -83,7 +78,7 @@ void Shop_screen::destroy()
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
 
-	skillup.destroy();
+	purchase.destroy();
 	shopf.destroy();
 	items.destroy();
 }
@@ -134,7 +129,7 @@ void Shop_screen::draw(const mat3 & projection)
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-		skillup.draw(projection);
+		purchase.draw(projection);
 		shopf.draw(projection);
 		items.draw(projection);
 }
@@ -144,7 +139,7 @@ void Shop_screen::update_shop(bool shopping, int current_stock, int afforable, i
 	if (shopping) {
 		shopf.update_sframe(shopping, item_num, screen);
 		items.update_item(shopping, item_num);
-		skillup.update_itemlevel(shopping, current_stock, afforable, item_num);
+		purchase.update_purchase(shopping, current_stock, afforable, item_num);
 	}
 }
 
@@ -160,18 +155,16 @@ bool Shop_screen::inside(vec2 h, vec2 w,vec2 pos)
 	}
 }
 
-bool Shop_screen::level_position(vec2 mouse_pos)
+bool Shop_screen::level_position(vec2 mouse_pos, vec2 screen)
 {
-	float lxpos = skillup.get_position().x;
-	float lypos = skillup.get_position().y;
-	vec2 height = { lypos + 30.f,lypos-30.f };
-	vec2 width = { lxpos + 182.5f, lxpos -182.5f};
-	if (inside(height,width,mouse_pos)) {
-		
+	float lxpos = purchase.get_position().x;
+	float lypos = purchase.get_position().y;
+	vec2 height = { lypos + 40.f,lypos - 40.f };
+	vec2 width = { lxpos + 192.5f, lxpos - 192.5f };
+	if (inside(height, width, mouse_pos)) {
 		return true;
 	}
 	else {
-		
 		return false;
 	}
 

@@ -83,10 +83,11 @@ set(SOURCE_FILES
 	src/shop_screen.cpp
 	src/shop_item.cpp
 	src/shop_frame.cpp
+	src/purchase.cpp
 	src/json/json_reader.cpp
 	src/json/json_value.cpp
 	src/json/json_writer.cpp
-	
+
 
   src/project_path.hpp
 	src/common.hpp
@@ -141,6 +142,7 @@ set(SOURCE_FILES
 	src/shop_screen.hpp
 	src/shop_item.hpp
 	src/shop_frame.hpp
+	src/purchase.cpp
 	src/json/allocator.h
 	src/json/assertions.h
 	src/json/autolink.h

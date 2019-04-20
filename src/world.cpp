@@ -191,13 +191,12 @@ bool World::init(vec2 screen)
 	shop.init();
 	shop.update_hero(m_hero);
 
-	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 	button_play.set_hoverable(true);
-	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
 	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-	// testButton2.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->doNothing(); });
+	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
 	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+	button_back_to_menu2.makeButton(985, 30, 260, 80, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 	// For future reference: examples of how to use buttons
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
@@ -311,7 +310,9 @@ void World::destroy()
 	hme.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
+	button_shop.destroy();
 	button_back_to_menu.destroy();
+	button_back_to_menu2.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -324,7 +325,9 @@ bool World::update(float elapsed_ms)
 
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
-	
+	current_stock = shop.get_stock(find_item(item_num));
+	current_price = shop.get_price(find_item(item_num));
+	balance = shop.get_balance();
 	shop_screen.update_shop(shopping, current_stock, balance - current_price, item_num, screen);
 
 	if (passed_level && m_hero.justFinishedTransition) {
@@ -1130,7 +1133,9 @@ bool World::update(float elapsed_ms)
 		ingame.destroy();
 		button_play.destroy();
 		button_tutorial.destroy();
+		button_shop.destroy();
 		button_back_to_menu.destroy();
+		button_back_to_menu2.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
 		m_hero.destroy();
@@ -1158,7 +1163,9 @@ bool World::update(float elapsed_ms)
 		shop.update_hero(m_hero);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_back_to_menu2.makeButton(985, 30, 260, 80, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		start.init(screen);
@@ -1288,16 +1295,16 @@ void World::draw()
 	if (!display_tutorial && !shopping) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
+		button_shop.draw(projection_2D);
 	}
 
 	if (display_tutorial) {
-		// button_play2.draw(projection_2D);
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
 	if (shopping) {
 		shop_screen.draw(projection_2D);
-		//button_back_to_menu.draw(projection_2D);
+		button_back_to_menu2.draw(projection_2D);
 	}
 
 	// Drawing entities
@@ -1463,7 +1470,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		glfwGetWindowSize(m_window, &w, &h);
 		button_play.destroy();
 		button_tutorial.destroy();
+		button_shop.destroy();
 		button_back_to_menu.destroy();
+		button_back_to_menu2.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
 		hme.destroy();
@@ -1500,7 +1509,9 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_back_to_menu2.makeButton(985, 30, 260, 80, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		m_hero.init(screen);
@@ -1612,19 +1623,19 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			zoom_factor = 1.1f;
 		}
 	}
-	else if (key == GLFW_KEY_G && start_is_over == false) {
+	else if (key == GLFW_KEY_G && start_is_over == false && !shopping) {
 		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
-	else if (key == GLFW_KEY_H && action != GLFW_RELEASE && !start_is_over) {
-		shopping = !shopping;
-	}
 	else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && !start_is_over) {
-        if (!display_tutorial) {
+        if (!display_tutorial && !shopping) {
             // escape in start screen
             glfwSetWindowShouldClose(m_window, GL_TRUE);
         }
+		else if (shopping) {
+			shopping = !shopping;
+		}
         else {
             // escape in tutorial
             display_tutorial = !display_tutorial;
@@ -1681,26 +1692,33 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over && !shopping) {
-		if (!display_tutorial) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over ) {
+		if (!display_tutorial && !shopping) {
 			button_play.check_click(mouse_pos);
 			button_tutorial.check_click(mouse_pos);
+			button_shop.check_click(mouse_pos);
 		}
 		else {
 			button_back_to_menu.check_click(mouse_pos);
+			button_back_to_menu2.check_click(mouse_pos);
 		}
 
 	}
 	if (shopping) {
-		item_num = shop_screen.item_position(mouse_pos, screen);
-		if (item_num != 0) {
-			std::string item_name = find_item(item_num);
-			current_stock = shop.get_stock(item_name);
-			current_price = shop.get_price(item_name);
-			balance = shop.get_balance();
-			bool buying = shop_screen.level_position(mouse_pos);
-			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && buying) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && item_num == 0) {
+			item_num = shop_screen.item_position(mouse_pos, screen);
+		}
+		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && item_num != 0) {
+			if (shop_screen.level_position(mouse_pos, screen)) {
+				std::string item_name = find_item(item_num);
 				shop.buy_item(item_name);
+				current_stock = shop.get_stock(item_name);
+				current_price = shop.get_price(item_name);
+				balance = shop.get_balance();
+				item_num = 0;
+			}
+			else {
+				item_num = shop_screen.item_position(mouse_pos, screen);
 			}
 		}
 	}
