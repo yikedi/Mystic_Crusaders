@@ -66,6 +66,8 @@ public:
 
     bool waved;
 
+    void set_dangerPos(vec2 pos);
+
 protected:
 	EnemyPowerupWave wave;
 
@@ -86,4 +88,5 @@ public:
     int m_level;
 	bool stunned;
     vec3 enemyColor;
+    vec2 dangerPos;
 };

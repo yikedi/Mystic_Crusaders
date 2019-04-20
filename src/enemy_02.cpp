@@ -61,7 +61,7 @@ bool Enemy_02::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(70.0f + (float)level * 0.6f * randAttributeFactor, 400.0f);
+	m_speed = std::min(70.0f + (float)level * 0.5f * randAttributeFactor, 400.0f);
 	randMovementCooldown = std::max(1000.0 - (double)level * 1.5 * randAttributeFactor, 200.0);
 	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
@@ -75,6 +75,7 @@ bool Enemy_02::init(int level)
 	waved = false;
 	wave.init(m_position, {1.f, 1.f, 1.f});
 	groupAtk = false;
+	dangerPos = {NULL, NULL};
 
 	return true;
 }
@@ -215,6 +216,16 @@ void Enemy_02::update(float ms, vec2 target_pos)
 	float y_diff =  m_position.y - target_pos.y;
 	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
 	float enemy_angle = atan2(y_diff, x_diff);
+	if(dangerPos.x != NULL && dangerPos.y != NULL) {
+		float x_diff2 =  m_position.x - dangerPos.x;
+		float y_diff2 =  m_position.y - dangerPos.y;
+		float danger_angle = atan2(y_diff2, x_diff2);
+		if (enemy_angle - danger_angle < 0.3f && enemy_angle - danger_angle > 0.f) {
+			enemy_angle += 0.3f;
+		} else if (danger_angle - enemy_angle < 0.3f && danger_angle - enemy_angle > 0.f) {
+			enemy_angle -= 0.3f;
+		}
+	}
 	float m_speed_rand_LO = m_speed * 0.8f;
 	float m_speed_rand_HI = m_speed * 1.2f;
 	float m_speed_rand = m_speed_rand_LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(m_speed_rand_HI-m_speed_rand_LO)));
@@ -260,6 +271,7 @@ void Enemy_02::update(float ms, vec2 target_pos)
 			speedBoost = true;
 		}
 		groupAtk = false;
+		dangerPos = {NULL, NULL};
 	}
 
 	stunned = false;

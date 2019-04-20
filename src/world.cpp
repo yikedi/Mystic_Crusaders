@@ -833,6 +833,8 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
+		vec2 dangerPos = {NULL, NULL};
+
 		auto enemy = m_enemys_01.begin();
 
 		while (enemy != m_enemys_01.end())
@@ -844,6 +846,8 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*h_proj))
 				{
 					enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
+
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy->is_alive()) {
@@ -876,6 +880,7 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*t))
 				{
 					t->apply_effect(*enemy);
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
 
 					if (!enemy->is_alive()) {
 						enemy->destroy(true);
@@ -907,6 +912,7 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*h_proj))
 				{
 					enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy2->is_alive()) {
@@ -915,7 +921,7 @@ bool World::update(float elapsed_ms)
 						if (!passed_level){
 							++m_points;
 						}
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 17);
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 19);
 					}
 					break;
 				}
@@ -937,6 +943,7 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*t))
 				{
 					t->apply_effect(*enemy2);
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 
 					if (!enemy2->is_alive()) {
 						enemy2->destroy(true);
@@ -944,7 +951,7 @@ bool World::update(float elapsed_ms)
 						if (!passed_level){
 							++m_points;
 						}
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 19;
 					}
 					break;
 				}
@@ -968,6 +975,7 @@ bool World::update(float elapsed_ms)
 				if (enemy3->collide_with(*h_proj))
 				{
 					enemy3->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy3->is_alive()) {
@@ -998,6 +1006,7 @@ bool World::update(float elapsed_ms)
 				if (enemy3->collide_with(*t))
 				{
 					t->apply_effect(*enemy3);
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 
 					if (!enemy3->is_alive()) {
 						enemy3->destroy(true);
@@ -1030,6 +1039,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy))
 				{
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
 					p->change_hp(-1.f);
 					enemy->take_damage(6.f);
 
@@ -1060,6 +1070,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy2))
 				{
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 					p->change_hp(-1.f);
 					enemy2->take_damage(6.f);
 
@@ -1067,7 +1078,7 @@ bool World::update(float elapsed_ms)
 						enemy2->destroy(true);
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 19;
 					}
 					break;
 				}
@@ -1090,6 +1101,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy3))
 				{
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 					p->change_hp(-1.f);
 					enemy3->take_damage(6.f);
 
@@ -1097,7 +1109,7 @@ bool World::update(float elapsed_ms)
 						enemy3->destroy(true);
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
-						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 41;
 					}
 					break;
 				}
@@ -1202,7 +1214,18 @@ bool World::update(float elapsed_ms)
 				m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS)-log(m_points + 1) * 300;
 			}
 		}
+
+		if(dangerPos.x != NULL && dangerPos.y != NULL) {
+			for (auto& enemy : m_enemys_01)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+			for (auto& enemy : m_enemys_02)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+			for (auto& enemy : m_enemys_03)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+		}
 	}
+
+
 
 	// If hero is dead, restart the game after the fading animation
 	if (!m_hero.is_alive() &&
