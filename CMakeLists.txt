@@ -80,6 +80,9 @@ set(SOURCE_FILES
 	src/particles.cpp
 	src/skill_switch_UI.cpp
 	src/Shop.cpp
+	src/shop_screen.cpp
+	src/shop_item.cpp
+	src/shop_frame.cpp
 	src/json/json_reader.cpp
 	src/json/json_value.cpp
 	src/json/json_writer.cpp
@@ -135,6 +138,9 @@ set(SOURCE_FILES
 	src/phoenix.h
 	src/particles.h
 	src/Shop.h
+	src/shop_screen.hpp
+	src/shop_item.hpp
+	src/shop_frame.hpp
 	src/json/allocator.h
 	src/json/assertions.h
 	src/json/autolink.h

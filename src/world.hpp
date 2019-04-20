@@ -30,6 +30,7 @@
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
 #include "Shop.h"
+#include "shop_screen.hpp"
 
 // stlib
 #include <vector>
@@ -97,6 +98,7 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
+	Shop_screen shop_screen;
 	Bar_description hme;
 	In_game ingame;
 	// Screen texture
@@ -125,6 +127,7 @@ private:
 	vec3 kill_num;
 
 	bool game_is_paused;
+	bool shopping;
 	vec2 mouse_pos;
 	int used_skillpoints;
 	vec3 ice_skill_set;

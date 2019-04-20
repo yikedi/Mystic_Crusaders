@@ -8,9 +8,9 @@
 
 #include "common.hpp"
 
-class Skillup : public Renderable
+class Shop_frame : public Renderable
 {
-	static Texture level_texture;
+	Texture sframe_texture;
 public:
 
 	// Creates all the associated render resources and default transform
@@ -21,19 +21,16 @@ public:
 
 	void draw(const mat3& projection)override;
 
-	void update_leveltex(bool paused, int freepoints, int skill_num); //call on world
-
-	void get_texture(int loc);
+	void update_sframe(bool shopping, int skill_num, vec2 screen); //call on world
 
 	vec2 get_position() const;
 
-	void change_position(vec2 screen);
-
+	void get_texture(int loc);
 
 private:
 	vec2 m_scale;
 	vec2 m_position;
 	TexturedVertex vertices[4];
-
+	
 };
 

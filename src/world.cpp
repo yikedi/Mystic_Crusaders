@@ -175,6 +175,7 @@ bool World::init(vec2 screen)
 	fire_skill_set = { 0.f,0.f,0.f };
 	level_num = { 0.f,0.f,1.f };
 	game_is_paused = false;
+	shopping = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
@@ -212,7 +213,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -322,6 +323,7 @@ bool World::update(float elapsed_ms)
 
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
+	shop_screen.update_shop(shopping, 5, 1, screen);
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -347,7 +349,7 @@ bool World::update(float elapsed_ms)
 		//kill_num = number_to_vec(cur_points_needed, true);
 	}
 
-	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
+	if (start_is_over && !game_is_paused && !shopping && !m_hero.isInTransition) {
 		if (m_hero.is_alive()) {
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -1128,6 +1130,7 @@ bool World::update(float elapsed_ms)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		shop_screen.destroy();
 		m_hero.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
@@ -1155,6 +1158,7 @@ bool World::update(float elapsed_ms)
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
 		m_tutorial.init(screen);
+		shop_screen.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -1188,6 +1192,7 @@ bool World::update(float elapsed_ms)
 		fire_skill_set = { 0.f,0.f,0.f };
 		level_num = { 0.f,0.f,1.f };
 		game_is_paused = false;
+		shopping = false;
 		previous_point = 0;
 		pass_points = 5;
 		map.set_is_over(true);
@@ -1287,6 +1292,10 @@ void World::draw()
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
+	if (shopping) {
+		shop_screen.draw(projection_2D);
+		//button_back_to_menu.draw(projection_2D);
+	}
 
 	// Drawing entities
 	map.draw(projection_2D);
@@ -1306,7 +1315,7 @@ void World::draw()
 	for (auto& phoenix : phoenix_list)
 		phoenix->draw(projection_2D);
 
-	if (start_is_over) {
+	if (start_is_over && !shopping) {
 
 		for (auto& treetrunk : m_treetrunk)
 			treetrunk.draw(projection_2D);
@@ -1444,7 +1453,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true && shopping == false)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
@@ -1452,6 +1461,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
+		shop_screen.destroy();
 		hme.destroy();
 		map.destroy();
 		m_hero.destroy();
@@ -1488,6 +1498,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
 		m_tutorial.init(screen);
+		shop_screen.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -1525,6 +1536,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
+		shopping = false;
 		display_tutorial = false;
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
@@ -1600,8 +1612,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
-	else if (key == GLFW_KEY_H) {
-		//shopping
+	else if (key == GLFW_KEY_H && action != GLFW_RELEASE && !start_is_over) {
+		shopping = !shopping;
 	}
 	else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && !start_is_over) {
         if (!display_tutorial) {
@@ -1645,7 +1657,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
 
-	if (start_is_over && !game_is_paused) {
+	if (start_is_over && !game_is_paused && !shopping) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
 		if (xpos - salmon_position.x != 0)
@@ -1675,7 +1687,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 	}
 
-	if (!game_is_paused && start_is_over) {
+	if (!game_is_paused && start_is_over && !shopping) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
 
@@ -1695,7 +1707,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 
 	}
-	else if (game_is_paused && start_is_over) {
+	else if (game_is_paused && start_is_over && !shopping) {
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
 			skill_element = stree.element_position(mouse_pos);
@@ -1797,7 +1809,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
-		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over && !shopping) {
 			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
 		}
 	}

@@ -96,6 +96,21 @@ float Shop::get_interest_value(string item_name)
 	return shop_info["items"][item_name]["interest_value"].asFloat();
 }
 
+int Shop::get_price(string item_name)
+{
+	return shop_info["items"][item_name]["price"].asInt();
+}
+
+int Shop::get_stock(string item_name)
+{
+	return shop_info["items"][item_name]["stock"].asInt();
+}
+
+int Shop::get_maxstock(string item_name)
+{
+	return shop_info["items"][item_name]["max_stock"].asInt();
+}
+
 Shop::~Shop()
 {
 }
