@@ -17,7 +17,7 @@ bool Shop_screen::init(vec2 screen)
 {
 	if (!shop_texture.is_valid())
 	{
-		if (!shop_texture.load_from_file(textures_path("skill1.png")))
+		if (!shop_texture.load_from_file(textures_path("shop.png")))
 		{
 			fprintf(stderr, "Failed to load shop texture!");
 			return false;
