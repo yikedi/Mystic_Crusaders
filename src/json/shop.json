@@ -1,6 +1,17 @@
 {
-   "balance" : 501,
+   "balance" : 500,
    "items" : {
+      "" : {
+         "price" : null,
+         "stock" : null
+      },
+      "coin_increase" : {
+         "description" : "Increase money earned by killing enemies by 20%",
+         "interest_value" : 0.20000000000000001,
+         "max_stock" : 5,
+         "price" : 50,
+         "stock" : 5
+      },
       "exp_increase" : {
          "description" : "Increase exp point earned by killing enemies by 20%",
          "interest_value" : 0.20000000000000001,
@@ -33,7 +44,7 @@
          "description" : "Increase the mp recovery rate by 30%",
          "interest_value" : 0.29999999999999999,
          "max_stock" : 5,
-         "price" : 109,
+         "price" : 30,
          "stock" : 5
       },
       "second_life" : {

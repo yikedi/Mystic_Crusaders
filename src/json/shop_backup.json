@@ -52,8 +52,16 @@
 			"max_stock": 5,
 			"price": 50,
 			"interest_value":0.2
+		},
+		
+		"coin_increase":
+		{
+			"description":"Increase money earned by killing enemies by 20%",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":0.2
 		}
-
 
 	},
 

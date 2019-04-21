@@ -16,8 +16,6 @@ bool Shop::init()
 	Json::Reader reader;
 	if (!reader.parse(ifs, shop_info, false))
 		return false;
-
-	//buy_item("mp_recovery");
 	ifs.close();
 
 	return true;
@@ -80,7 +78,7 @@ void Shop::update_hero(Hero& hero)
 	purchased = get_purchased("movement_speed");
 	hero.movement_speed = 200.f * (1.0 + float(purchased) * get_interest_value("movement_speed"));
 	purchased = get_purchased("exp_increase");
-	hero.exp_multiplier = 1.0 + float(purchased) * get_interest_value("exp_increase");
+	hero.exp_multiplier = 1.0 + float(purchased) * get_interest_value("exp_increase");	
 	purchased = get_purchased("second_life");
 	bool second_life(purchased > 0);
 	hero.second_life = second_life;
