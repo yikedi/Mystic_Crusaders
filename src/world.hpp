@@ -30,6 +30,8 @@
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
 #include "box.hpp"
+#include "Shop.h"
+
 
 // stlib
 #include <vector>
@@ -61,7 +63,7 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
-
+	Shop shop;
 private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
@@ -150,6 +152,7 @@ private:
 	std::vector<Thunder*> thunders;
 	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
+	
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
 

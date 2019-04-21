@@ -63,10 +63,10 @@ bool Mapscreen::init(vec2 screen, int game_level) {
 void Mapscreen::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
+
 	//g_level = 1;
 }
 

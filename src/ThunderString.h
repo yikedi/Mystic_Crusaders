@@ -17,7 +17,7 @@ public:
 
 	bool init(vec2 position, vec3 color);
 
-	void destroy();
+	void destroy(bool reset);
 
 	void update(float ms);
 

@@ -74,7 +74,7 @@ bool Button::init(double x, double y, double w, double h, std::string path1, std
 	{
 		/*
 		  CONVERSION FROM STATIC PATH TO DYNAMIC ONE
-		  First convert the textures_path() to string, add it with std::string, 
+		  First convert the textures_path() to string, add it with std::string,
 		  and then convert it back to const char-star
 		*/
 		string s = string(textures_path()) + path;
@@ -149,11 +149,8 @@ Button::~Button() {
 void Button::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+	effect.release();
 }
 
 void Button::check_click(vec2 mouse_position) {

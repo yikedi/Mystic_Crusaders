@@ -1,0 +1,70 @@
+{
+	"items":
+	{
+		"max_hp": 
+		{
+			"description":"Increase the max hp of the hero by 30",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":30.0
+		},
+
+		"mp_recovery":
+		{
+			"description":"Increase the mp recovery rate by 30%",
+			"stock": 5,
+			"max_stock":5,
+			"price":50,
+			"interest_value":0.3
+		},
+
+		"fireball_damage": 
+		{
+			"description":"Increase the damage of fireballs by 20%",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":0.2
+		},
+
+		"movement_speed":
+		{
+			"description":"Increase the movement speed of the hero by 20%",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":0.2
+		},
+
+		"second_life":
+		{
+			"description":"Automatically recovery all hp and mp when hero dies for the first time in a game",
+			"stock": 1,
+			"max_stock": 1,
+			"price": 0,
+			"interest_value":0
+		},
+		"exp_increase":
+		{
+			"description":"Increase exp point earned by killing enemies by 20%",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":0.2
+		},
+		
+		"coin_increase":
+		{
+			"description":"Increase money earned by killing enemies by 20%",
+			"stock": 5,
+			"max_stock": 5,
+			"price": 50,
+			"interest_value":0.2
+		}
+
+	},
+
+	"balance": 500
+
+}

@@ -184,14 +184,12 @@ void phoenix::destroy(bool reset)
             m_particles[i].destroy();
         }
         m_particles.clear();
+		glDeleteVertexArrays(1, &mesh.vao);
+		effect.release();
     }
 
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
 }
 
 void phoenix::setTextureLocs(int index)

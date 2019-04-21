@@ -72,7 +72,7 @@ bool EnemyPowerupWave::init(vec2 position, vec3 color)
 	return true;
 }
 
-void EnemyPowerupWave::destroy()
+void EnemyPowerupWave::destroy(bool reset)
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -80,6 +80,12 @@ void EnemyPowerupWave::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+	if(reset) {
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+	}
 }
 
 void EnemyPowerupWave::setTextureLocs(int index)
@@ -97,7 +103,7 @@ void EnemyPowerupWave::setTextureLocs(int index)
 
 	// Clear memory allocation
 	if (!first_time) {
-		destroy();
+		destroy(false);
 	}
 
 	// Vertex Buffer creation
