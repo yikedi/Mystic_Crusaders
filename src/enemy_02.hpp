@@ -40,6 +40,8 @@ public:
 
 	bool speedBoost;
 
+	bool groupAtk;
+
 	private:
 	int powerupType;
 
