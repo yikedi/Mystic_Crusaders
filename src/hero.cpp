@@ -76,10 +76,7 @@ bool Hero::init(vec2 screen)
 	m_direction = {0.f,0.f};
 	m_light_up = 0;
 	advanced = false;
-	max_hp = 100.f;
-	max_mp = 100.f;
-	hp = max_hp;
-	mp = max_mp;
+
     ice_arrow_skill.init();
 	thunder_skill.init();
 	phoenix_skill.init();
@@ -93,6 +90,18 @@ bool Hero::init(vec2 screen)
 	isInTransition = false;
 	justFinishedTransition = false;
 	just_took_damage = false;
+
+	//the following fields can be affected by shop
+	max_hp = 100.f;
+	max_mp = 100.f;
+	hp = max_hp;
+	mp = max_mp;
+	fireball_damage = 20.0f;
+	movement_speed = 200.f;
+	exp_multiplier = 1.0f;
+	mp_recovery_rate = 0.05;
+	second_life = false;
+
 	return true;
 }
 
@@ -134,8 +143,7 @@ void Hero::update(float ms)
 		momentum.y = std::min(momentum.y + deceleration, 0.f);
 	}
 
-	const float SALMON_SPEED = 200.f;
-	float step = SALMON_SPEED * (ms / 1000);
+	float step = movement_speed * (ms / 1000);
     float animSpeed = 0.0f;
 	if (m_is_alive)
 	{
@@ -147,7 +155,7 @@ void Hero::update(float ms)
 
         if (mp < max_mp)
         {
-            mp += 0.05;
+            mp += mp_recovery_rate;
         }
 
         // setting player movement state
@@ -586,6 +594,13 @@ void Hero::take_damage(float damage)
 	just_took_damage = true;
 	change_hp(-1.f * damage);
 	if (hp <= 0.5f) {
+		if (second_life)
+		{
+			hp = max_hp;
+			mp = max_mp;
+			second_life = false;
+			return;
+		}
 		m_is_alive = false;
 	}
 }
