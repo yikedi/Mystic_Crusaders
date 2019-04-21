@@ -5,8 +5,6 @@
 #include <string.h>
 #include <cassert>
 #include <sstream>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include <gl3w.h>
 
 // Same as static in c, local to compilation unit
@@ -102,15 +100,6 @@ bool World::init(vec2 screen)
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
 	glfwSetScrollCallback(m_window, mouse_wheel_callback);
-    
-    // Initialize font library and face
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-        printf("ERROR::FREETYPE: Could not init FreeType Library");
-
-    FT_Face face;
-    if (FT_New_Face(ft, font_path("ARCADECLASSIC.TTF"), 0, &face))
-        printf("ERROR::FREETYPE: Failed to load font");
 
 	// Create a frame buffer
 	m_frame_buffer = 0;
@@ -188,6 +177,7 @@ bool World::init(vec2 screen)
 	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
+    screen_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	m_portal.init(screen);
@@ -1285,6 +1275,8 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
+    screen_text.RenderText(projection_2D, "This is sample text", 0.f, 0.f, 1.f, vec3{ 0.1f, 0.8f, 0.2f });
+
 	if (!display_tutorial) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);

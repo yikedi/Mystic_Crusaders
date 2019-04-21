@@ -3,12 +3,17 @@
 // stlib
 #include <fstream> // stdout, stderr..
 #include <vector>
-
+#include <map>
+#include <string>
 
 // glfw
 #define NOMINMAX
 #include <gl3w.h>
 #include <GLFW/glfw3.h>
+
+// freetype
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 // Simple utility macros to avoid mistyping directory name, name has to be a string literal
 // audio_path("audio.ogg") -> data/audio/audio.ogg
@@ -108,6 +113,31 @@ struct Effect
 	GLuint vertex;
 	GLuint fragment;
 	GLuint program;
+};
+
+// Character wrapper
+struct Character
+{
+    GLuint textureID;  // ID handle of the glyph texture
+    vec2 Size;       // Size of glyph
+    vec2 Bearing;    // Offset from baseline to left/top of glyph
+    GLuint Advance;    // Offset to advance to next glyph
+};
+
+struct Text
+{
+    GLuint vao, vbo;
+    Effect textEffect;
+    std::map<GLchar, Character> Characters;
+
+    FT_Library ft;
+    FT_Face face;
+
+    Text();
+    ~Text();
+
+    bool loadCharacters(const char* ft_path);
+    void RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors);
 };
 
 // Helper container for all the information we need when rendering an object together

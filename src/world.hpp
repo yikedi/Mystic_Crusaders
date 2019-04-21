@@ -94,7 +94,7 @@ private:
 	GLFWwindow* m_window;
 
 	Startscreen start;
-
+    Text screen_text;
 	Skilltree stree;
 	Bar_description hme;
 	In_game ingame;
