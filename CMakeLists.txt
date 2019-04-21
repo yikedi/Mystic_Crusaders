@@ -79,6 +79,7 @@ set(SOURCE_FILES
 	src/phoenix.cpp
 	src/particles.cpp
 	src/skill_switch_UI.cpp
+	src/box.cpp
 
   src/project_path.hpp
 	src/common.hpp
@@ -129,6 +130,7 @@ set(SOURCE_FILES
 	src/phoenix_skill.h
 	src/phoenix.h
 	src/particles.h
+	src/box.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

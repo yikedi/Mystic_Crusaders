@@ -206,6 +206,11 @@ bool World::init(vec2 screen)
 	m_treetrunk_position.push_back({ screen.x / 4 - 120.f , screen.y / 4 + 50.f });
 	m_treetrunk_position.push_back({ 2* screen.x  / 3 , screen.y *3/ 4  });
 
+	m_box_position.push_back({ 3 * screen.x / 5 - 200.f, screen.y / 3 });
+	m_box_position.push_back({ 4 * screen.x / 5 , screen.y / 3 - 50.f });
+	m_box_position.push_back({ screen.x / 4 , screen.y / 4 });
+	m_box_position.push_back({ 2 * screen.x / 3 , screen.y * 3 / 4 });
+	m_box_position.push_back({ screen.x / 3 , screen.y * 3 / 4 + 50.f });
 
 	initTrees();
 
@@ -214,7 +219,7 @@ bool World::init(vec2 screen)
 }
 
 bool World::initTrees() {
-	if (m_game_level % 2 == 0) {
+	if (m_game_level % 3 == 0) {
 		for (auto & position : m_treetrunk_position)
 		{
 			if (!spawn_treetrunk())
@@ -233,7 +238,7 @@ bool World::initTrees() {
 			new_tree.set_position({ position.x + 10.f ,position.y });
 		}
 	}
-	else
+	else if (m_game_level % 3 == 1) 
 	{
 		for (auto & position : m_treetrunk_position)
 		{
@@ -242,6 +247,16 @@ bool World::initTrees() {
 
 			Vine& new_vine = m_vine.back();
 			new_vine.set_position({ position.x,position.y - 30.f });
+		}
+	}
+	else {
+		for (auto & position : m_box_position)
+		{
+			if (!spawn_box())
+				return false;
+
+			Box& new_box = m_box.back();
+			new_box.set_position({ position.x,position.y - 30.f });
 		}
 	}
 
@@ -290,6 +305,8 @@ void World::destroy()
 		treetrunk.destroy();
 	for (auto& vine : m_vine)
 		vine.destroy();
+	for (auto& box : m_box)
+		box.destroy();
 	for (auto& thunder : thunders)
 		thunder->destroy();
 	for (auto& phoenix : phoenix_list)
@@ -335,9 +352,12 @@ bool World::update(float elapsed_ms)
 			tree.destroy();
 		for (auto& vine : m_vine)
 			vine.destroy();
+		for (auto& box : m_box)
+			box.destroy();
 		m_tree.clear();
 		m_treetrunk.clear();
 		m_vine.clear();
+		m_box.clear();
 		initTrees();
 		map.init(screen, m_game_level);
 		pass_points = m_points + (m_game_level + 1) * 5;
@@ -504,6 +524,8 @@ bool World::update(float elapsed_ms)
 			e_proj.update(elapsed_ms * m_current_speed);
 		for (auto& vine : m_vine)
 			vine.update(elapsed_ms * m_current_speed);
+		for (auto& box : m_box)
+			box.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
 		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
 		for (auto& thunder : thunders)
@@ -589,7 +611,119 @@ bool World::update(float elapsed_ms)
 				enemy_projectiles.erase(enemy_projectiles.begin() + i);
 			}
 		}
+		//check box collision
+		for (auto &box : m_box) {
 
+			for (auto &e1 : m_enemys_01)
+			{
+
+				if (box.collides_with(e1))
+				{
+					vec2 cur_position = e1.get_position();
+					vec2 box_location = box.get_position();
+					vec2 difference = { cur_position.x - box_location.x, cur_position.y - box_location.y };
+					float size = sqrtf(dot(difference, difference));
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { -difference.y / size, difference.x / size };
+					}
+					else {
+						difference = { difference.y / size, -difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.2f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
+					e1.set_position(new_position);
+				}
+			}
+
+			for (auto &e2 : m_enemys_02)
+			{
+				if (box.collides_with(e2))
+				{
+					vec2 cur_position = e2.get_position();
+					vec2 box_location = box.get_position();
+					vec2 difference = { cur_position.x - box_location.x, cur_position.y - box_location.y };
+					float size = sqrtf(dot(difference, difference));
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { -difference.y / size, difference.x / size };
+					}
+					else {
+						difference = { difference.y / size, -difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.2f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
+					e2.set_position(new_position);
+				}
+			}
+
+			for (auto &e3 : m_enemys_03)
+			{
+				if (box.collides_with(e3))
+				{
+					vec2 cur_position = e3.get_position();
+					vec2 box_location = box.get_position();
+					vec2 difference = { cur_position.x - box_location.x, cur_position.y - box_location.y };
+					float size = sqrtf(dot(difference, difference));
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { -difference.y / size, difference.x / size };
+					}
+					else {
+						difference = { difference.y / size, -difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.2f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
+					e3.set_position(new_position);
+				}
+			}
+
+			if (box.collides_with(m_hero)) {
+				vec2 cur_direction = m_hero.get_direction();
+				vec2 cur_position = m_hero.get_position();
+				float stepback = elapsed_ms * -0.6; // -0.2 is 200 / 1000, which is in hero.cpp so 0.6 to stepback more so the hero does not stuck on it
+				vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
+				m_hero.set_position(new_position);
+			}
+
+			p_len = (int)hero_projectiles.size() - 1;
+			for (int i = p_len; i >= 0; i--)
+			{
+				Projectile* h_proj = hero_projectiles.at(i);
+				if (box.collides_with(*h_proj))
+				{
+					h_proj->destroy();
+					hero_projectiles.erase(hero_projectiles.begin() + i);
+				}
+			}
+
+			//same for enemy projectile
+			l_len = (int)enemy_projectiles.size() - 1;
+			for (int i = l_len; i >= 0; i--)
+			{
+				EnemyLaser laser = enemy_projectiles.at(i);
+				if (box.collides_with(laser))
+				{
+					laser.destroy();
+					enemy_projectiles.erase(enemy_projectiles.begin() + i);
+				}
+			}
+
+
+		}
+		
 
 
 		//check treetrunk collision
@@ -1147,6 +1281,8 @@ bool World::update(float elapsed_ms)
 			phoenix->destroy(true);
 		for (auto& vine : m_vine)
 			vine.destroy();
+		for (auto& box : m_box)
+			box.destroy();
 		m_hero.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -1166,6 +1302,7 @@ bool World::update(float elapsed_ms)
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
+		m_box.clear();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
@@ -1310,6 +1447,8 @@ void World::draw()
 			tree.draw(projection_2D);
 		for (auto& vine : m_vine)
 			vine.draw(projection_2D);
+		for (auto& box : m_box)
+			box.draw(projection_2D);
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
@@ -1426,6 +1565,17 @@ bool World::spawn_vine()
 	return false;
 }
 
+bool World::spawn_box()
+{
+	Box box;
+	if (box.init({ m_window_width,m_window_height }))
+	{
+		m_box.emplace_back(box);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn box");
+	return false;
+}
 
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
@@ -1476,9 +1626,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			phoenix->destroy(true);
 		for (auto& vine : m_vine)
 			vine.destroy();
+		for (auto& box : m_box)
+			box.destroy();
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
+		m_box.clear();
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
