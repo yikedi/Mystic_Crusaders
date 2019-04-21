@@ -77,7 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
 
 	if (m_window == nullptr)
 		return false;
@@ -186,8 +186,6 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
-	shop.init();
-	shop.update_hero(m_hero);
 
 	// std::function<void> f1 = &World::startGame;
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
@@ -371,7 +369,6 @@ bool World::update(float elapsed_ms)
 			}
 
 
-
 			auto vine = m_vine.begin();
 			while (vine != m_vine.end())
 			{
@@ -427,7 +424,7 @@ bool World::update(float elapsed_ms)
 
 				m_hero.apply_momentum(force);
 			}
-			if (m_points * m_hero.exp_multiplier - previous_point > 15 + (m_hero.level * 5))
+			if (m_points - previous_point > 15 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
 				m_hero.levelup();
@@ -458,32 +455,64 @@ bool World::update(float elapsed_ms)
 				enemy.set_wave();
 				Mix_PlayChannel(-1, m_amplify_sound, 0);
 				int rand_factor = 0 + (std::rand() % (1 - 0 + 1));
-				if (rand_factor == 0)
-				{
-					if (m_enemys_01.size() > 0) {
-						int factor = m_enemys_01.size();
-						if (factor == 0) {
-							enemy.recentPowerupType = m_enemys_01[0].powerup();
-							m_enemys_01[0].set_wave();
+				int group_behavior_chance = std::min(50, std::max(0 , (int) m_points / 2));
+				if (rand() % 100 < group_behavior_chance) {
+					if (rand_factor == 0)
+					{
+						enemy.recentPowerupType = 4;
+						auto enemy1 = m_enemys_01.begin();
+						while (enemy1 != m_enemys_01.end())
+						{
+							enemy1 -> shoot_projectiles(enemy_projectiles);
+							enemy1 -> set_wave();
+							if (enemy1 == m_enemys_01.end() || m_enemys_01.size() == 0) {
+								break;
+							}
+							++enemy1;
 						}
-						else {
-							rand_factor = std::rand() % factor + 0;
-							enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
-							m_enemys_01[rand_factor].set_wave();
+						Mix_PlayChannel(-1, m_laser_sound, 0);
+					}
+					else {
+						enemy.recentPowerupType = 4;
+						auto enemy2 = m_enemys_02.begin();
+						while (enemy2 != m_enemys_02.end())
+						{
+							enemy2 -> groupAtk = true;
+							enemy2 -> set_wave();
+							if (enemy2 == m_enemys_02.end() || m_enemys_02.size() == 0) {
+								break;
+							}
+							++enemy2;
 						}
 					}
-				}
-				else {
-					if (m_enemys_02.size() > 0) {
-						int factor = m_enemys_02.size();
-						if (factor == 0) {
-							enemy.recentPowerupType = m_enemys_02[0].powerup();
-							m_enemys_02[0].set_wave();
+				} else {
+					if (rand_factor == 0)
+					{
+						if (m_enemys_01.size() > 0) {
+							int factor = m_enemys_01.size();
+							if (factor == 0) {
+								enemy.recentPowerupType = m_enemys_01[0].powerup();
+								m_enemys_01[0].set_wave();
+							}
+							else {
+								rand_factor = std::rand() % factor + 0;
+								enemy.recentPowerupType = m_enemys_01[rand_factor].powerup();
+								m_enemys_01[rand_factor].set_wave();
+							}
 						}
-						else {
-							rand_factor = std::rand() % factor + 0;
-							enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
-							m_enemys_02[rand_factor].set_wave();
+					}
+					else {
+						if (m_enemys_02.size() > 0) {
+							int factor = m_enemys_02.size();
+							if (factor == 0) {
+								enemy.recentPowerupType = m_enemys_02[0].powerup();
+								m_enemys_02[0].set_wave();
+							}
+							else {
+								rand_factor = std::rand() % factor + 0;
+								enemy.recentPowerupType = m_enemys_02[rand_factor].powerup();
+								m_enemys_02[rand_factor].set_wave();
+							}
 						}
 					}
 				}
@@ -524,10 +553,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e1))
 			{
 				vec2 cur_position = e1.get_position();
-				int facing = e1.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e1.set_position(new_position);
 			}
 		}
@@ -537,10 +577,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e2))
 			{
 				vec2 cur_position = e2.get_position();
-				int facing = e2.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e2.set_position(new_position);
 			}
 		}
@@ -550,10 +601,21 @@ bool World::update(float elapsed_ms)
 			if (m_portal.collides_with(e3))
 			{
 				vec2 cur_position = e3.get_position();
-				int facing = e3.m_face_left_or_right;
-				facing = (facing == 0) ? facing - 1 : facing;
-				facing = facing * -10;
-				vec2 new_position = { cur_position.x + facing, cur_position.y + 5 };
+				vec2 tree_location = m_portal.get_position();
+				vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
+				float size = sqrtf(dot(difference, difference));
+				vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+				float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+				float det = difference.x * diffHero.y - difference.y * diffHero.x;
+				float angle = atan2(det, dot);
+				vec2 directDiff = { difference.x / size, difference.y / size };
+				if (angle < 0.f) {
+					difference = { - difference.y / size, difference.x / size };
+				} else {
+					difference = { difference.y / size, - difference.x / size };
+				}
+				float stepback = elapsed_ms * 0.2f;
+				vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 				e3.set_position(new_position);
 			}
 		}
@@ -606,6 +668,9 @@ bool World::update(float elapsed_ms)
 
 				//find the difference vector, but only push back hero in the opposite direction that the hero walks
 				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
+				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back. 
+				if (abs(current_direction.x) < 1.0f && abs(current_direction.y) < 1.0f)
+					difference = { cur_position.x - tree_location.x , cur_position.y - tree_location.y };
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
 				float size = sqrtf(dot(difference, difference));
 				difference = { difference.x / size, difference.y / size }; //scale the difference
@@ -647,9 +712,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e1.set_position(new_position);
 				}
 			}
@@ -662,9 +736,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e2.set_position(new_position);
 				}
 			}
@@ -677,9 +760,18 @@ bool World::update(float elapsed_ms)
 					vec2 tree_location = treeTrunk.get_position();
 					vec2 difference = { cur_position.x - tree_location.x, cur_position.y - tree_location.y };
 					float size = sqrtf(dot(difference, difference));
-					difference = { difference.x / size, difference.y / size };
-					float stepback = elapsed_ms * 0.5;
-					vec2 new_position = { cur_position.x + difference.x * stepback, cur_position.y + difference.y * stepback };
+					vec2 diffHero = { cur_position.x - m_hero.get_position().x, cur_position.y - m_hero.get_position().y };
+					float dot = difference.x * diffHero.x + difference.y * diffHero.y;
+					float det = difference.x * diffHero.y - difference.y * diffHero.x;
+					float angle = atan2(det, dot);
+					vec2 directDiff = { difference.x / size, difference.y / size };
+					if (angle < 0.f) {
+						difference = { - difference.y / size, difference.x / size };
+					} else {
+						difference = { difference.y / size, - difference.x / size };
+					}
+					float stepback = elapsed_ms * 0.05f;
+					vec2 new_position = { cur_position.x + (difference.x + directDiff.x)* stepback, cur_position.y + (difference.y + directDiff.y) * stepback };
 					e3.set_position(new_position);
 				}
 			}
@@ -743,6 +835,8 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
+		vec2 dangerPos = {NULL, NULL};
+
 		auto enemy = m_enemys_01.begin();
 
 		while (enemy != m_enemys_01.end())
@@ -754,6 +848,8 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*h_proj))
 				{
 					enemy->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
+
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy->is_alive()) {
@@ -786,6 +882,7 @@ bool World::update(float elapsed_ms)
 				if (enemy->collide_with(*t))
 				{
 					t->apply_effect(*enemy);
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
 
 					if (!enemy->is_alive()) {
 						enemy->destroy(true);
@@ -817,6 +914,7 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*h_proj))
 				{
 					enemy2->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy2->is_alive()) {
@@ -825,7 +923,7 @@ bool World::update(float elapsed_ms)
 						if (!passed_level){
 							++m_points;
 						}
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 17);
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + (m_points / 19);
 					}
 					break;
 				}
@@ -847,6 +945,7 @@ bool World::update(float elapsed_ms)
 				if (enemy2->collide_with(*t))
 				{
 					t->apply_effect(*enemy2);
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 
 					if (!enemy2->is_alive()) {
 						enemy2->destroy(true);
@@ -854,7 +953,7 @@ bool World::update(float elapsed_ms)
 						if (!passed_level){
 							++m_points;
 						}
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 19;
 					}
 					break;
 				}
@@ -878,6 +977,7 @@ bool World::update(float elapsed_ms)
 				if (enemy3->collide_with(*h_proj))
 				{
 					enemy3->take_damage(h_proj->get_damage(), h_proj->get_velocity());
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 					h_proj->destroy();
 					hero_projectiles.erase(hero_projectiles.begin() + i);
 					if (!enemy3->is_alive()) {
@@ -908,6 +1008,7 @@ bool World::update(float elapsed_ms)
 				if (enemy3->collide_with(*t))
 				{
 					t->apply_effect(*enemy3);
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 
 					if (!enemy3->is_alive()) {
 						enemy3->destroy(true);
@@ -940,6 +1041,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy))
 				{
+					dangerPos = {enemy->get_position().x, enemy->get_position().y};
 					p->change_hp(-1.f);
 					enemy->take_damage(6.f);
 
@@ -970,6 +1072,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy2))
 				{
+					dangerPos = {enemy2->get_position().x, enemy2->get_position().y};
 					p->change_hp(-1.f);
 					enemy2->take_damage(6.f);
 
@@ -977,7 +1080,7 @@ bool World::update(float elapsed_ms)
 						enemy2->destroy(true);
 						enemy2 = m_enemys_02.erase(enemy2);
 						++m_points;
-						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_02 = INIT_MAX_ENEMIES + m_points / 19;
 					}
 					break;
 				}
@@ -1000,6 +1103,7 @@ bool World::update(float elapsed_ms)
 				phoenix* p = phoenix_list.at(i);
 				if (p->collide_with(*enemy3))
 				{
+					dangerPos = {enemy3->get_position().x, enemy3->get_position().y};
 					p->change_hp(-1.f);
 					enemy3->take_damage(6.f);
 
@@ -1007,7 +1111,7 @@ bool World::update(float elapsed_ms)
 						enemy3->destroy(true);
 						enemy3 = m_enemys_03.erase(enemy3);
 						++m_points;
-						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 17;
+						MAX_ENEMIES_03 = INIT_MAX_ENEMIES + m_points / 41;
 					}
 					break;
 				}
@@ -1112,7 +1216,18 @@ bool World::update(float elapsed_ms)
 				m_next_enemy3_spawn = m_dist(m_rng) * (ENEMY_03_DELAY_MS)-log(m_points + 1) * 300;
 			}
 		}
+
+		if(dangerPos.x != NULL && dangerPos.y != NULL) {
+			for (auto& enemy : m_enemys_01)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+			for (auto& enemy : m_enemys_02)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+			for (auto& enemy : m_enemys_03)
+				enemy.set_dangerPos({dangerPos.x, dangerPos.y});
+		}
 	}
+
+
 
 	// If hero is dead, restart the game after the fading animation
 	if (!m_hero.is_alive() &&
@@ -1150,7 +1265,6 @@ bool World::update(float elapsed_ms)
 		for (auto& vine : m_vine)
 			vine.destroy();
 		m_hero.init(screen);
-		shop.update_hero(m_hero);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
@@ -1173,7 +1287,6 @@ bool World::update(float elapsed_ms)
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
-		shop.set_balance(shop.get_balance() + m_points * (1.f + shop.get_purchased("coin_increase") * shop.get_interest_value("coin_increase")));
 		m_points = 0;
 		m_portal.setIsPortal(false);
 		passed_level = false;
@@ -1289,7 +1402,10 @@ void World::draw()
 	}
 
 	// Drawing entities
-	map.draw(projection_2D);
+	if(start_is_over)
+	{
+		map.draw(projection_2D);
+	}
 	m_hero.draw(projection_2D);
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
@@ -1632,14 +1748,14 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		game_is_paused = !game_is_paused;
 	}
 	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
-		int level_up_skill = (m_hero.get_active_skill() + 1) % 3;
-		m_hero.set_active_skill(level_up_skill);
+		m_hero.set_active_skill(0);
 	}
 	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
-		int level_up_skill = (m_hero.get_active_skill() - 1) % 3;
-		m_hero.set_active_skill(level_up_skill);
+		m_hero.set_active_skill(1);
 	}
-
+	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
+		m_hero.set_active_skill(2);
+	}
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
