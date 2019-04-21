@@ -51,7 +51,7 @@ bool Shop::buy_item(string item_name)
 	{
 		set_balance(balance - price);
 		change_stock(item_name, stock - 1);
-		change_price(item_name, int(price * 1.3));
+		change_price(item_name, int(price + 50));
 		return true;
 	}
 	return false;
