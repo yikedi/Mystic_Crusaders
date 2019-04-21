@@ -77,7 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", glfwGetPrimaryMonitor(), nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
 
 	if (m_window == nullptr)
 		return false;
@@ -273,7 +273,7 @@ void World::destroy()
 
 	Mix_CloseAudio();
 
-	m_hero.destroy();
+	m_hero.destroy(true);
 	for (auto& enemy : m_enemys_01)
 		enemy.destroy(true);
 	for (auto& enemy : m_enemys_02)
@@ -301,7 +301,7 @@ void World::destroy()
 	enemy_projectiles.clear();
 	m_interface.destroy();
 	ingame.destroy();
-	m_skill_switch.destroy();
+	m_skill_switch.destroy(true);
 	start.destroy();
 	stree.destroy();
 	hme.destroy();
@@ -1241,7 +1241,7 @@ bool World::update(float elapsed_ms)
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
 		m_tutorial.destroy();
-		m_hero.destroy();
+		m_hero.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1275,7 +1275,7 @@ bool World::update(float elapsed_ms)
 		enemy_projectiles.clear();
 		thunders.clear();
 		phoenix_list.clear();
-		m_skill_switch.destroy();
+		m_skill_switch.destroy(true);
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
@@ -1568,12 +1568,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tutorial.destroy();
 		hme.destroy();
 		map.destroy();
-		m_hero.destroy();
+		m_hero.destroy(true);
 		start.destroy();
 		stree.destroy();
 		m_interface.destroy();
 		ingame.destroy();
-		m_skill_switch.destroy();
+		m_skill_switch.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)

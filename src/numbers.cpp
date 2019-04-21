@@ -73,9 +73,7 @@ void Numbers::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
 }
 
 void Numbers::draw(const mat3 & projection)

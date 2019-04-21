@@ -97,7 +97,7 @@ bool Hero::init(vec2 screen)
 }
 
 // Releases all graphics resources
-void Hero::destroy()
+void Hero::destroy(bool reset)
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -106,6 +106,11 @@ void Hero::destroy()
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 
+	if(reset) {
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+	}
 }
 
 // Called on each frame by World::update()
@@ -244,7 +249,7 @@ void Hero::setTextureLocs(int index) {
 
 	// Clear memory allocation
     if (m_is_alive) {
-        destroy();
+        destroy(false);
     }
 
     // Vertex Buffer creation

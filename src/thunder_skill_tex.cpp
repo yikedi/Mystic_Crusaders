@@ -62,9 +62,7 @@ void Thunderskilltex::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
 }
 
 void Thunderskilltex::draw(const mat3 & projection)

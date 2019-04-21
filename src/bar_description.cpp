@@ -75,9 +75,7 @@ void Bar_description::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
 }
 
 void Bar_description::draw(const mat3 & projection)

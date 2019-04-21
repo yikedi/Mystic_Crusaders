@@ -99,7 +99,10 @@ void Enemy_03::destroy(bool reset)
 	glDeleteVertexArrays(1, &mesh.vao);
 	effect.release();
 	if((waved && !m_is_alive) || reset) {
-		wave.destroy();
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+		wave.destroy(true);
 	}
 }
 
