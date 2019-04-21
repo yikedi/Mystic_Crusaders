@@ -12,33 +12,36 @@ bool Scrollable::init(vec2 position, int _width, int _height, float time) {
 		}
 	}
 
-	float w = _width;
-	float h = _height;
+	float w = (float) _width;
+	float h = (float) _height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
 	halfHeight = hr;
 	width = _width;
 	height = _height;
+	full_height = scroll_texture.height;	// full height of our texture
+	total_time = time;
 
-	TexturedVertex vertices[4];
-	vertices[0].position = { -wr, +hr, 0.f };
-	vertices[0].texcoord = { 0.f, 1.f };
-	vertices[1].position = { +wr, +hr, 0.f };
-	vertices[1].texcoord = { 1.f, 1.f };
-	vertices[2].position = { +wr, -hr, 0.f };
-	vertices[2].texcoord = { 1.f, 0.f };
-	vertices[3].position = { -wr, -hr, 0.f };
-	vertices[3].texcoord = { 0.f, 0.f };
+	// TexturedVertex vertices[4];
+	texVertices[0].position = { -wr, +hr, -0.02f };
+	texVertices[0].texcoord = { 0.f, 1.f };
+	texVertices[1].position = { +wr, +hr, -0.02f };
+	texVertices[1].texcoord = { 1.f, 1.f };
+	texVertices[2].position = { +wr, -hr, -0.02f };
+	texVertices[2].texcoord = { 1.f, 0.f };
+	texVertices[3].position = { -wr, -hr, -0.02f };
+	texVertices[3].texcoord = { 0.f, 0.f };
 
 	// counterclockwise as it's the default opengl front winding direction
 	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+	m_is_in_use = false;
 
 	gl_flush_errors();
 
 	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
 
 	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
@@ -59,6 +62,7 @@ bool Scrollable::init(vec2 position, int _width, int _height, float time) {
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
 	set_position({ (float)position.x, (float)position.y });
+	m_is_in_use = true;
 
 	return true;
 }
@@ -121,6 +125,70 @@ void Scrollable::draw(const mat3 &projection)
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	// }
+}
+
+void Scrollable::update(float currTime) {
+	/*
+	// updates the current position for our scrollable
+	current_time = currTime;
+	if (!(current_time > total_time)) {
+		// we are still updating where the texture is rendered, for the screen
+		setTextureLocs(current_time);
+	}
+	else {
+		current_time = total_time;
+		setTextureLocs(total_time);
+	}
+	*/
+}
+
+void Scrollable::setTime(float curr_time) {
+
+}
+
+void Scrollable::setTextureLocs(float curr_time) {
+	/* 
+		Calculations for height: 
+		We first have full height. We only need to scroll from the top of the image, to
+		just where the top of the screen would be at for the bottom of the image. This 
+		distance is traversed over the total time. 
+	*/
+	// fprintf(stderr, "current time: %f", curr_time);
+	fprintf(stderr, " current time global: %f ", current_time);
+	float current_height = 1.f - ((full_height - height) * (current_time / total_time)) / full_height;
+	float current_bottom = current_height - (height / full_height);
+	if (current_height > full_height) {
+		fprintf(stderr, "value is too high!");
+	}
+	if (current_height < 0.f) {
+		fprintf(stderr, "value is too low!");
+	}
+
+	texVertices[0].texcoord = { 0.f, current_height }; //top left
+	texVertices[1].texcoord = { 1.f, current_height }; //top right
+	texVertices[2].texcoord = { 0.f, current_bottom }; //bottom right
+	texVertices[3].texcoord = { 1.f, current_bottom }; //bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Clear Memory
+	if (m_is_in_use) {
+		destroy();
+	}
+
+	// Vertex Buffer creation
+	glGenBuffers(1, &mesh.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, texVertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glGenBuffers(1, &mesh.ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
 void Scrollable::set_position(vec2 position)

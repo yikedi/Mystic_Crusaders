@@ -186,9 +186,11 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
+	drawIntro = false;
+	currTimeIntro = 0.f;
 
 	// std::function<void> f1 = &World::startGame;
-	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); drawIntro = true; });
 	button_play.set_hoverable(true);
 	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
 	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -210,7 +212,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen) && intro_text.init({100.f, 500.f}, 400.f, 300.f, 30.f);
 }
 
 bool World::initTrees() {
@@ -321,6 +323,11 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
 
+	if (drawIntro) {
+		intro_text.update(currTimeIntro);
+		currTimeIntro += 0.1f;
+	}
+
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
 		passed_level = !passed_level;
@@ -347,7 +354,6 @@ bool World::update(float elapsed_ms)
 
 	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
 		if (m_hero.is_alive()) {
-
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 				m_hero.shoot_projectiles(hero_projectiles);
 				Mix_PlayChannel(-1, m_fireball_sound, 0);
@@ -1272,6 +1278,9 @@ void World::draw()
 
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
+	if (drawIntro) {
+		intro_text.draw(projection_2D);
+	}
 	start.draw(projection_2D);
 	if (!display_tutorial) {
 		button_play.draw(projection_2D);
@@ -1283,10 +1292,13 @@ void World::draw()
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
 	}
+	
 
 	// Drawing entities
 	map.draw(projection_2D);
 	m_hero.draw(projection_2D);
+	
+	
 	for (auto& enemy : m_enemys_01)
 		enemy.draw(projection_2D);
 	for (auto& enemy : m_enemys_02)
@@ -1316,6 +1328,7 @@ void World::draw()
 		m_skill_switch.draw(projection_2D);
 		m_portal.draw(projection_2D);
 	}
+	
 
 	if (game_is_paused){
 		stree.draw(projection_2D);

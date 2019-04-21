@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "common.hpp"
@@ -8,7 +9,7 @@
 class Scrollable : public Renderable
 {
 
-	Texture scroll_texture;
+	SpriteSheet scroll_texture;
 
 public:
 
@@ -45,5 +46,7 @@ private:
 	float width;
 	float height;
 	float halfHeight;
+	float full_height;
 	float opacity = 1.f;
+	bool m_is_in_use;
 };

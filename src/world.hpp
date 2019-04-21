@@ -29,6 +29,7 @@
 #include "vine.h"
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
+#include "scrollable.hpp"
 
 // stlib
 #include <vector>
@@ -189,6 +190,9 @@ private:
 	SkillSwitch m_skill_switch;
 
 	bool passed_level;
-
+	float currTimeIntro;
+	float previousTime = 0.f;
+	bool drawIntro;
+	Scrollable intro_text;
 
 };
