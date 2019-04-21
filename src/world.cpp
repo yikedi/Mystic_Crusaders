@@ -212,7 +212,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen) && intro_text.init({100.f, 500.f}, 400.f, 300.f, 30.f);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen) && intro_text.init({screen.x / 2.f, screen.y / 2.f}, 500.f, 300.f, 30.f);
 }
 
 bool World::initTrees() {
@@ -1278,9 +1278,7 @@ void World::draw()
 
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
-	if (drawIntro) {
-		intro_text.draw(projection_2D);
-	}
+	
 	start.draw(projection_2D);
 	if (!display_tutorial) {
 		button_play.draw(projection_2D);
@@ -1329,7 +1327,9 @@ void World::draw()
 		m_portal.draw(projection_2D);
 	}
 	
-
+	if (drawIntro) {
+		intro_text.draw(projection_2D);
+	}
 	if (game_is_paused){
 		stree.draw(projection_2D);
 	}

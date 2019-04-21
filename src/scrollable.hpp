@@ -9,7 +9,7 @@
 class Scrollable : public Renderable
 {
 
-	SpriteSheet scroll_texture;
+	Texture scroll_texture;
 
 public:
 

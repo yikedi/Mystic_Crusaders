@@ -22,15 +22,15 @@ bool Scrollable::init(vec2 position, int _width, int _height, float time) {
 	full_height = scroll_texture.height;	// full height of our texture
 	total_time = time;
 
-	// TexturedVertex vertices[4];
-	texVertices[0].position = { -wr, +hr, -0.02f };
-	texVertices[0].texcoord = { 0.f, 1.f };
-	texVertices[1].position = { +wr, +hr, -0.02f };
-	texVertices[1].texcoord = { 1.f, 1.f };
-	texVertices[2].position = { +wr, -hr, -0.02f };
-	texVertices[2].texcoord = { 1.f, 0.f };
-	texVertices[3].position = { -wr, -hr, -0.02f };
-	texVertices[3].texcoord = { 0.f, 0.f };
+	TexturedVertex vertices[4];
+	vertices[0].position = { -wr, +hr, -0.01f };
+	vertices[0].texcoord = { 0.f, 1.f };
+	vertices[1].position = { +wr, +hr, -0.01f };
+	vertices[1].texcoord = { 1.f, 1.f };
+	vertices[2].position = { +wr, -hr, -0.01f };
+	vertices[2].texcoord = { 1.f, 0.f };
+	vertices[3].position = { -wr, -hr, -0.01f };
+	vertices[3].texcoord = { 0.f, 0.f };
 
 	// counterclockwise as it's the default opengl front winding direction
 	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
@@ -61,7 +61,9 @@ bool Scrollable::init(vec2 position, int _width, int _height, float time) {
 	zoom_factor = 1.f;
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
-	set_position({ (float)position.x, (float)position.y });
+	//set_position({ (float)position.x, (float)position.y });
+	//set_position(position);
+	m_position = {0.f,0.f};
 	m_is_in_use = true;
 
 	return true;
@@ -80,6 +82,8 @@ void Scrollable::destroy()
 void Scrollable::draw(const mat3 &projection)
 {
 	// if ((button_hoverable && mouse_hovering) || !button_hoverable) {
+	gl_flush_errors();
+
 	transform_begin();
 	transform_translate(m_position);
 	transform_scale(m_scale);
@@ -90,7 +94,7 @@ void Scrollable::draw(const mat3 &projection)
 
 	// Enabling alpha channel for textures
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
 	// Getting uniform locations for glUniform* calls
