@@ -1632,14 +1632,14 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		game_is_paused = !game_is_paused;
 	}
 	else if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
-		m_hero.set_active_skill(0);
+		int level_up_skill = (m_hero.get_active_skill() + 1) % 3;
+		m_hero.set_active_skill(level_up_skill);
 	}
 	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
-		m_hero.set_active_skill(1);
+		int level_up_skill = (m_hero.get_active_skill() - 1) % 3;
+		m_hero.set_active_skill(level_up_skill);
 	}
-	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
-		m_hero.set_active_skill(2);
-	}
+
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
