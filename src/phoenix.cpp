@@ -338,7 +338,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
     float d_hp = -ms / 1000 * 5; //Decrease hp every second
     change_hp(d_hp); //decrease some amount of hp overtime
     float fire = float(rand() % 100);
-    if (fire < 5.f)
+    if (fire < 3.f)
     {
         attack(m_enemys_01, m_enemys_02, m_enemys_03, hero_projectiles);
     }
