@@ -10,7 +10,7 @@
 
 bool Mapscreen::init(vec2 screen, int game_level) {
 	if(game_level % 3 == 0 )
-		map_screen.load_from_file(textures_path("grass3.png"));
+		map_screen.load_from_file(textures_path("grassland.png"));
 	else if (game_level % 3 == 1)
 		map_screen.load_from_file(textures_path("desert.png"));
 	else
