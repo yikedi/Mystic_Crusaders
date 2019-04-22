@@ -91,14 +91,17 @@ void Enemy_02::destroy(bool reset)
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
 	if((waved && !m_is_alive) || reset) {
-		wave.destroy();
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+		wave.destroy(true);
 	}
 }
 
 
 vec2 Enemy_02::get_bounding_box()const
 {
-	return { std::fabs(m_scale.x) * enemy_texture.subWidth, std::fabs(m_scale.y) * enemy_texture.subHeight };
+	return { std::fabs(m_scale.x) * enemy_texture.subWidth - 30.f, std::fabs(m_scale.y) * enemy_texture.subHeight - 10.f};
 }
 
 void Enemy_02::draw(const mat3& projection)

@@ -32,7 +32,6 @@
 #include "Shop.h"
 #include "shop_screen.hpp"
 #include "box.hpp"
-
 // stlib
 #include <vector>
 #include <random>

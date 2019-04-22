@@ -10,7 +10,7 @@
 
 enum CurrentSkillState { ICEBLADES, PHOENIX, FIRESTORM };
 
-class SkillSwitch: public Renderable 
+class SkillSwitch: public Renderable
 {
 
 	static SpriteSheet skill_texture;
@@ -19,7 +19,7 @@ public:
 
 	bool init(vec2 position);
 
-	void destroy();
+	void destroy(bool reset);
 
 	void update(int skill, float zoom);
 

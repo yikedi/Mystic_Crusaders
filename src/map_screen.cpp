@@ -10,7 +10,7 @@
 
 bool Mapscreen::init(vec2 screen, int game_level) {
 	if(game_level % 3 == 0 )
-		map_screen.load_from_file(textures_path("grass3.png"));
+		map_screen.load_from_file(textures_path("grassland.png"));
 	else if (game_level % 3 == 1)
 		map_screen.load_from_file(textures_path("desert.png"));
 	else
@@ -63,10 +63,10 @@ bool Mapscreen::init(vec2 screen, int game_level) {
 void Mapscreen::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
+
 	//g_level = 1;
 }
 

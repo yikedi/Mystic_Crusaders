@@ -191,7 +191,6 @@ bool World::init(vec2 screen)
 	kill_num = number_to_vec(cur_points_needed, true);
 	shop.init();
 	shop.update_hero(m_hero);
-
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 	button_play.set_hoverable(true);
 	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -294,7 +293,7 @@ void World::destroy()
 
 	Mix_CloseAudio();
 
-	m_hero.destroy();
+	m_hero.destroy(true);
 	for (auto& enemy : m_enemys_01)
 		enemy.destroy(true);
 	for (auto& enemy : m_enemys_02)
@@ -324,7 +323,7 @@ void World::destroy()
 	enemy_projectiles.clear();
 	m_interface.destroy();
 	ingame.destroy();
-	m_skill_switch.destroy();
+	m_skill_switch.destroy(true);
 	start.destroy();
 	stree.destroy();
 	hme.destroy();
@@ -404,7 +403,6 @@ bool World::update(float elapsed_ms)
 			}
 
 
-
 			auto vine = m_vine.begin();
 			while (vine != m_vine.end())
 			{
@@ -460,7 +458,7 @@ bool World::update(float elapsed_ms)
 
 				m_hero.apply_momentum(force);
 			}
-			if (m_points * m_hero.exp_multiplier - previous_point > 15 + (m_hero.level * 5))
+			if (m_points - previous_point > 15 + (m_hero.level * 5))
 			{
 				previous_point = m_points;
 				m_hero.levelup();
@@ -818,6 +816,9 @@ bool World::update(float elapsed_ms)
 
 				//find the difference vector, but only push back hero in the opposite direction that the hero walks
 				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
+				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back. 
+				if (abs(current_direction.x) < 1.0f && abs(current_direction.y) < 1.0f)
+					difference = { cur_position.x - tree_location.x , cur_position.y - tree_location.y };
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
 				float size = sqrtf(dot(difference, difference));
 				difference = { difference.x / size, difference.y / size }; //scale the difference
@@ -1395,7 +1396,7 @@ bool World::update(float elapsed_ms)
 		button_back_to_menu2.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
-		m_hero.destroy();
+		m_hero.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1437,7 +1438,7 @@ bool World::update(float elapsed_ms)
 		enemy_projectiles.clear();
 		thunders.clear();
 		phoenix_list.clear();
-		m_skill_switch.destroy();
+		m_skill_switch.destroy(true);
 		m_interface.destroy();
 		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
@@ -1581,7 +1582,6 @@ void World::draw()
 	}
 
 	// Drawing entities
-
 	if (start_is_over && !shopping) {
 		map.draw(projection_2D);
 		m_hero.draw(projection_2D);
@@ -1597,8 +1597,6 @@ void World::draw()
 			e_proj.draw(projection_2D);
 		for (auto& thunder : thunders)
 			thunder->draw(projection_2D);
-		for (auto& phoenix : phoenix_list)
-			phoenix->draw(projection_2D);
 
 		for (auto& treetrunk : m_treetrunk)
 			treetrunk.draw(projection_2D);
@@ -1608,11 +1606,13 @@ void World::draw()
 			vine.draw(projection_2D);
 		for (auto& box : m_box)
 			box.draw(projection_2D);
+		m_portal.draw(projection_2D);
+		for (auto& phoenix : phoenix_list)
+			phoenix->draw(projection_2D);
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
 		m_skill_switch.draw(projection_2D);
-		m_portal.draw(projection_2D);
 	}
 
 	if (game_is_paused){
@@ -1764,12 +1764,12 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		shop_screen.destroy();
 		hme.destroy();
 		map.destroy();
-		m_hero.destroy();
+		m_hero.destroy(true);
 		start.destroy();
 		stree.destroy();
 		m_interface.destroy();
 		ingame.destroy();
-		m_skill_switch.destroy();
+		m_skill_switch.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1957,7 +1957,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_hero.set_active_skill(level_up_skill);
 	}
 	else if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
-		int level_up_skill = (m_hero.get_active_skill() - 1) % 3;
+		int level_up_skill = (m_hero.get_active_skill() - 1 + 3) % 3;
 		m_hero.set_active_skill(level_up_skill);
 	}
 

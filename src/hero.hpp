@@ -51,7 +51,7 @@ public:
 	bool init(vec2 screen);
 
 	// Releases all associated resources
-	void destroy();
+	void destroy(bool reset);
 
 	// Update salmon position based on direction
 	// ms represents the number of milliseconds elapsed from the previous update() call
