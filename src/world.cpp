@@ -1449,7 +1449,7 @@ bool World::update(float elapsed_ms)
 		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
-		button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		start.init(screen);
@@ -1840,7 +1840,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
-		button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		m_hero.init(screen);
