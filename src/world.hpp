@@ -160,7 +160,7 @@ private:
 	std::vector<Thunder*> thunders;
 	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
-	
+
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
 
@@ -221,3 +221,4 @@ private:
 	float interest;
 	int balance;
 
+};
