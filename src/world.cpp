@@ -185,7 +185,7 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_portal.init(screen);
 	m_skill_switch.init({ 500.f, 500.f });
-	intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
+	intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
 	m_story.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
@@ -207,7 +207,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
-	button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+	button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
@@ -1498,7 +1498,7 @@ bool World::update(float elapsed_ms)
 		m_interface.init({ 300.f, 42.f }, m_hero.max_hp);
 		ingame.init(screen);
 		hme.init(screen);
-		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
 		m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
@@ -1855,7 +1855,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
-		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
 		m_story.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });

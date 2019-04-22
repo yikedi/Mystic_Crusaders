@@ -3,7 +3,14 @@
 bool Scrollable::init(vec2 position, vec2 screen, float increment) {
 
 	// Load shared texture
-	scroll_texture.load_from_file(textures_path("scrollerTextSemiTransparent.png"));
+	if (!scroll_texture.is_valid())
+	{
+		if (!scroll_texture.load_from_file(textures_path("scroller.png")))
+		{
+			fprintf(stderr, "Failed to load srcoller texture!");
+			return false;
+		}
+	}
 	float w = screen.x;
 	float individual_scale_factor = scroll_texture.width / screen.x;
 	float h = scroll_texture.height / individual_scale_factor; // maintains current ratio
