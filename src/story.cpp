@@ -53,15 +53,14 @@ bool Story::init(vec2 screen) {
 void Story::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+	effect.release();
 }
 
 void Story::update() {
 	// updates the current position for our scrollable
-	
+
 }
 
 void Story::draw(const mat3& projection) {
