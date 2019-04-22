@@ -182,7 +182,7 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_portal.init(screen);
 	m_skill_switch.init({ 500.f, 500.f });
-	intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+	intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
 	m_story.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
@@ -1471,7 +1471,7 @@ bool World::update(float elapsed_ms)
 		m_interface.init({ 300.f, 42.f });
 		ingame.init(screen);
 		hme.init(screen);
-		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
 		m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
@@ -1811,7 +1811,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
-		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
 		m_story.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });
