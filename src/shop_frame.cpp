@@ -1,4 +1,4 @@
-#include "skillup.hpp"
+#include "shop_frame.hpp"
 
 #include <iostream>
 
@@ -8,21 +8,21 @@
 #include <cmath>
 
 #include <gl3w.h>
+//change position
 
-Texture Skillup::level_texture;
-bool Skillup::init(vec2 screen)
+
+bool Shop_frame::init(vec2 screen)
 {
-	level_texture.load_from_file(textures_path("level_up.png"));
-	float w = level_texture.width;
-	float h = level_texture.height;
+	sframe_texture.load_from_file(textures_path("skill_frame.png"));
+	float w = sframe_texture.width;
+	float h = sframe_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 385.f;
 
-	vertices[0].position = { -width / 2, +hr, 0.f };
-	vertices[1].position = { +width / 2, +hr, 0.f };
-	vertices[2].position = { +width / 2, -hr, 0.f };
-	vertices[3].position = { -width / 2, -hr, 0.f };
+	vertices[0].position = { -wr, +hr, 0.f };
+	vertices[1].position = { +wr, +hr, 0.f };
+	vertices[2].position = { +wr, -hr, 0.f };
+	vertices[3].position = { -wr, -hr, 0.f };
 
 	glGenBuffers(1, &mesh.vbo);
 	glGenBuffers(1, &mesh.ibo);
@@ -35,22 +35,18 @@ bool Skillup::init(vec2 screen)
 	// Loading shaders
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
-
-	m_scale = {1.f,1.f};
-	m_position.x = 0.6*screen.x;
-	m_position.y = 0.75*screen.y;
+	m_scale = { 1.f, 1.f };
 	return true;
 }
 
-void Skillup::destroy()
+void Shop_frame::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
-
-    effect.release();
+	effect.release();
 }
 
-void Skillup::draw(const mat3 & projection)
+void Shop_frame::draw(const mat3 & projection)
 {
 	gl_flush_errors();
 
@@ -85,10 +81,11 @@ void Skillup::draw(const mat3 & projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, level_texture.id);
+	glBindTexture(GL_TEXTURE_2D, sframe_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
+
 	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
@@ -97,11 +94,39 @@ void Skillup::draw(const mat3 & projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
+void Shop_frame::update_sframe(bool shopping, int item_num, vec2 screen)
 {
-	if (paused) {
-		if (freepoints > 0 && skill_num != 0) {
+	if (shopping) {
+
+		if (item_num == 1) {
 			get_texture(0);
+			m_position.x = 0.375*screen.x;
+			m_position.y = 0.28*screen.y;
+		}
+		else if (item_num == 2) {
+			get_texture(0);
+			m_position.x = 0.52*screen.x;
+			m_position.y = 0.28*screen.y;
+		}
+		else if (item_num == 3) {
+			get_texture(0);
+			m_position.x = 0.67*screen.x;
+			m_position.y = 0.28*screen.y;
+		}
+		else if (item_num == 4) {
+			get_texture(0);
+			m_position.x = 0.36*screen.x;
+			m_position.y = 0.5*screen.y;
+		}
+		else if (item_num == 5) {
+			get_texture(0);
+			m_position.x = 0.52*screen.x;
+			m_position.y = 0.5*screen.y;
+		}
+		else if (item_num == 6) {
+			get_texture(0);
+			m_position.x = 0.67*screen.x;
+			m_position.y = 0.5*screen.y;
 		}
 		else {
 			get_texture(1);
@@ -109,24 +134,14 @@ void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
 	}
 }
 
-void Skillup::update_itemlevel(bool paused, int stock, int afforable, int skill_num)
+vec2 Shop_frame::get_position()const
 {
-	if (paused) {
-		if (stock > 0 && skill_num != 0 && afforable >= 0) {
-			get_texture(0);
-		}
-		else {
-			get_texture(1);
-		}
-	}
+	return m_position;
 }
 
-
-void Skillup::get_texture(int loc)
+void Shop_frame::get_texture(int loc)
 {
-	float h = 385.f;
-	float w = 770.f;
-	float texture_locs[] = {0.f, h/w,1.f};
+	float texture_locs[] = { 0.f, 1.f, 1.f };
 
 	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
 	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
@@ -146,16 +161,4 @@ void Skillup::get_texture(int loc)
 	// Index Buffer creation
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
-}
-
-
-vec2 Skillup::get_position()const
-{
-	return m_position;
-}
-
-void Skillup::change_position(vec2 screen)
-{
-	m_position.x = 0.5*screen.x;
-	m_position.y = 0.75*screen.y;
 }

@@ -1,41 +1,31 @@
-#include "tutorial_screen.hpp"
+#include "shop_item.hpp"
 
 #include <iostream>
 
 #include <string.h>
 #include <cassert>
 #include <sstream>
+#include <cmath>
 
 #include <gl3w.h>
-Texture TutorialScreen::tutorial_screen;
 
-bool TutorialScreen::init(vec2 screen) {
-	tutorial_screen.load_from_file(textures_path("full_tutorial_screen.png"));
-	float w = tutorial_screen.width;
-	float h = tutorial_screen.height;
+bool Shop_item::init(vec2 screen)
+{
+	item_texture.load_from_file(textures_path("item_description.png"));
+	//item_texture.load_from_file(thunder_skill1());
+	float w = item_texture.width;
+	float h = item_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
-	float width = 1920.f;
+	float width = 351.f;
 
 	vertices[0].position = { -width/2, +hr, 0.f };
 	vertices[1].position = { +width/2, +hr, 0.f };
 	vertices[2].position = { +width/2, -hr, 0.f };
 	vertices[3].position = { -width/2, -hr, 0.f };
 
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
-
-	gl_flush_errors();
-
-	// Vertex Buffer creation
 	glGenBuffers(1, &mesh.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
 	glGenBuffers(1, &mesh.ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 
 	// Vertex Array (Container for Vertex + Index buffer)
 	glGenVertexArrays(1, &mesh.vao);
@@ -45,52 +35,26 @@ bool TutorialScreen::init(vec2 screen) {
 	// Loading shaders
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
-	m_scale = set_scale(1920.f, 1080.f, screen);
-	m_position = { float(screen.x / 2), float(screen.y / 2) };
+
+	m_scale = { 0.75f,0.75f };
+
+	m_position.x = 0.145*screen.x;
+	m_position.y = 0.4 * screen.y;
+	m_light_up = 0;
 	return true;
 }
 
-void TutorialScreen::destroy() {
+void Shop_item::destroy()
+{
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
 	effect.release();
+
 }
 
-void TutorialScreen::update(bool tutorial_display, int page_num){
-	if (tutorial_display) {
-		get_texture(page_num-1);
-	}
-}
-
-void TutorialScreen::get_texture(int loc)
+void Shop_item::draw(const mat3 & projection)
 {
-	float sw = 1920.f;
-	float w = 4*sw;
-	float texture_locs[] = { 0.f, sw / w, 2 * sw / w, 3 * sw / w, 1.f };
-
-	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
-	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
-	vertices[2].texcoord = { texture_locs[loc + 1], 0.f };//bottom right
-	vertices[3].texcoord = { texture_locs[loc], 0.f };//bottom left
-
-	// counterclockwise as it's the default opengl front winding direction
-	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
-
-	// Clearing errors
-	gl_flush_errors();
-
-	//destroy(false);
-	// Vertex Buffer creation
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
-
-	// Index Buffer creation
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
-}
-
-void TutorialScreen::draw(const mat3& projection) {
 		gl_flush_errors();
 
 		transform_begin();
@@ -108,6 +72,7 @@ void TutorialScreen::draw(const mat3& projection) {
 		GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 		GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 		GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
+		GLint light_up_uloc = glGetUniformLocation(effect.program, "light_up");
 
 		// Setting vertices and indices
 		glBindVertexArray(mesh.vao);
@@ -124,7 +89,7 @@ void TutorialScreen::draw(const mat3& projection) {
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tutorial_screen.id);
+		glBindTexture(GL_TEXTURE_2D, item_texture.id);
 
 		// Setting uniform values to the currently bound program
 		glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -132,14 +97,45 @@ void TutorialScreen::draw(const mat3& projection) {
 		glUniform3fv(color_uloc, 1, color);
 		glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
+		glUniform1iv(light_up_uloc, 1, &m_light_up);
 		// Drawing!
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-vec2 TutorialScreen::set_scale(float w, float h, vec2 screen)
+void Shop_item::update_item(bool shopping, int item_num)
 {
-	float xscale = screen.x / w;
-	float yscale = screen.y / h;
-	//return{ 1.f,1.f };
-	return { xscale, yscale };
+	if (shopping) {
+		get_texture(item_num);
+	}
+}
+
+void Shop_item::get_texture(int loc)
+{
+	float sw = 351.f;
+	float w = 2106.f;
+	float texture_locs[] = {0.f, 0.f, sw / w, 2 * sw / w, 3 * sw / w, 4 * sw / w, 5 * sw / w, 1.f };
+
+	vertices[0].texcoord = { texture_locs[loc], 1.f };//top left
+	vertices[1].texcoord = { texture_locs[loc + 1], 1.f };//top right
+	vertices[2].texcoord = { texture_locs[loc + 1], 0.f };//bottom right
+	vertices[3].texcoord = { texture_locs[loc], 0.f };//bottom left
+
+	// counterclockwise as it's the default opengl front winding direction
+	uint16_t indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	// Clearing errors
+	gl_flush_errors();
+
+	// Vertex Buffer creation
+	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
+
+	// Index Buffer creation
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
+}
+
+vec2 Shop_item::get_position()const
+{
+	return m_position;
 }

@@ -83,9 +83,15 @@ set(SOURCE_FILES
 	src/scrollable.cpp
 	src/box.cpp
 	src/Shop.cpp
+	src/shop_data.cpp
+	src/shop_screen.cpp
+	src/shop_item.cpp
+	src/shop_frame.cpp
+	src/purchase.cpp
 	src/json/json_reader.cpp
 	src/json/json_value.cpp
 	src/json/json_writer.cpp
+	src/box.cpp
 
   src/project_path.hpp
 	src/common.hpp
@@ -138,8 +144,12 @@ set(SOURCE_FILES
 	src/phoenix_skill.h
 	src/phoenix.h
 	src/particles.h
-	src/box.hpp
 	src/Shop.h
+	src/shop_data.hpp
+	src/shop_screen.hpp
+	src/shop_item.hpp
+	src/shop_frame.hpp
+	src/purchase.cpp
 	src/json/allocator.h
 	src/json/assertions.h
 	src/json/autolink.h
@@ -152,6 +162,7 @@ set(SOURCE_FILES
 	src/json/value.h
 	src/json/version.h
 	src/json/writer.h
+	src/box.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
