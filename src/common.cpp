@@ -277,8 +277,6 @@ void Effect::release()
 
 Text::Text()
 {
-    if (FT_Init_FreeType(&ft))
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
 }
 
@@ -289,6 +287,10 @@ Text::~Text()
 
 bool Text::loadCharacters(const char* ft_path)
 {
+
+    if (FT_Init_FreeType(&ft))
+        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
     if (FT_New_Face(ft, ft_path, 0, &face))
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
@@ -299,6 +301,7 @@ bool Text::loadCharacters(const char* ft_path)
     // Loading shaders
     if (!textEffect.load_from_file(shader_path("text.vs.glsl"), shader_path("text.fs.glsl")))
         return false;
+    
 
     for (GLubyte c = 0; c < 128; c++)
     {
@@ -338,24 +341,36 @@ bool Text::loadCharacters(const char* ft_path)
         Characters.insert(std::pair<GLchar, Character>(c, character));
     }
 
-    // allocate memory
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
     // clear face and freetype library
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
+
+    // allocate memory
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 6, NULL, GL_DYNAMIC_DRAW);
+    glUseProgram(textEffect.program);
+    GLint in_position_loc = glGetAttribLocation(textEffect.program, "in_position");
+    GLint in_texcoord_loc = glGetAttribLocation(textEffect.program, "in_texcoord");
+    glEnableVertexAttribArray(in_position_loc);
+    glEnableVertexAttribArray(in_texcoord_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+    glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    
 
     return true;
 }
 
 void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors)
 {
+    glUseProgram(textEffect.program);
+    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
     glUniformMatrix3fv(glGetUniformLocation(textEffect.program, "projection"), 1, GL_FALSE, (float*)&projection);
     glUniform3f(glGetUniformLocation(textEffect.program, "textColor"), colors.x, colors.y, colors.z);
     glActiveTexture(GL_TEXTURE0);
@@ -391,7 +406,7 @@ void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLflo
         glBindTexture(GL_TEXTURE_2D, ch.textureID);
         // Update content of VBO memory
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TexturedVertex) * 6, vertices);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         // Render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
