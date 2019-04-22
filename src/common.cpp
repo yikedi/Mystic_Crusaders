@@ -275,16 +275,6 @@ void Effect::release()
 	glDeleteProgram(program);
 }
 
-Text::Text()
-{
-
-}
-
-Text::~Text()
-{
-
-}
-
 bool Text::loadCharacters(const char* ft_path)
 {
     glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -361,13 +351,12 @@ bool Text::loadCharacters(const char* ft_path)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    
-
     return true;
 }
 
 void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors)
 {
+    // Setting uniform values to the currently bound program
     glUseProgram(textEffect.program);
     glUniformMatrix3fv(glGetUniformLocation(textEffect.program, "projection"), 1, GL_FALSE, (float*)&projection);
     glUniform3f(glGetUniformLocation(textEffect.program, "textColor"), colors.x, colors.y, colors.z);
