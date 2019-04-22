@@ -61,8 +61,8 @@ void Thunder::draw(const mat3 &projection)
 
 void Thunder::destroy()
 {
-	thunderString.destroy();
-	thunderBall.destroy();
+	thunderString.destroy(true);
+	thunderBall.destroy(true);
 }
 
 bool Thunder::can_remove()

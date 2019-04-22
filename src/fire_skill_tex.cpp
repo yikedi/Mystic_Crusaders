@@ -18,12 +18,12 @@ bool Fireskilltex::init(vec2 screen, int skill_num)
 			m_position.y = 0.42*screen.y;
 			break;
 		case 2:
-			fire_texture.load_from_file(fire_skill1());
+			fire_texture.load_from_file(fire_skill2());
 			m_position.x = 0.76*screen.x;
 			m_position.y = 0.52*screen.y;
 			break;
 		case 3:
-			fire_texture.load_from_file(fire_skill1());
+			fire_texture.load_from_file(fire_skill3());
 			m_position.x = 0.71*screen.x;
 			m_position.y = 0.62*screen.y;
 			break;
@@ -62,9 +62,7 @@ void Fireskilltex::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
 }
 
 void Fireskilltex::draw(const mat3 & projection)

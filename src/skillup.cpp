@@ -47,9 +47,7 @@ void Skillup::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
 }
 
 void Skillup::draw(const mat3 & projection)
@@ -111,6 +109,19 @@ void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
 	}
 }
 
+void Skillup::update_itemlevel(bool paused, int stock, int afforable, int skill_num)
+{
+	if (paused) {
+		if (stock > 0 && skill_num != 0 && afforable >= 0) {
+			get_texture(0);
+		}
+		else {
+			get_texture(1);
+		}
+	}
+}
+
+
 void Skillup::get_texture(int loc)
 {
 	float h = 385.f;
@@ -141,4 +152,10 @@ void Skillup::get_texture(int loc)
 vec2 Skillup::get_position()const
 {
 	return m_position;
+}
+
+void Skillup::change_position(vec2 screen)
+{
+	m_position.x = 0.5*screen.x;
+	m_position.y = 0.75*screen.y;
 }

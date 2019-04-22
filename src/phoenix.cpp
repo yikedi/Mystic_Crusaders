@@ -184,14 +184,12 @@ void phoenix::destroy(bool reset)
             m_particles[i].destroy();
         }
         m_particles.clear();
+		glDeleteVertexArrays(1, &mesh.vao);
+		effect.release();
     }
 
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
 }
 
 void phoenix::setTextureLocs(int index)
@@ -338,7 +336,7 @@ void phoenix::update(float ms, vec2 hero_position, std::vector<Enemy_01> &m_enem
     float d_hp = -ms / 1000 * 5; //Decrease hp every second
     change_hp(d_hp); //decrease some amount of hp overtime
     float fire = float(rand() % 100);
-    if (fire < 5.f)
+    if (fire < 3.f)
     {
         attack(m_enemys_01, m_enemys_02, m_enemys_03, hero_projectiles);
     }

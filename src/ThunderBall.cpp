@@ -93,15 +93,20 @@ void ThunderBall::set_position(vec2 position)
 	m_position = position;
 }
 
-void ThunderBall::destroy()
+void ThunderBall::destroy(bool reset)
 {
-
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+	if(reset) {
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+	}
 }
 
 void ThunderBall::update(float ms)
@@ -133,7 +138,7 @@ void ThunderBall::setTextureLocs(int index)
 
 	// Clear memory allocation
 	if (!first_time) {
-		destroy();
+		destroy(false);
 	}
 
 	// Vertex Buffer creation

@@ -23,9 +23,15 @@ public:
 
 	void update_leveltex(bool paused, int freepoints, int skill_num); //call on world
 
+	void update_itemlevel(bool paused, int stock, int afforable, int skill_num);
+
 	void get_texture(int loc);
 
 	vec2 get_position() const;
+
+	void change_position(vec2 screen);
+
+	void change_scale(vec2 screen);
 
 
 private:

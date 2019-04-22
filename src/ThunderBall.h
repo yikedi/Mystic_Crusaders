@@ -19,7 +19,7 @@ public:
 
 	void draw(const mat3 &projection);
 
-	void destroy();
+	void destroy(bool reset);
 
 	vec2 get_bounding_box();
 

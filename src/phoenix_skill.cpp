@@ -4,10 +4,10 @@
 
 void phoenix_skill::init()
 {
-	m_hp = 150.f;
-	damage = 20.f;
+	m_hp = 100.f;
+	damage = 10.f;
 	m_scale = {0.8f,0.8f};
-	mp_cost = 25.f;
+	mp_cost = 14.f;
 }
 
 float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 hero_position)
@@ -40,7 +40,7 @@ bool phoenix_skill::level_up(int select)
 	case LEVEL_UP_DAMAGE: // increase damage
 		if (damage_level < 5)
 		{
-			damage += 2.f;
+			damage *= 1.2f;
 			mp_cost += 2.f;
 			success = true;
 			damage_level++;
@@ -49,7 +49,7 @@ bool phoenix_skill::level_up(int select)
 	case LEVEL_UP_EFFECT: //
 		if (effect_level < 5)
 		{
-			m_hp *= 1.1f;
+			m_hp *= 1.15f;
 			mp_cost += 1.5f;
 			success = true;
 			effect_level++;

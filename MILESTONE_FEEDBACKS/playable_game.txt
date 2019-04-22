@@ -1,0 +1,16 @@
+Grade: 87.5/100
+
+All the members did put substantial work in the milestone, there have been many new features implemented that contributed to the extra marks in the creative part. This type of game is not easy to make it playable for longer amounts of time without making it feel repetitive, but I am impressed by how they made it. For the final milestone I would like to see some extra minor visual effects (dead body decals, on-hit effects/knockbacks) and more complex enemy strategies, though these are just personal suggestions. The game definitely does deserve more marks, but it had to be graded against the expected milestone requirement. I would alternate the type of tasks between the members so that all get to work on the codebase, regardless, all the member passionately contributed to the game.
+
+## Milestone Requirements (57.75):
++ 7.5/15 Geometry: Reduced complexity of the polygonal asset (tree trunks ~ quads)
++ 10/20 Collisions: The collision detection method still uses the approximate naive shapes
++ 15/15 Physics: Tree branches wind waving simulation
++ 15/15 Non-linear: Spiders move along curved trajectories. Not parametric but well constructed motions
++ 10/10 Stable game code
+
+## Milestone creative (30):
++ 10 Tree waving shader
++ 5 Thunderstorm effect visuals (concatenated animations)
++ 15 Various type of spides with individually tuned effects/motion
+

@@ -1,0 +1,28 @@
+# Team 7
+Grades: 75/100
+
+The game introduced a new goblet mechanic which brings the player to next level once has enough kills. There is also a new phoenix skill. Despite the report says “we decided not to implement A* pathfinding because it decreases the randomness of enemy movement”, I suggest implementing some AI related features. It seems that the current version cannot satisfy the AI requirement.
+
+Here are some extra comments:
+- It’s better to add a “main menu” button in the game.
+It would be clearer if the skill UI shows number of available level-up points.
+- Now, phoenix is always below the scene objects, which should be fixed. Also, the particle drawing for the phoenix is inefficient. A better way is to draw all the particles with a single draw call.
+
+## Milestone requirements (50)
+
++10/10 Gameplay (6 min): The game has enough contents.
++12/15 Performance & Robust Playing: The game runs without lag or crash and terminates gracefully. -3 because the game crashes on my machine. It is caused by drawing uninitialized game map in the start menu. And I’m confused why this code ran without problem during the grading.
++5/5 Correct Time Step.
++10/20 Memory: The game leaks memory and the amount grows as the play time increases.
+Visual Leak Detector detected 3323 memory leaks (358800 bytes).
+Some sources are: phoenix::shoot_projectiles(), ThunderBall::init(), etc.
++0/10 Reloadable: The game doesn’t support save and load.
++13/15 Bugs & Glitches: 
+- -2 After death, restarting the game gives a different first level.
+
+## Milestone creative (25)
+
++15 Phoenix: a new skill with particle visual effect.
++5 New level and level transition.
++5 Goblet.
+

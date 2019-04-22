@@ -50,7 +50,7 @@ bool SkillSwitch::init(vec2 position)
 		fprintf(stderr, "skillswitch glGenVertexArrays has error!");
 		return false;
 	}
-		
+
 	// Loading shaders
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl"))) {
 		fprintf(stderr, "skillswitch shaders not loaded!");
@@ -66,11 +66,11 @@ bool SkillSwitch::init(vec2 position)
 	prevSkill = ICEBLADES;
 
 	return true;
-		
+
 }
 
 // Releases all graphics resources
-void SkillSwitch::destroy()
+void SkillSwitch::destroy(bool reset)
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -78,6 +78,11 @@ void SkillSwitch::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+	if(reset) {
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+	}
 }
 
 void SkillSwitch::draw(const mat3& projection)
@@ -218,7 +223,7 @@ void SkillSwitch::setTextureLocs(int index) {
 
 	// Clear Memory
 	if (m_is_in_use) {
-		destroy();
+		destroy(false);
 	}
 
 	// Vertex Buffer creation
@@ -232,7 +237,7 @@ void SkillSwitch::setTextureLocs(int index) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 6, indices, GL_STATIC_DRAW);
 }
 
-void SkillSwitch::set_position(vec2 position) 
+void SkillSwitch::set_position(vec2 position)
 {
 	m_position = { (position.x + skill_texture.subWidth / 2.f) / zoom_factor, (position.y + skill_texture.subHeight / 2.f) / zoom_factor };
 }

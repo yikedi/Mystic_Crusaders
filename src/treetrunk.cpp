@@ -76,7 +76,7 @@ bool Treetrunk::init(vec2 screen)
 	// Setting initial values
 	m_scale.x = -100.f;
 	m_scale.y = 60.f;
-	
+
 	m_num_indices = indices.size();
 	//m_position = { screen.x / 3, screen.y / 3 };
 	m_rotation = 0.f;
@@ -90,17 +90,15 @@ void Treetrunk::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
-	glDeleteShader(effect.vertex);
-	glDeleteShader(effect.fragment);
-	glDeleteShader(effect.program);
+	effect.release();
 }
 
 // Called on each frame by World::update()
 void Treetrunk::update(float ms)
 {
-	
+
 
 }
 
@@ -242,7 +240,7 @@ bool Treetrunk::collide_with(Projectile &p)
 	r *= 4.f;
 	float top, bottom, left, right;
 	float scale_back = abs(p.get_scale().x);
-	float factor = 0.95 * 0.5; 
+	float factor = 0.95 * 0.5;
 	top = -1.f * p.get_bounding_box().y / scale_back * factor;
 	bottom = p.get_bounding_box().y / scale_back * factor;
 	left = -1.f * p.get_bounding_box().x / scale_back * factor;

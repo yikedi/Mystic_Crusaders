@@ -2,7 +2,7 @@
 
 void ThunderSkill::init()
 {
-	mp_cost = 6.f;
+	mp_cost = 6.5f;
 	damage = 0.4f;
 	damage_level = 0;
 	effect_level = 0;
@@ -20,7 +20,7 @@ bool ThunderSkill::level_up(int select)
 			{
 				damage += 0.2f;
 				impactTime += 500;
-				mp_cost += 0.8f;
+				mp_cost += 0.9f;
 				success = true;
 				damage_level++;
 			}
@@ -29,7 +29,7 @@ bool ThunderSkill::level_up(int select)
 			if (effect_level < 5)
 			{
 				scale = { scale.x * 1.15f , scale.y * 1.15f };
-				mp_cost += 1.3f;
+				mp_cost += 1.4f;
 				success = true;
 				effect_level++;
 			}
