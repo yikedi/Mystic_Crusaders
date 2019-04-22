@@ -248,7 +248,7 @@ bool World::initTrees() {
 			new_tree.set_position({ position.x + 10.f ,position.y });
 		}
 	}
-	else if (m_game_level % 3 == 1) 
+	else if (m_game_level % 3 == 1)
 	{
 		for (auto & position : m_treetrunk_position)
 		{
@@ -370,7 +370,7 @@ bool World::update(float elapsed_ms)
 			}
 		}
 	}
-	
+
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -819,7 +819,7 @@ bool World::update(float elapsed_ms)
 
 
 		}
-		
+
 
 
 		//check treetrunk collision
@@ -834,7 +834,7 @@ bool World::update(float elapsed_ms)
 
 				//find the difference vector, but only push back hero in the opposite direction that the hero walks
 				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
-				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back. 
+				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back.
 				if (abs(current_direction.x) < 1.0f && abs(current_direction.y) < 1.0f)
 					difference = { cur_position.x - tree_location.x , cur_position.y - tree_location.y };
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
@@ -1617,7 +1617,7 @@ void World::draw()
 	// Drawing entities
 	if (start_is_over && !shopping) {
 		map.draw(projection_2D);
-		m_hero.draw(projection_2D);	// TODO if problems, refer to this line 
+		m_hero.draw(projection_2D);	// TODO if problems, refer to this line
 		for (auto& enemy : m_enemys_01)
 			enemy.draw(projection_2D);
 		for (auto& enemy : m_enemys_02)
@@ -1844,6 +1844,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		m_hero.init(screen);
+		shop.update_hero(m_hero);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
 		m_enemys_03.clear();
@@ -1865,6 +1866,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_right = (float)w;// *0.5;
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
+		shop.set_balance(shop.get_balance() + m_points * (1.f + shop.get_purchased("coin_increase") * shop.get_interest_value("coin_increase")));
 		m_points = 0;
 		m_portal.setIsPortal(false);
 		passed_level = false;
