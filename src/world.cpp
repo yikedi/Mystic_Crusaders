@@ -183,7 +183,7 @@ bool World::init(vec2 screen)
 	m_portal.init(screen);
 	m_skill_switch.init({ 500.f, 500.f });
 	intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
-	//m_story.init(screen);
+	m_story.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
@@ -201,7 +201,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
-	button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+	button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
@@ -327,7 +327,7 @@ void World::destroy()
 	stree.destroy();
 	hme.destroy();
 	intro_text.destroy();
-	//m_story.destroy();
+	m_story.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
@@ -350,7 +350,7 @@ bool World::update(float elapsed_ms)
 			intro_text.update();
 			if (intro_text.check_position_for_ending()) {
 				// Text has scrolled past the edge of the screen
-				fprintf(stderr, "Game started because we scrolled past the edge!");
+				// fprintf(stderr, "Game started because we scrolled past the edge!");
 				startGame();
 			}
 		}
@@ -1397,7 +1397,7 @@ bool World::update(float elapsed_ms)
 		button_skip_intro.destroy();
 		m_tutorial.destroy();
 		intro_text.destroy();
-		//m_story.destroy();
+		m_story.destroy();
 		m_hero.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
@@ -1425,7 +1425,7 @@ bool World::update(float elapsed_ms)
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
-		button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+		button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
@@ -1472,7 +1472,7 @@ bool World::update(float elapsed_ms)
 		ingame.init(screen);
 		hme.init(screen);
 		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
-		//m_story.init(screen);
+		m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
 	}
@@ -1567,7 +1567,7 @@ void World::draw()
 				button_tutorial.draw(projection_2D);
 			}
 			else {
-				//m_story.draw(projection_2D);
+				m_story.draw(projection_2D);
 				intro_text.draw(projection_2D);
 				button_skip_intro.draw(projection_2D);
 			}
@@ -1767,7 +1767,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ingame.destroy();
 		m_skill_switch.destroy(true);
 		intro_text.destroy();
-		//m_story.destroy();
+		m_story.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1798,7 +1798,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
-		button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
+		button_skip_intro.makeButton(801, 520, 429, 200, "skipButton.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
@@ -1812,7 +1812,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		ingame.init(screen);
 		hme.init(screen);
 		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
-		//m_story.init(screen);
+		m_story.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
