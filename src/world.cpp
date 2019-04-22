@@ -1556,7 +1556,6 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
-    screen_text.RenderText(projection_2D, "This is sample text", 60.f, 30.f, 1.f, vec3{ 0.3f, 0.7f, 0.2f });
 	if (!display_tutorial && !shopping) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
@@ -1610,6 +1609,9 @@ void World::draw()
 		m_portal.draw(projection_2D);
 		for (auto& phoenix : phoenix_list)
 			phoenix->draw(projection_2D);
+        screen_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), 800.f, 60.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
+        int remaining_skills = m_level - used_skillpoints;
+        screen_text.RenderText(projection_2D, "Remaining skill points  " + std::to_string(remaining_skills), 800.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
