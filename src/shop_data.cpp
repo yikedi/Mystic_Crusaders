@@ -11,7 +11,7 @@
 
 bool Shop_data::init(vec2 screen, int which)
 {
-	number_texture.load_from_file(textures_path("number.png"));
+	number_texture.load_from_file(textures_path("number_yellow.png"));
 	switch (which) {
 	case 1:							// stock
 		m_position.x = (float)0.18*screen.x;
