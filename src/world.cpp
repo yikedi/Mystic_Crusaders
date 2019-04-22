@@ -77,7 +77,7 @@ bool World::init(vec2 screen)
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "Mystic Crusaders",nullptr, nullptr); // glfwGetPrimaryMonitor()
 
 	if (m_window == nullptr)
 		return false;
@@ -170,11 +170,14 @@ bool World::init(vec2 screen)
 	pass_points = 5;
 	used_skillpoints = 0;
 	skill_num = 0;
+	item_num = 0;
+	page_num = 1;
 	ice_skill_set = { 0.f,0.f,0.f };
 	thunder_skill_set = { 0.f,0.f,0.f };
 	fire_skill_set = { 0.f,0.f,0.f };
 	level_num = { 0.f,0.f,1.f };
 	game_is_paused = false;
+	shopping = false;
 	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
@@ -186,14 +189,16 @@ bool World::init(vec2 screen)
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
-
-	// std::function<void> f1 = &World::startGame;
+	shop.init();
+	shop.update_hero(m_hero);
 	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 	button_play.set_hoverable(true);
-	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
 	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-	// testButton2.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->doNothing(); });
-	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
+	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1;});
+	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+	button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num =std::min(4, page_num+1); });
+	button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 	// For future reference: examples of how to use buttons
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
@@ -215,7 +220,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -324,7 +329,11 @@ void World::destroy()
 	hme.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
+	button_tutorial_next_page.destroy();
+	button_tutorial_prevous_page.destroy();
+	button_shop.destroy();
 	button_back_to_menu.destroy();
+	button_back_to_menu2.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -336,7 +345,12 @@ bool World::update(float elapsed_ms)
 	vec2 screen = { (float)w, (float)h };
 
 	start.update(start_is_over);
+	m_tutorial.update(display_tutorial, page_num);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
+	current_stock = shop.get_stock(find_item(item_num));
+	current_price = shop.get_price(find_item(item_num));
+	balance = shop.get_balance();
+	shop_screen.update_shop(shopping, current_stock, balance, current_price, item_num, screen);
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -365,7 +379,7 @@ bool World::update(float elapsed_ms)
 		//kill_num = number_to_vec(cur_points_needed, true);
 	}
 
-	if (start_is_over && !game_is_paused && !m_hero.isInTransition) {
+	if (start_is_over && !game_is_paused && !shopping && !m_hero.isInTransition) {
 		if (m_hero.is_alive()) {
 
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
@@ -1375,8 +1389,13 @@ bool World::update(float elapsed_ms)
 		ingame.destroy();
 		button_play.destroy();
 		button_tutorial.destroy();
+		button_tutorial_next_page.destroy();
+		button_tutorial_prevous_page.destroy();
+		button_shop.destroy();
 		button_back_to_menu.destroy();
+		button_back_to_menu2.destroy();
 		m_tutorial.destroy();
+		shop_screen.destroy();
 		m_hero.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
@@ -1401,10 +1420,16 @@ bool World::update(float elapsed_ms)
 		for (auto& box : m_box)
 			box.destroy();
 		m_hero.init(screen);
+		shop.update_hero(m_hero);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
+		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		m_tutorial.init(screen);
+		shop_screen.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -1424,6 +1449,7 @@ bool World::update(float elapsed_ms)
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 		zoom_factor = 1.f;
+		shop.set_balance(shop.get_balance() + m_points * (1.f + shop.get_purchased("coin_increase") * shop.get_interest_value("coin_increase")));
 		m_points = 0;
 		m_portal.setIsPortal(false);
 		passed_level = false;
@@ -1432,12 +1458,15 @@ bool World::update(float elapsed_ms)
 		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
+		item_num = 0;
+		page_num = 1;
 		ice_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
 		level_num = { 0.f,0.f,1.f };
 		game_is_paused = false;
+		shopping = false;
 		previous_point = 0;
 		pass_points = 5;
 		map.set_is_over(true);
@@ -1527,37 +1556,47 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
-	if (!display_tutorial) {
+	if (!display_tutorial && !shopping) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
+		button_shop.draw(projection_2D);
 	}
 
 	if (display_tutorial) {
-		// button_play2.draw(projection_2D);
 		m_tutorial.draw(projection_2D);
 		button_back_to_menu.draw(projection_2D);
+		if (page_num != 4 && page_num != 1) {
+			button_tutorial_next_page.draw(projection_2D);
+			button_tutorial_prevous_page.draw(projection_2D);
+		}
+		else if (page_num == 1) {
+			button_tutorial_next_page.draw(projection_2D);
+		}
+		else if (page_num == 4) {
+			button_tutorial_prevous_page.draw(projection_2D);
+		}
+	}
+	if (shopping) {
+		shop_screen.draw(projection_2D);
+		button_back_to_menu2.draw(projection_2D);
 	}
 
 	// Drawing entities
-	if(start_is_over)
-	{
+	if (start_is_over && !shopping) {
 		map.draw(projection_2D);
-	}
-	m_hero.draw(projection_2D);
-	for (auto& enemy : m_enemys_01)
-		enemy.draw(projection_2D);
-	for (auto& enemy : m_enemys_02)
-		enemy.draw(projection_2D);
-	for (auto& enemy : m_enemys_03)
-		enemy.draw(projection_2D);
-	for (auto& h_proj : hero_projectiles)
-		h_proj->draw(projection_2D);
-	for (auto& e_proj : enemy_projectiles)
-		e_proj.draw(projection_2D);
-	for (auto& thunder : thunders)
-		thunder->draw(projection_2D);
-
-	if (start_is_over) {
+		m_hero.draw(projection_2D);
+		for (auto& enemy : m_enemys_01)
+			enemy.draw(projection_2D);
+		for (auto& enemy : m_enemys_02)
+			enemy.draw(projection_2D);
+		for (auto& enemy : m_enemys_03)
+			enemy.draw(projection_2D);
+		for (auto& h_proj : hero_projectiles)
+			h_proj->draw(projection_2D);
+		for (auto& e_proj : enemy_projectiles)
+			e_proj.draw(projection_2D);
+		for (auto& thunder : thunders)
+			thunder->draw(projection_2D);
 
 		for (auto& treetrunk : m_treetrunk)
 			treetrunk.draw(projection_2D);
@@ -1567,16 +1606,14 @@ void World::draw()
 			vine.draw(projection_2D);
 		for (auto& box : m_box)
 			box.draw(projection_2D);
+		m_portal.draw(projection_2D);
+		for (auto& phoenix : phoenix_list)
+			phoenix->draw(projection_2D);
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
 		m_skill_switch.draw(projection_2D);
-		m_portal.draw(projection_2D);
 	}
-
-	//move the phoenix draw after treetrunk draw so that the phoenix is not behind the tree 
-	for (auto& phoenix : phoenix_list)
-		phoenix->draw(projection_2D);
 
 	if (game_is_paused){
 		stree.draw(projection_2D);
@@ -1712,14 +1749,19 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R && start_is_over == true && shopping == false)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
 		button_play.destroy();
 		button_tutorial.destroy();
+		button_tutorial_next_page.destroy();
+		button_tutorial_prevous_page.destroy();
+		button_shop.destroy();
 		button_back_to_menu.destroy();
+		button_back_to_menu2.destroy();
 		m_tutorial.destroy();
+		shop_screen.destroy();
 		hme.destroy();
 		map.destroy();
 		m_hero.destroy(true);
@@ -1757,8 +1799,13 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		start.init(screen);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
+		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		m_tutorial.init(screen);
+		shop_screen.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
@@ -1787,6 +1834,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		initTrees();
 		used_skillpoints = 0;
 		skill_num = 0;
+		item_num = 0;
+		page_num = 1;
 		ice_skill_set = { 0.f,0.f,0.f };
 		thunder_skill_set = { 0.f,0.f,0.f };
 		fire_skill_set = { 0.f,0.f,0.f };
@@ -1796,6 +1845,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		map.set_is_over(true);
 		start_is_over = false;
 		game_is_paused = false;
+		shopping = false;
 		display_tutorial = false;
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
@@ -1866,19 +1916,19 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			zoom_factor = 1.1f;
 		}
 	}
-	else if (key == GLFW_KEY_G && start_is_over == false) {
+	else if (key == GLFW_KEY_G && start_is_over == false && !shopping) {
 		map.init(screen,m_game_level);
 		start_is_over = true;
 		zoom_factor = 1.1f;
 	}
-	else if (key == GLFW_KEY_H) {
-		//shopping
-	}
 	else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && !start_is_over) {
-        if (!display_tutorial) {
+        if (!display_tutorial && !shopping) {
             // escape in start screen
             glfwSetWindowShouldClose(m_window, GL_TRUE);
         }
+		else if (shopping) {
+			shopping = !shopping;
+		}
         else {
             // escape in tutorial
             display_tutorial = !display_tutorial;
@@ -1916,7 +1966,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
 {
 
-	if (start_is_over && !game_is_paused) {
+	if (start_is_over && !game_is_paused && !shopping) {
 		float angle = 0.f;
 		vec2 salmon_position = m_hero.get_position();
 		if (xpos - salmon_position.x != 0)
@@ -1935,18 +1985,42 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over) {
-		if (!display_tutorial) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over ) {
+		if (!display_tutorial && !shopping) {
 			button_play.check_click(mouse_pos);
 			button_tutorial.check_click(mouse_pos);
+			button_shop.check_click(mouse_pos);
 		}
-		else {
+		else if (!display_tutorial && shopping){
+			button_back_to_menu2.check_click(mouse_pos);
+		}
+		else if (display_tutorial && !shopping) {
+			button_tutorial_next_page.check_click(mouse_pos);
+			button_tutorial_prevous_page.check_click(mouse_pos);
 			button_back_to_menu.check_click(mouse_pos);
 		}
 
 	}
+	if (shopping) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && item_num == 0) {
+			item_num = shop_screen.item_position(mouse_pos, screen);
+		}
+		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && item_num != 0) {
+			if (shop_screen.level_position(mouse_pos, screen)) {
+				std::string item_name = find_item(item_num);
+				shop.buy_item(item_name);
+				current_stock = shop.get_stock(item_name);
+				current_price = shop.get_price(item_name);
+				balance = shop.get_balance();
+				item_num = 0;
+			}
+			else {
+				item_num = shop_screen.item_position(mouse_pos, screen);
+			}
+		}
+	}
 
-	if (!game_is_paused && start_is_over) {
+	else if (!game_is_paused && start_is_over && !shopping) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			shootingFireBall = true;
 
@@ -1966,7 +2040,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 
 	}
-	else if (game_is_paused && start_is_over) {
+	else if (game_is_paused && start_is_over && !shopping) {
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
 			skill_element = stree.element_position(mouse_pos);
@@ -2068,7 +2142,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				skill_num = stree.icon_position(mouse_pos, skill_element);
 			}
 		}
-		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over) {
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over && !shopping) {
 			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
 		}
 	}
@@ -2134,13 +2208,16 @@ vec3 World::number_to_vec(int number, bool kill)
 		return { b,s,g };
 	}
 	else {
-		if (number % 2 == 0) {
+		if (number % 3 == 0) {
 			g = 1.f;
+		}
+		else if (number % 3 == 2) {
+			g = 3.f;
 		}
 		else {
 			g = 2.f;
 		}
-		number = floor(number/2);
+		number = floor(number /3);
 		while (number > 9) {
 			b += 1.f;
 			number -= 10.f;
@@ -2153,7 +2230,30 @@ vec3 World::number_to_vec(int number, bool kill)
 		return { b,s,g };
 	}
 }
-
+std::string World::find_item(int item_num) {
+	std::string result = "";
+	switch (item_num) {
+	case 1:
+		result = "max_hp";
+		break;
+	case 2:
+		result = "mp_recovery";
+		break;
+	case 3:
+		result = "exp_increase";
+		break;
+	case 4:
+		result = "fireball_damage";
+		break;
+	case 5:
+		result = "movement_speed";
+		break;
+	case 6:
+		result = "coin_increase";
+		break;
+	}
+	return result;
+}
 void World::doNothing() {
 	// NOT A STUB
 	return;

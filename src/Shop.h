@@ -17,9 +17,12 @@ public:
 	int get_balance();
 	int get_purchased(string item_name);
 	float get_interest_value(string item_name);
+	int get_price(string item_name);
 	void save();
 	bool buy_item(string key);
 	void update_hero(Hero& hero);
+	int get_stock(string item_name);
+	int get_maxstock(string item_name);
 	~Shop();
 
 	Json::Value shop_info;

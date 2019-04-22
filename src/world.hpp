@@ -29,10 +29,9 @@
 #include "vine.h"
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
-#include "box.hpp"
 #include "Shop.h"
-
-
+#include "shop_screen.hpp"
+#include "box.hpp"
 // stlib
 #include <vector>
 #include <random>
@@ -90,6 +89,8 @@ private:
 
 	vec3 number_to_vec(int number, bool kill);
 
+	std::string find_item(int item_num);
+
 	void doNothing();
 
 
@@ -100,6 +101,7 @@ private:
 	Startscreen start;
 
 	Skilltree stree;
+	Shop_screen shop_screen;
 	Bar_description hme;
 	In_game ingame;
 	// Screen texture
@@ -128,6 +130,9 @@ private:
 	vec3 kill_num;
 
 	bool game_is_paused;
+	bool shopping;
+	int item_num;
+	int page_num;
 	vec2 mouse_pos;
 	int used_skillpoints;
 	vec3 ice_skill_set;
@@ -190,12 +195,20 @@ private:
 	clock_t lastFireProjectileTime;
 	Button button_play;
 	Button button_tutorial;
+	Button button_tutorial_next_page;
+	Button button_tutorial_prevous_page;
+	Button button_shop;
 	Button button_back_to_menu;
+	Button button_back_to_menu2;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
 	SkillSwitch m_skill_switch;
 
 	bool passed_level;
 
-
+	int current_stock;
+	//int total_stock;
+	int current_price;
+	float interest;
+	int balance;
 };

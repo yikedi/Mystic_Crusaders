@@ -1,4 +1,4 @@
-#include "skillup.hpp"
+#include "purchase.hpp"
 
 #include <iostream>
 
@@ -9,12 +9,12 @@
 
 #include <gl3w.h>
 
-Texture Skillup::level_texture;
-bool Skillup::init(vec2 screen)
+Texture Purchase::purchase_texture;
+bool Purchase::init(vec2 screen)
 {
-	level_texture.load_from_file(textures_path("level_up.png"));
-	float w = level_texture.width;
-	float h = level_texture.height;
+	purchase_texture.load_from_file(textures_path("purchase_button.png"));
+	float w = purchase_texture.width;
+	float h = purchase_texture.height;
 	float wr = w * 0.5f;
 	float hr = h * 0.5f;
 	float width = 385.f;
@@ -42,15 +42,15 @@ bool Skillup::init(vec2 screen)
 	return true;
 }
 
-void Skillup::destroy()
+void Purchase::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    effect.release();
+	effect.release();
 }
 
-void Skillup::draw(const mat3 & projection)
+void Purchase::draw(const mat3 & projection)
 {
 	gl_flush_errors();
 
@@ -85,7 +85,7 @@ void Skillup::draw(const mat3 & projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, level_texture.id);
+	glBindTexture(GL_TEXTURE_2D, purchase_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -97,19 +97,7 @@ void Skillup::draw(const mat3 & projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Skillup::update_leveltex(bool paused, int freepoints, int skill_num)
-{
-	if (paused) {
-		if (freepoints > 0 && skill_num != 0) {
-			get_texture(0);
-		}
-		else {
-			get_texture(1);
-		}
-	}
-}
-
-void Skillup::update_itemlevel(bool paused, int stock, int afforable, int skill_num)
+void Purchase::update_purchase(bool paused, int stock, int afforable, int skill_num)
 {
 	if (paused) {
 		if (stock > 0 && skill_num != 0 && afforable >= 0) {
@@ -122,7 +110,7 @@ void Skillup::update_itemlevel(bool paused, int stock, int afforable, int skill_
 }
 
 
-void Skillup::get_texture(int loc)
+void Purchase::get_texture(int loc)
 {
 	float h = 385.f;
 	float w = 770.f;
@@ -139,6 +127,7 @@ void Skillup::get_texture(int loc)
 	// Clearing errors
 	gl_flush_errors();
 
+
 	// Vertex Buffer creation
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 4, vertices, GL_STATIC_DRAW);
@@ -149,12 +138,12 @@ void Skillup::get_texture(int loc)
 }
 
 
-vec2 Skillup::get_position()const
+vec2 Purchase::get_position()const
 {
 	return m_position;
 }
 
-void Skillup::change_position(vec2 screen)
+void Purchase::change_position(vec2 screen)
 {
 	m_position.x = 0.5*screen.x;
 	m_position.y = 0.75*screen.y;

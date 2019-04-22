@@ -8,22 +8,21 @@
 
 #include "common.hpp"
 
-class Skillup : public Renderable
+class Purchase : public Renderable
 {
-	static Texture level_texture;
+	static Texture purchase_texture;
 public:
 
 	// Creates all the associated render resources and default transform
 	bool init(vec2 screen);
 
-	// Releases all the associated resources
 	void destroy();
+
+	void destroy(bool reset);
 
 	void draw(const mat3& projection)override;
 
-	void update_leveltex(bool paused, int freepoints, int skill_num); //call on world
-
-	void update_itemlevel(bool paused, int stock, int afforable, int skill_num);
+	void update_purchase(bool paused, int stock, int afforable, int skill_num);
 
 	void get_texture(int loc);
 
