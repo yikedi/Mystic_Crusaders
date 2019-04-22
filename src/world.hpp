@@ -31,6 +31,8 @@
 #include "skill_switch_UI.hpp"
 #include "scrollable.hpp"
 #include "story.hpp"
+#include "box.hpp"
+#include "Shop.h"
 
 // stlib
 #include <vector>
@@ -62,7 +64,7 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
-
+	Shop shop;
 private:
 	// Generates a new enemy
 	bool spawn_enemy_01();
@@ -71,6 +73,7 @@ private:
 	bool spawn_treetrunk();
 	bool spawn_tree();
 	bool spawn_vine();
+	bool spawn_box();
 
 	bool shootingFireBall;
 
@@ -143,12 +146,14 @@ private:
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
 	std::vector<Vine> m_vine;
+	std::vector<Box> m_box;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
 	std::vector<Thunder*> thunders;
 	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
+	
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
 
@@ -180,6 +185,7 @@ private:
 
 	int m_tree_number;
 	std::vector<vec2> m_treetrunk_position;
+	std::vector<vec2> m_box_position;
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;

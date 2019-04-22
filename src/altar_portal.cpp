@@ -105,6 +105,7 @@ void AltarPortal::destroy()
 {
     glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
 
     glDeleteShader(effect.vertex);
     glDeleteShader(effect.fragment);
@@ -237,7 +238,7 @@ bool AltarPortal::collides_with(Enemies &enemy)
 	float other_r = std::max(enemy.get_bounding_box().x, enemy.get_bounding_box().y);
 	float my_r = std::max(get_bounding_box().x, get_bounding_box().y);
 	float r = std::max(other_r, my_r);
-	r *= 1.f;
+	r *= 1.1f;
 	if (d_sq < r * r)
 		return true;
 	return false;

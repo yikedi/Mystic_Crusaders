@@ -100,9 +100,8 @@ void Skilltree::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+    effect.release();
+
 	ices1.destroy();
 	ices2.destroy();
 	ices3.destroy();

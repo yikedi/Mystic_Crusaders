@@ -34,8 +34,13 @@ public:
 	//hero attributes
 	float max_hp;
 	float max_mp;
+	float mp_recovery_rate;
 	float hp;
 	float mp;
+	float fireball_damage;
+	float movement_speed;
+	float exp_multiplier;
+	bool second_life;
 	//std::vector<skill> skill_list;
 
     int numTiles = 1;
@@ -46,7 +51,7 @@ public:
 	bool init(vec2 screen);
 
 	// Releases all associated resources
-	void destroy();
+	void destroy(bool reset);
 
 	// Update salmon position based on direction
 	// ms represents the number of milliseconds elapsed from the previous update() call
@@ -121,6 +126,8 @@ public:
 	int level;
 	bool isInTransition;
 	bool justFinishedTransition;
+
+
 private:
     TexturedVertex texVertices[4];
     std::vector<float> texture_locs;

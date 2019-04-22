@@ -71,8 +71,8 @@ bool Enemy_03::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(50.0f + (float)level * 0.6f * randAttributeFactor, 140.0f);
-	attackCooldown = std::max(5000.0 - (double)level * 10.0 * randAttributeFactor, 1500.0);
+	m_speed = std::min(50.0f + (float)level * 0.4f * randAttributeFactor, 140.0f);
+	attackCooldown = std::max(5000.0 - (double)level * 6.0 * randAttributeFactor, 1500.0);
 	randMovementCooldown = std::max(1000.0 - (double)level * 2.6 * randAttributeFactor, 250.0);
 	m_range = std::min(400.0 + (double)level * 3.0 * randAttributeFactor, 700.0);
 	hp = std::min(50.0f + (float)level * 0.6f * randAttributeFactor, 140.f);
@@ -85,6 +85,7 @@ bool Enemy_03::init(int level)
 	waved = false;
 	enemyColor = {1.f,1.f,1.f};
 	wave.init(m_position, enemyColor);
+	dangerPos = {NULL, NULL};
 
 	return true;
 }
@@ -98,7 +99,10 @@ void Enemy_03::destroy(bool reset)
 	glDeleteVertexArrays(1, &mesh.vao);
 	effect.release();
 	if((waved && !m_is_alive) || reset) {
-		wave.destroy();
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+		wave.destroy(true);
 	}
 }
 
@@ -214,6 +218,16 @@ void Enemy_03::update(float ms, vec2 target_pos)
 	float y_diff =  m_position.y - target_pos.y;
 	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
 	float enemy_angle = atan2(y_diff, x_diff);
+	if(dangerPos.x != NULL && dangerPos.y != NULL) {
+		float x_diff2 =  m_position.x - dangerPos.x;
+		float y_diff2 =  m_position.y - dangerPos.y;
+		float danger_angle = atan2(y_diff2, x_diff2);
+		if (enemy_angle - danger_angle < 0.3f && enemy_angle - danger_angle > 0.f) {
+			enemy_angle += 0.3f;
+		} else if (danger_angle - enemy_angle < 0.3f && danger_angle - enemy_angle > 0.f) {
+			enemy_angle -= 0.3f;
+		}
+	}
 	int facing = 1;
 	if (x_diff > 0.0) {
 		facing = 0;
@@ -246,6 +260,7 @@ void Enemy_03::update(float ms, vec2 target_pos)
 		float HI = enemy_angle + 2.0f;
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
+		dangerPos = {NULL, NULL};
 	}
 
 	stunned = false;

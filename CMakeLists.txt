@@ -81,6 +81,11 @@ set(SOURCE_FILES
 	src/skill_switch_UI.cpp
 	src/story.cpp
 	src/scrollable.cpp
+	src/box.cpp
+	src/Shop.cpp
+	src/json/json_reader.cpp
+	src/json/json_value.cpp
+	src/json/json_writer.cpp
 
   src/project_path.hpp
 	src/common.hpp
@@ -133,6 +138,20 @@ set(SOURCE_FILES
 	src/phoenix_skill.h
 	src/phoenix.h
 	src/particles.h
+	src/box.hpp
+	src/Shop.h
+	src/json/allocator.h
+	src/json/assertions.h
+	src/json/autolink.h
+	src/json/config.h
+	src/json/features.h
+	src/json/forwards.h
+	src/json/json.h
+	src/json/json_tool.h
+	src/json/reader.h
+	src/json/value.h
+	src/json/version.h
+	src/json/writer.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

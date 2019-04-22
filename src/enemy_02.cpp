@@ -61,8 +61,8 @@ bool Enemy_02::init(int level)
 	float f = (float)rand() / RAND_MAX;
     float randAttributeFactor = 1.0f + f * (2.0f - 1.0f);
 
-	m_speed = std::min(70.0f + (float)level * 0.7f * randAttributeFactor, 400.0f);
-	randMovementCooldown = std::max(1000.0 - (double)level * 2.0 * randAttributeFactor, 200.0);
+	m_speed = std::min(70.0f + (float)level * 0.5f * randAttributeFactor, 400.0f);
+	randMovementCooldown = std::max(1000.0 - (double)level * 1.5 * randAttributeFactor, 200.0);
 	hp = std::min(50.0f + (float)level * 0.2f * randAttributeFactor, 80.f);
 	deceleration = 1.0f;
 	momentum_factor = 1.3f;
@@ -74,6 +74,8 @@ bool Enemy_02::init(int level)
 	speedBoost = false;
 	waved = false;
 	wave.init(m_position, {1.f, 1.f, 1.f});
+	groupAtk = false;
+	dangerPos = {NULL, NULL};
 
 	return true;
 }
@@ -89,14 +91,17 @@ void Enemy_02::destroy(bool reset)
     glDeleteShader(effect.fragment);
     glDeleteShader(effect.program);
 	if((waved && !m_is_alive) || reset) {
-		wave.destroy();
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+		wave.destroy(true);
 	}
 }
 
 
 vec2 Enemy_02::get_bounding_box()const
 {
-	return { std::fabs(m_scale.x) * enemy_texture.subWidth, std::fabs(m_scale.y) * enemy_texture.subHeight };
+	return { std::fabs(m_scale.x) * enemy_texture.subWidth - 30.f, std::fabs(m_scale.y) * enemy_texture.subHeight - 10.f};
 }
 
 void Enemy_02::draw(const mat3& projection)
@@ -214,6 +219,16 @@ void Enemy_02::update(float ms, vec2 target_pos)
 	float y_diff =  m_position.y - target_pos.y;
 	float distance = std::sqrt(x_diff * x_diff + y_diff * y_diff);
 	float enemy_angle = atan2(y_diff, x_diff);
+	if(dangerPos.x != NULL && dangerPos.y != NULL) {
+		float x_diff2 =  m_position.x - dangerPos.x;
+		float y_diff2 =  m_position.y - dangerPos.y;
+		float danger_angle = atan2(y_diff2, x_diff2);
+		if (enemy_angle - danger_angle < 0.3f && enemy_angle - danger_angle > 0.f) {
+			enemy_angle += 0.3f;
+		} else if (danger_angle - enemy_angle < 0.3f && danger_angle - enemy_angle > 0.f) {
+			enemy_angle -= 0.3f;
+		}
+	}
 	float m_speed_rand_LO = m_speed * 0.8f;
 	float m_speed_rand_HI = m_speed * 1.2f;
 	float m_speed_rand = m_speed_rand_LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(m_speed_rand_HI-m_speed_rand_LO)));
@@ -241,14 +256,25 @@ void Enemy_02::update(float ms, vec2 target_pos)
 		m_position.x += cos(enemy_angle)*step;
 		m_position.y += sin(enemy_angle)*step;
 	}
-	if (checkIfCanChangeDirectionOfMove(currentTime)){
+	if (checkIfCanChangeDirectionOfMove(currentTime) || groupAtk){
 		float LO = enemy_angle - 0.9f;
 		float HI = enemy_angle + 0.9f;
+		if (groupAtk) {
+			LO = enemy_angle - 0.2f;
+			HI = enemy_angle + 0.2f;
+		}
 		enemyRandMoveAngle = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 		setRandMovementTime(currentTime);
 		if (powerupType == 2 || powerupType == 3) {
 			speedBoost = !speedBoost;
+		} else {
+			speedBoost = false;
 		}
+		if (groupAtk) {
+			speedBoost = true;
+		}
+		groupAtk = false;
+		dangerPos = {NULL, NULL};
 	}
 
 	stunned = false;

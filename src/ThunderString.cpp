@@ -76,20 +76,20 @@ bool ThunderString::init(vec2 position, vec3 color)
 	return true;
 }
 
-void ThunderString::destroy()
+void ThunderString::destroy(bool reset)
 {
-	//glDeleteBuffers(1, &mesh.vbo);
-	//glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteVertexArrays(1, &mesh.vao);
-	//effect.release();
-
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	//glDeleteBuffers(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+	if(reset) {
+		glDeleteVertexArrays(1, &mesh.vao);
+		glDetachShader(effect.program, effect.vertex);
+		glDetachShader(effect.program, effect.fragment);
+	}
 }
 
 void ThunderString::setTextureLocs(int index)
@@ -106,8 +106,8 @@ void ThunderString::setTextureLocs(int index)
 	gl_flush_errors();
 
 	// Clear memory allocation
-	if (first_time) {
-		destroy();
+	if (!first_time) {
+		destroy(false);
 	}
 
 	// Vertex Buffer creation
