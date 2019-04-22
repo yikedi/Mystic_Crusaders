@@ -9,7 +9,7 @@
 Texture UserInterface::UserInterface_texture;
 
 
-bool UserInterface::init(vec2 size, float max_hp)
+bool UserInterface::init(vec2 size, float _max_hp)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
@@ -66,7 +66,7 @@ bool UserInterface::init(vec2 size, float max_hp)
 		return false;
 
 	// Setting initial values
-	max_hp = 100.f;
+	max_hp = _max_hp;
 	max_mp = 100.f;
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
@@ -80,8 +80,6 @@ bool UserInterface::init(vec2 size, float max_hp)
 	set_color({ 1.0f,1.0f,1.0f });
 	m_light_up = 0;
 	advanced = false;
-	max_hp = 100.f;
-	max_mp = 100.f;
 	hp = max_hp;
 	mp = max_mp;
 	max_exp = 20;

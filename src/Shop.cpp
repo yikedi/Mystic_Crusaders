@@ -71,6 +71,7 @@ void Shop::update_hero(Hero& hero)
 	Json::Value info_for_hero;
 	int purchased = get_purchased("max_hp");
 	hero.max_hp = 100 + purchased * get_interest_value("max_hp");
+	hero.hp = hero.max_hp;
 	purchased = get_purchased("mp_recovery");
 	hero.mp_recovery_rate = 0.05 * (1 + purchased * get_interest_value("mp_recovery"));
 	purchased = get_purchased("fireball_damage");

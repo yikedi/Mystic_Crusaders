@@ -225,7 +225,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }, m_hero.get_hp()) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }, m_hero.max_hp) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -591,12 +591,11 @@ bool World::update(float elapsed_ms)
 		for (auto& box : m_box)
 			box.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float) (m_points - previous_point), (float) (20 + (m_hero.level * 5)) }, zoom_factor);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		for (auto& phoenix : phoenix_list)
 			phoenix->update(elapsed_ms,m_hero.get_position(),m_enemys_01, m_enemys_02, m_enemys_03,hero_projectiles);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 		hme.update_hme(m_hero.get_position(), zoom_factor, screen);
 		level_num = number_to_vec(m_game_level, false);
 		kill_num = number_to_vec(pass_points - m_points, true);
@@ -1496,7 +1495,7 @@ bool World::update(float elapsed_ms)
 		drawIntro = false;
 		start.init(screen);
 		stree.init(screen, 1);
-		m_interface.init({ 300.f, 42.f }, m_hero.get_hp());
+		m_interface.init({ 300.f, 42.f }, m_hero.max_hp);
 		ingame.init(screen);
 		hme.init(screen);
 		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
@@ -1522,7 +1521,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_game_level ;
+	title_ss << "Points: " << m_points << "  HP: " << (int) m_hero.get_hp() << "  MP: " << (int) m_hero.get_mp() << "  Level: " << m_game_level ;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -1851,7 +1850,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		m_interface.init({ 300.f, 42.f }, m_hero.get_hp());
+		m_interface.init({ 300.f, 42.f }, m_hero.max_hp);
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
