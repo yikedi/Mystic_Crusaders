@@ -29,7 +29,9 @@
 #include "vine.h"
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
+#include "box.hpp"
 #include "Shop.h"
+
 
 // stlib
 #include <vector>
@@ -70,6 +72,7 @@ private:
 	bool spawn_treetrunk();
 	bool spawn_tree();
 	bool spawn_vine();
+	bool spawn_box();
 
 	bool shootingFireBall;
 
@@ -142,6 +145,7 @@ private:
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
 	std::vector<Vine> m_vine;
+	std::vector<Box> m_box;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
@@ -180,6 +184,7 @@ private:
 
 	int m_tree_number;
 	std::vector<vec2> m_treetrunk_position;
+	std::vector<vec2> m_box_position;
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;

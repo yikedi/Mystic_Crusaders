@@ -79,6 +79,7 @@ set(SOURCE_FILES
 	src/phoenix.cpp
 	src/particles.cpp
 	src/skill_switch_UI.cpp
+	src/box.cpp
 	src/Shop.cpp
 	src/json/json_reader.cpp
 	src/json/json_value.cpp
@@ -134,6 +135,7 @@ set(SOURCE_FILES
 	src/phoenix_skill.h
 	src/phoenix.h
 	src/particles.h
+	src/box.hpp
 	src/Shop.h
 	src/json/allocator.h
 	src/json/assertions.h
