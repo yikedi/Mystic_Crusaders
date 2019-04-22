@@ -287,6 +287,12 @@ Text::~Text()
 
 bool Text::loadCharacters(const char* ft_path)
 {
+    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+
+    // Loading shaders
+    if (!textEffect.load_from_file(shader_path("text.vs.glsl"), shader_path("text.fs.glsl")))
+        return false;
 
     if (FT_Init_FreeType(&ft))
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -297,11 +303,6 @@ bool Text::loadCharacters(const char* ft_path)
     FT_Set_Pixel_Sizes(face, 0, 48);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
-
-    // Loading shaders
-    if (!textEffect.load_from_file(shader_path("text.vs.glsl"), shader_path("text.fs.glsl")))
-        return false;
-    
 
     for (GLubyte c = 0; c < 128; c++)
     {
@@ -327,8 +328,8 @@ bool Text::loadCharacters(const char* ft_path)
             face->glyph->bitmap.buffer
         );
         // Set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // Now store character for later use
@@ -340,7 +341,7 @@ bool Text::loadCharacters(const char* ft_path)
         };
         Characters.insert(std::pair<GLchar, Character>(c, character));
     }
-
+    glBindTexture(GL_TEXTURE_2D, 0);
     // clear face and freetype library
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
@@ -351,9 +352,8 @@ bool Text::loadCharacters(const char* ft_path)
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(TexturedVertex) * 6, NULL, GL_DYNAMIC_DRAW);
-    glUseProgram(textEffect.program);
     GLint in_position_loc = glGetAttribLocation(textEffect.program, "in_position");
-    GLint in_texcoord_loc = glGetAttribLocation(textEffect.program, "in_texcoord");
+    GLint in_texcoord_loc = glGetAttribLocation(textEffect.program, "in_texcoords");
     glEnableVertexAttribArray(in_position_loc);
     glEnableVertexAttribArray(in_texcoord_loc);
     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
@@ -369,8 +369,6 @@ bool Text::loadCharacters(const char* ft_path)
 void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors)
 {
     glUseProgram(textEffect.program);
-    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
     glUniformMatrix3fv(glGetUniformLocation(textEffect.program, "projection"), 1, GL_FALSE, (float*)&projection);
     glUniform3f(glGetUniformLocation(textEffect.program, "textColor"), colors.x, colors.y, colors.z);
     glActiveTexture(GL_TEXTURE0);

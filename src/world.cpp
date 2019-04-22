@@ -1275,8 +1275,7 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
-    screen_text.RenderText(projection_2D, "This is sample text", 30.f, 30.f, 1.f, vec3{ 0.8f, 0.8f, 0.2f });
-
+    screen_text.RenderText(projection_2D, "This is sample text", 60.f, 30.f, 1.f, vec3{ 0.3f, 0.7f, 0.2f });
 	if (!display_tutorial) {
 		button_play.draw(projection_2D);
 		button_tutorial.draw(projection_2D);
