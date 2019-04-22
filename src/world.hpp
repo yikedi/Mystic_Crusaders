@@ -30,6 +30,7 @@
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
 #include "scrollable.hpp"
+#include "story.hpp"
 
 // stlib
 #include <vector>
@@ -185,14 +186,14 @@ private:
 	Button button_play;
 	Button button_tutorial;
 	Button button_back_to_menu;
+	Button button_skip_intro;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
 	SkillSwitch m_skill_switch;
 
 	bool passed_level;
-	float currTimeIntro;
-	float previousTime = 0.f;
 	bool drawIntro;
 	Scrollable intro_text;
+	Story m_story;
 
 };

@@ -182,15 +182,16 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_portal.init(screen);
 	m_skill_switch.init({ 500.f, 500.f });
+	intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+	//m_story.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
 	drawIntro = false;
-	currTimeIntro = 0.f;
 
 	// std::function<void> f1 = &World::startGame;
-	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); drawIntro = true; });
+	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 	button_play.set_hoverable(true);
 	//std::function<void ()> f1 = [&]() { display_tutorial = true; };	// lambda function for setting diplay_tutorial = true;
 	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
@@ -200,6 +201,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
+	button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
@@ -212,7 +214,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen) && intro_text.init({screen.x / 2.f, screen.y / 2.f}, 500.f, 300.f, 30.f);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -307,9 +309,12 @@ void World::destroy()
 	start.destroy();
 	stree.destroy();
 	hme.destroy();
+	intro_text.destroy();
+	//m_story.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_back_to_menu.destroy();
+	button_skip_intro.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -323,10 +328,17 @@ bool World::update(float elapsed_ms)
 	start.update(start_is_over);
 	stree.update_skill(game_is_paused, m_level, used_skillpoints,ice_skill_set, thunder_skill_set, fire_skill_set, skill_num, screen);
 
-	if (drawIntro) {
-		intro_text.update(currTimeIntro);
-		currTimeIntro += 0.1f;
+	if (!start_is_over) {
+		if (drawIntro) {
+			intro_text.update();
+			if (intro_text.check_position_for_ending()) {
+				// Text has scrolled past the edge of the screen
+				fprintf(stderr, "Game started because we scrolled past the edge!");
+				startGame();
+			}
+		}
 	}
+	
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -1131,7 +1143,10 @@ bool World::update(float elapsed_ms)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		button_skip_intro.destroy();
 		m_tutorial.destroy();
+		intro_text.destroy();
+		//m_story.destroy();
 		m_hero.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
@@ -1154,9 +1169,10 @@ bool World::update(float elapsed_ms)
 		for (auto& vine : m_vine)
 			vine.destroy();
 		m_hero.init(screen);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		start.init(screen);
 		m_enemys_01.clear();
@@ -1195,11 +1211,14 @@ bool World::update(float elapsed_ms)
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		drawIntro = false;
 		start.init(screen);
 		stree.init(screen, 1);
 		m_interface.init({ 300.f, 42.f });
 		ingame.init(screen);
 		hme.init(screen);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+		//m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
 	}
@@ -1278,23 +1297,31 @@ void World::draw()
 
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
-	
 	start.draw(projection_2D);
-	if (!display_tutorial) {
-		button_play.draw(projection_2D);
-		button_tutorial.draw(projection_2D);
-	}
-
-	if (display_tutorial) {
-		// button_play2.draw(projection_2D);
-		m_tutorial.draw(projection_2D);
-		button_back_to_menu.draw(projection_2D);
-	}
-	
 
 	// Drawing entities
 	map.draw(projection_2D);
 	m_hero.draw(projection_2D);
+	if (!start_is_over) {
+		if (!display_tutorial) {
+			// On start menu, without displaying tutorial
+			if (!drawIntro) {
+				button_play.draw(projection_2D);
+				button_tutorial.draw(projection_2D);
+			}
+			else {
+				//m_story.draw(projection_2D);
+				intro_text.draw(projection_2D);
+				button_skip_intro.draw(projection_2D);
+			}
+		}
+
+		if (display_tutorial) {
+			// button_play2.draw(projection_2D);
+			m_tutorial.draw(projection_2D);
+			button_back_to_menu.draw(projection_2D);
+		}
+	}
 	
 	
 	for (auto& enemy : m_enemys_01)
@@ -1327,9 +1354,6 @@ void World::draw()
 		m_portal.draw(projection_2D);
 	}
 	
-	if (drawIntro) {
-		intro_text.draw(projection_2D);
-	}
 	if (game_is_paused){
 		stree.draw(projection_2D);
 	}
@@ -1460,6 +1484,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_play.destroy();
 		button_tutorial.destroy();
 		button_back_to_menu.destroy();
+		button_skip_intro.destroy();
 		m_tutorial.destroy();
 		hme.destroy();
 		map.destroy();
@@ -1469,6 +1494,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_interface.destroy();
 		ingame.destroy();
 		m_skill_switch.destroy();
+		intro_text.destroy();
+		//m_story.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1493,9 +1520,10 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_tree.clear();
 		m_vine.clear();
 		start.init(screen);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; });
+		button_skip_intro.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		m_hero.init(screen);
 		m_enemys_01.clear();
@@ -1508,6 +1536,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 10.8f);
+		//m_story.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
@@ -1535,6 +1565,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		start_is_over = false;
 		game_is_paused = false;
 		display_tutorial = false;
+		drawIntro = false;
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
 	}
@@ -1675,8 +1706,14 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	vec2 screen = { (float)w, (float)h };
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over) {
 		if (!display_tutorial) {
-			button_play.check_click(mouse_pos);
-			button_tutorial.check_click(mouse_pos);
+			if (!drawIntro) {
+				button_play.check_click(mouse_pos);
+				button_tutorial.check_click(mouse_pos);
+			}
+			else {
+				// We are drawing intro, only one button active
+				button_skip_intro.check_click(mouse_pos);
+			}
 		}
 		else {
 			button_back_to_menu.check_click(mouse_pos);
