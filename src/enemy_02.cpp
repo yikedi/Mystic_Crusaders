@@ -101,7 +101,7 @@ void Enemy_02::destroy(bool reset)
 
 vec2 Enemy_02::get_bounding_box()const
 {
-	return { std::fabs(m_scale.x) * enemy_texture.subWidth, std::fabs(m_scale.y) * enemy_texture.subHeight };
+	return { std::fabs(m_scale.x) * enemy_texture.subWidth - 30.f, std::fabs(m_scale.y) * enemy_texture.subHeight - 10.f};
 }
 
 void Enemy_02::draw(const mat3& projection)
