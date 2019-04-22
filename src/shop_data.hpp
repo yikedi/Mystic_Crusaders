@@ -8,32 +8,33 @@
 
 #include "common.hpp"
 
-class Shop_frame : public Renderable
+class Shop_data : public Renderable
 {
-	Texture sframe_texture;
+	Texture number_texture;
 public:
 
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen);
-
+	bool init(vec2 screen, int which);
 	void destroy();
-
-	void destroy(bool reset);
-
-	// Releases all the associated resources
 
 	void draw(const mat3& projection)override;
 
-	void update_sframe(bool shopping, int skill_num, vec2 screen); //call on world
+	void update_numbers(bool shopping, int number, int item_num);
 
-	vec2 get_position() const;
+	void update_numbers(bool shopping, int number);
 
 	void get_texture(int loc);
+
+	vec2 get_position() const;
 
 private:
 	vec2 m_scale;
 	vec2 m_position;
+
+	float zoom_factor;
+
+	std::string element;
+
 	TexturedVertex vertices[4];
-	
 };
 

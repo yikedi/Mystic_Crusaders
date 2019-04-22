@@ -31,6 +31,7 @@
 #include "skill_switch_UI.hpp"
 #include "Shop.h"
 #include "shop_screen.hpp"
+#include "box.hpp"
 
 // stlib
 #include <vector>
@@ -71,6 +72,7 @@ private:
 	bool spawn_treetrunk();
 	bool spawn_tree();
 	bool spawn_vine();
+	bool spawn_box();
 
 	bool shootingFireBall;
 
@@ -131,7 +133,7 @@ private:
 	bool game_is_paused;
 	bool shopping;
 	int item_num;
-	//std::string item_name;
+	int page_num;
 	vec2 mouse_pos;
 	int used_skillpoints;
 	vec3 ice_skill_set;
@@ -149,6 +151,7 @@ private:
 	std::vector<Treetrunk> m_treetrunk;
 	std::vector<Tree> m_tree;
 	std::vector<Vine> m_vine;
+	std::vector<Box> m_box;
 	std::vector<Projectile*> hero_projectiles;
 	std::vector<EnemyLaser> enemy_projectiles;
 	std::vector<EnemyLaser> enemy_powerup_projectiles;
@@ -187,11 +190,14 @@ private:
 
 	int m_tree_number;
 	std::vector<vec2> m_treetrunk_position;
+	std::vector<vec2> m_box_position;
 	vec2 mouse_position;
 
 	clock_t lastFireProjectileTime;
 	Button button_play;
 	Button button_tutorial;
+	Button button_tutorial_next_page;
+	Button button_tutorial_prevous_page;
 	Button button_shop;
 	Button button_back_to_menu;
 	Button button_back_to_menu2;

@@ -14,10 +14,12 @@ class Shop_item : public Renderable
 public:
 
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen); 
+	bool init(vec2 screen);
+	void destroy();
+
 
 	// Releases all the associated resources
-	void destroy();
+	void destroy(bool reset);
 
 	void draw(const mat3& projection)override;
 

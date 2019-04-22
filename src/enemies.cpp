@@ -123,3 +123,8 @@ void Enemies::set_wave()
 	wave.custom_color = enemyColor;
 	waved = true;
 }
+
+void Enemies::set_dangerPos(vec2 pos)
+{
+	dangerPos = pos;
+}

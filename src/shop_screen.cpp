@@ -66,6 +66,18 @@ bool Shop_screen::init(vec2 screen)
 	shopf.init(screen);
 	items.init(screen);
 	purchase.init(screen);
+	stock1.init(screen, 1);
+	stock2.init(screen, 2);
+	price1.init(screen, 3);
+	price2.init(screen, 4); 
+	price3.init(screen, 5);
+	price4.init(screen, 6);
+	price5.init(screen, 7);
+	balance1.init(screen,8);
+	balance2.init(screen, 9);
+	balance3.init(screen, 10);
+	balance4.init(screen, 11);
+	balance5.init(screen, 12);
 	return true;
 }
 
@@ -74,13 +86,23 @@ void Shop_screen::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+	effect.release();
 
 	purchase.destroy();
 	shopf.destroy();
 	items.destroy();
+	stock1.destroy();
+	stock2.destroy();
+	price1.destroy();
+	price2.destroy();
+	price3.destroy();
+	price4.destroy();
+	price5.destroy();
+	balance1.destroy();
+	balance2.destroy();
+	balance3.destroy();
+	balance4.destroy();
+	balance5.destroy();
 }
 
 void Shop_screen::draw(const mat3 & projection)
@@ -132,14 +154,41 @@ void Shop_screen::draw(const mat3 & projection)
 		purchase.draw(projection);
 		shopf.draw(projection);
 		items.draw(projection);
+		stock1.draw(projection);
+		stock2.draw(projection);
+		price1.draw(projection);
+		price2.draw(projection);
+		price3.draw(projection);
+		price4.draw(projection);
+		price5.draw(projection);
+		balance1.draw(projection);
+		balance2.draw(projection);
+		balance3.draw(projection);
+		balance4.draw(projection);
+		balance5.draw(projection);
 }
 
-void Shop_screen::update_shop(bool shopping, int current_stock, int afforable, int item_num, vec2 screen)
+void Shop_screen::update_shop(bool shopping, int current_stock, int balance, int current_price, int item_num, vec2 screen)
 {
 	if (shopping) {
 		shopf.update_sframe(shopping, item_num, screen);
 		items.update_item(shopping, item_num);
-		purchase.update_purchase(shopping, current_stock, afforable, item_num);
+		purchase.update_purchase(shopping, current_stock, balance-current_price, item_num);
+		vec2 stock_vec = stock_to_vec(current_stock);
+		vec5 coins = money_to_vec(balance);
+		vec5 item_price = money_to_vec(current_price);
+		stock1.update_numbers(shopping, (int)stock_vec.x, item_num);
+		stock2.update_numbers(shopping, (int)stock_vec.y, item_num);
+		balance1.update_numbers(shopping, (int)coins.x);
+		balance2.update_numbers(shopping, (int)coins.y);
+		balance3.update_numbers(shopping, (int)coins.z);
+		balance4.update_numbers(shopping, (int)coins.w);
+		balance5.update_numbers(shopping, (int)coins.v);
+		price1.update_numbers(shopping, (int)item_price.x, item_num);
+		price2.update_numbers(shopping, (int)item_price.y, item_num);
+		price3.update_numbers(shopping, (int)item_price.z, item_num);
+		price4.update_numbers(shopping, (int)item_price.w, item_num);
+		price5.update_numbers(shopping, (int)item_price.v, item_num);
 	}
 }
 
@@ -220,4 +269,53 @@ vec2 Shop_screen::set_scale(float w, float h, vec2 screen)
 	float xscale = screen.x / w;
 	float yscale = screen.y / h;
 	return { xscale, yscale };
+}
+
+vec2 Shop_screen::stock_to_vec(int number)
+{
+	float g = 0.f;
+	float s = 0.f;
+	while (number > 9) {
+		s += 1.f;
+		number -= 10.f;
+	}
+
+	while (number > 0) {
+		g += 1.f;
+		number -= 1.f;
+	}
+
+	return { s,g };
+}
+
+vec5 Shop_screen::money_to_vec(int number)
+{
+	float g = 0.f;
+	float s = 0.f;
+	float b = 0.f;
+	float q = 0.f;
+	float w = 0.f;
+
+	while (number > 9999) {
+		w += 1.f;
+		number -= 10000.f;
+	}
+	while (number > 999) {
+		q += 1.f;
+		number -= 1000.f;
+	}
+	while (number > 99) {
+		b += 1.f;
+		number -= 100.f;
+	}
+	while (number > 9) {
+		s += 1.f;
+		number -= 10.f;
+	}
+	while (number > 0) {
+		g += 1.f;
+		number -= 1.f;
+	}
+
+	return { w,q,b,s,g };
 }

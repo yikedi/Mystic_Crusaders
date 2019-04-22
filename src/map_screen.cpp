@@ -9,10 +9,12 @@
 #include <gl3w.h>
 
 bool Mapscreen::init(vec2 screen, int game_level) {
-	if(game_level%2 ==0 )
+	if(game_level % 3 == 0 )
 		map_screen.load_from_file(textures_path("grass3.png"));
-	else
+	else if (game_level % 3 == 1)
 		map_screen.load_from_file(textures_path("desert.png"));
+	else
+		map_screen.load_from_file(textures_path("indoor.png"));
 	float w = map_screen.width;
 	float h = map_screen.height;
 	float wr = w * 0.5f;

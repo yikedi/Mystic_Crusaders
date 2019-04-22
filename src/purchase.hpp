@@ -16,8 +16,9 @@ public:
 	// Creates all the associated render resources and default transform
 	bool init(vec2 screen);
 
-	// Releases all the associated resources
 	void destroy();
+
+	void destroy(bool reset);
 
 	void draw(const mat3& projection)override;
 

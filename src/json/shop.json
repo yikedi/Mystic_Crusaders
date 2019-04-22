@@ -1,5 +1,5 @@
 {
-   "balance" : 500,
+   "balance" : 381,
    "items" : {
       "" : {
          "price" : null,
@@ -30,8 +30,8 @@
          "description" : "Increase the max hp of the hero by 30",
          "interest_value" : 30.0,
          "max_stock" : 5,
-         "price" : 30,
-         "stock" : 5
+         "price" : 65,
+         "stock" : 2
       },
       "movement_speed" : {
          "description" : "Increase the movement speed of the hero by 20%",
@@ -44,8 +44,8 @@
          "description" : "Increase the mp recovery rate by 30%",
          "interest_value" : 0.29999999999999999,
          "max_stock" : 5,
-         "price" : 30,
-         "stock" : 5
+         "price" : 39,
+         "stock" : 4
       },
       "second_life" : {
          "description" : "Automatically recovery all hp and mp when hero dies for the first time in a game",

@@ -12,7 +12,7 @@
 Texture Purchase::purchase_texture;
 bool Purchase::init(vec2 screen)
 {
-	purchase_texture.load_from_file(textures_path("level_up.png"));
+	purchase_texture.load_from_file(textures_path("purchase_button.png"));
 	float w = purchase_texture.width;
 	float h = purchase_texture.height;
 	float wr = w * 0.5f;
@@ -47,9 +47,7 @@ void Purchase::destroy()
 	glDeleteBuffers(1, &mesh.vbo);
     glDeleteBuffers(1, &mesh.ibo);
 
-    glDeleteShader(effect.vertex);
-    glDeleteShader(effect.fragment);
-    glDeleteShader(effect.program);
+	effect.release();
 }
 
 void Purchase::draw(const mat3 & projection)
@@ -128,6 +126,7 @@ void Purchase::get_texture(int loc)
 
 	// Clearing errors
 	gl_flush_errors();
+
 
 	// Vertex Buffer creation
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
