@@ -219,7 +219,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }, m_hero.get_hp()) && m_tutorial.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -1436,8 +1436,6 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		phoenix_list.clear();
 		m_skill_switch.destroy(true);
-		m_interface.destroy();
-		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
@@ -1468,7 +1466,7 @@ bool World::update(float elapsed_ms)
 		drawIntro = false;
 		start.init(screen);
 		stree.init(screen, 1);
-		m_interface.init({ 300.f, 42.f });
+		m_interface.init({ 300.f, 42.f }, m_hero.get_hp());
 		ingame.init(screen);
 		hme.init(screen);
 		intro_text.init({ screen.x / 2.f, screen.y }, screen, 2.f);
@@ -1807,7 +1805,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		m_interface.init({ 300.f, 42.f });
+		m_interface.init({ 300.f, 42.f }, m_hero.get_hp());
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
