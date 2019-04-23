@@ -171,6 +171,8 @@ private:
 	float m_next_fish_spawn;
 
 	Mix_Music* m_background_music;
+	Mix_Music* m_background_music2;
+	Mix_Music* m_background_music3;
 	Mix_Music* m_homescreen_music;
 	Mix_Music* m_intro_music;
 	Mix_Chunk* m_salmon_dead_sound;
