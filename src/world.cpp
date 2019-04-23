@@ -134,12 +134,15 @@ bool World::init(vec2 screen)
 	m_laser_sound = Mix_LoadWAV(audio_path("laser.wav"));
 	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
 	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
+	m_phoenix_sound = Mix_LoadWAV(audio_path("phoenix.wav"));
+
 
 	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr
 		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr
 		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
 		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
-		|| m_transition_sound == nullptr || m_amplify_sound == nullptr
+		|| m_transition_sound == nullptr || m_amplify_sound == nullptr 
+		|| m_phoenix_sound == nullptr
 		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -152,7 +155,8 @@ bool World::init(vec2 screen)
 			audio_path("fireball.wav"),
 			audio_path("laser.wav"),
 			audio_path("transition.wav"),
-			audio_path("amplify.wav")
+			audio_path("amplify.wav"),
+			audio_path("phoenix.wav")
 		);
 		return false;
 	}
@@ -295,6 +299,8 @@ void World::destroy()
 		Mix_FreeChunk(m_transition_sound);
 	if (m_amplify_sound != nullptr)
 		Mix_FreeChunk(m_amplify_sound);
+	if (m_phoenix_sound != nullptr)
+		Mix_FreeChunk(m_phoenix_sound);
 
 	Mix_CloseAudio();
 
@@ -2078,7 +2084,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position, m_phoenix_sound);
 			if (m_hero.get_active_skill() == THUNDER_SKILL)
 				Mix_PlayChannel(-1, m_lightning_sound, 0);
 			else if(m_hero.get_active_skill() == ICE_SKILL)
@@ -2191,7 +2197,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over && !shopping) {
-			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position, m_phoenix_sound);
 		}
 	}
 }

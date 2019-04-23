@@ -2,6 +2,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+
+
 void phoenix_skill::init()
 {
 	m_hp = 100.f;
@@ -10,7 +12,7 @@ void phoenix_skill::init()
 	mp_cost = 14.f;
 }
 
-float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 hero_position)
+float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 hero_position, Mix_Chunk* m_phoenix_sound)
 {
 	int max_phoenix = 3;
 	int current_size = phoenix_list.size();
@@ -25,6 +27,7 @@ float phoenix_skill::create_phoenix(std::vector<phoenix*> &phoenix_list,vec2 her
 		float dy = sin(angle) * radius;
 		vec2 position = { hero_position.x + dx, hero_position.y + dy };
 		phoenix* p = new phoenix(m_hp, damage, position, m_scale, angle);
+		Mix_PlayChannel(-1, m_phoenix_sound, 0);
 		phoenix_list.emplace_back(p);
 	}
 	else

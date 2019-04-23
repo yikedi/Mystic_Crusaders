@@ -180,6 +180,7 @@ private:
 	Mix_Chunk* m_laser_sound;
 	Mix_Chunk* m_transition_sound;
 	Mix_Chunk* m_amplify_sound;
+	Mix_Chunk* m_phoenix_sound;
 
 
 
