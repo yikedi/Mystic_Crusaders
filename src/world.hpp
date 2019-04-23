@@ -102,7 +102,11 @@ private:
 	GLFWwindow* m_window;
 
 	Startscreen start;
-
+    Text map_text;
+    Text skill_text;
+    Text hp_text;
+    Text mp_text;
+    Text exp_text;
 	Skilltree stree;
 	Shop_screen shop_screen;
 	Bar_description hme;
@@ -210,6 +214,7 @@ private:
 	Button button_shop;
 	Button button_back_to_menu;
 	Button button_back_to_menu2;
+	Button button_back_from_skillscreen;
 	Button button_skip_intro;
 
 	bool display_tutorial = false;
