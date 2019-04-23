@@ -125,6 +125,8 @@ bool World::init(vec2 screen)
 	}
 
 	m_background_music = Mix_LoadMUS(audio_path("music.wav"));
+	m_homescreen_music = Mix_LoadMUS(audio_path("home_screen_music.wav"));
+	m_intro_music = Mix_LoadMUS(audio_path("intromusic.wav"));
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 	m_levelup_sound = Mix_LoadWAV(audio_path("level_up.wav"));
@@ -135,6 +137,8 @@ bool World::init(vec2 screen)
 	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
 	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
 	m_phoenix_sound = Mix_LoadWAV(audio_path("phoenix.wav"));
+	m_shop_sound = Mix_LoadWAV(audio_path("shop.wav"));
+	m_tutorial_sound = Mix_LoadWAV(audio_path("tutorial.wav"));
 
 
 	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr
@@ -142,7 +146,8 @@ bool World::init(vec2 screen)
 		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
 		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
 		|| m_transition_sound == nullptr || m_amplify_sound == nullptr 
-		|| m_phoenix_sound == nullptr
+		|| m_phoenix_sound == nullptr || m_intro_music == nullptr
+		|| m_homescreen_music == nullptr
 		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -156,13 +161,15 @@ bool World::init(vec2 screen)
 			audio_path("laser.wav"),
 			audio_path("transition.wav"),
 			audio_path("amplify.wav"),
-			audio_path("phoenix.wav")
+			audio_path("phoenix.wav"),
+			audio_path("intromusic.wav")
+			audio_path("home_screen_music.wav")
 		);
 		return false;
 	}
 
 	// Playing background music undefinitely
-	Mix_PlayMusic(m_background_music, -1);
+	Mix_PlayMusic(m_homescreen_music, -1);
 
 	fprintf(stderr, "Loaded music\n");
 
@@ -199,12 +206,31 @@ bool World::init(vec2 screen)
 
 	shop.init();
 	shop.update_hero(m_hero);
-	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
+	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+		drawIntro = true;
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_intro_music, 1);
+
+	});
 	button_play.set_hoverable(true);
-	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
-	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1;});
-	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { 
+		display_tutorial = true; 
+		Mix_PlayChannel(-1, m_tutorial_sound, -1); 
+	});
+	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+		shopping = true;
+		Mix_PlayChannel(-1, m_shop_sound, -1);
+	});
+	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { 
+		display_tutorial = false; page_num = 1;
+		Mix_FadeOutChannel(-1, 500); });
+	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { 
+		shopping = false;
+		Mix_FadeOutChannel(-1, 500);
+	});
 	button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num =std::min(4, page_num+1); });
 	button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 	// For future reference: examples of how to use buttons
@@ -283,6 +309,10 @@ void World::destroy()
 
 	if (m_background_music != nullptr)
 		Mix_FreeMusic(m_background_music);
+	if (m_intro_music != nullptr)
+		Mix_FreeMusic(m_intro_music);
+	if (m_homescreen_music != nullptr)
+		Mix_FreeMusic(m_homescreen_music);
 	if (m_salmon_dead_sound != nullptr)
 		Mix_FreeChunk(m_salmon_dead_sound);
 	if (m_salmon_eat_sound != nullptr)
@@ -301,6 +331,10 @@ void World::destroy()
 		Mix_FreeChunk(m_amplify_sound);
 	if (m_phoenix_sound != nullptr)
 		Mix_FreeChunk(m_phoenix_sound);
+	if (m_shop_sound != nullptr)
+		Mix_FreeChunk(m_shop_sound);
+	if (m_tutorial_sound != nullptr)
+		Mix_FreeChunk(m_tutorial_sound);
 
 	Mix_CloseAudio();
 
@@ -406,6 +440,7 @@ bool World::update(float elapsed_ms)
 	}
 
 	if (start_is_over && !game_is_paused && !shopping && !m_hero.isInTransition) {
+		
 		if (m_hero.is_alive()) {
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 				m_hero.shoot_projectiles(hero_projectiles);
@@ -1450,7 +1485,10 @@ bool World::update(float elapsed_ms)
 		shop.update_hero(m_hero);
 		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
 		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { 
+			shopping = true; 
+			
+		});
 		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
 		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
@@ -1508,6 +1546,11 @@ bool World::update(float elapsed_ms)
 		m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			//SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_homescreen_music, 1);
 	}
 
 
@@ -1897,6 +1940,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		drawIntro = false;
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			//SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_homescreen_music, 1);
 	}
 
 	// Control the current speed with `<` `>`
@@ -2220,6 +2268,15 @@ void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 
 void World::startGame()
 {
+	//Fade out intro music
+	while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+		// wait for any fades to complete
+		SDL_Delay(100);
+	}
+	//Fade in battle music 
+	if (Mix_FadeInMusic(m_background_music, -1, 1000) == -1) {
+		printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+	}
 	// grab screen size first
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
