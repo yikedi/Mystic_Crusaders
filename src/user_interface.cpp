@@ -1,12 +1,5 @@
 // Header
 #include "user_interface.hpp"
-#include "hero.hpp"
-
-// internal
-#include "enemy_01.hpp"
-#include "enemy_02.hpp"
-#include "fish.hpp"
-
 
 // stlib
 #include <vector>
@@ -16,7 +9,7 @@
 Texture UserInterface::UserInterface_texture;
 
 
-bool UserInterface::init(vec2 size)
+bool UserInterface::init(vec2 size, float _max_hp)
 {
 	//std::vector<Vertex> vertices;
 	//std::vector<uint16_t> indices;
@@ -73,7 +66,7 @@ bool UserInterface::init(vec2 size)
 		return false;
 
 	// Setting initial values
-	max_hp = 100.f; // TODO: in later versions, get the max HP from world or sth!
+	max_hp = _max_hp;
 	max_mp = 100.f;
 	m_scale.x = 1.f;
 	m_scale.y = 1.f;
@@ -85,11 +78,8 @@ bool UserInterface::init(vec2 size)
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 	set_color({ 1.0f,1.0f,1.0f });
-	m_direction = { 0.f,0.f };
 	m_light_up = 0;
 	advanced = false;
-	max_hp = 100.f;
-	max_mp = 100.f;
 	hp = max_hp;
 	mp = max_mp;
 	max_exp = 20;
@@ -107,9 +97,10 @@ void UserInterface::destroy()
 }
 
 // Called on each frame by World::update()
-void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom)
+void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom, float _max_hp)
 {
 	hp = hp_mp.x;
+	max_hp = _max_hp;
 	mp = hp_mp.y;
 	cur_exp = exp.x;
 	max_exp = exp.y;

@@ -29,9 +29,12 @@
 #include "vine.h"
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
+#include "scrollable.hpp"
+#include "story.hpp"
 #include "Shop.h"
 #include "shop_screen.hpp"
 #include "box.hpp"
+
 // stlib
 #include <vector>
 #include <random>
@@ -157,7 +160,7 @@ private:
 	std::vector<Thunder*> thunders;
 	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
-	
+
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
 
@@ -200,15 +203,22 @@ private:
 	Button button_shop;
 	Button button_back_to_menu;
 	Button button_back_to_menu2;
+	Button button_skip_intro;
+
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
 	SkillSwitch m_skill_switch;
 
 	bool passed_level;
 
+	bool drawIntro;
+	Scrollable intro_text;
+	Story m_story;
+
 	int current_stock;
 	//int total_stock;
 	int current_price;
 	float interest;
 	int balance;
+
 };

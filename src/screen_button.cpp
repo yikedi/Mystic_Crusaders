@@ -1,11 +1,6 @@
 #pragma once
 
 #include "common.hpp"
-#include "projectile.h"
-#include "fireball.h"
-#include "enemy_01.hpp"
-#include "enemy_02.hpp"
-#include "hero.hpp"
 
 // actual used includes
 #include "screen_button.hpp"

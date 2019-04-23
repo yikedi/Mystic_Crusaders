@@ -1,11 +1,6 @@
 #pragma once
 
 #include "common.hpp"
-#include "projectile.h"
-#include "fireball.h"
-#include "enemy_01.hpp"
-#include "enemy_02.hpp"
-#include "hero.hpp"
 
 // actual used includes
 #include <cmath>
@@ -52,24 +47,6 @@ public:
 	void set_position(vec2 position);
 	
 	void set_hoverable(bool is_hoverable);
-
-
-	/*
-	// Releases all associated resources
-	void destroy();
-
-	// If mouse is hovering above the button, we will light up the button.
-	void update(vec2 hp_mp, float zoom_factor);
-
-	// Renders the salmon
-	void draw(const mat3& projection)override;
-
-	// Light up the button when is_within_range()
-	void lightup();
-
-	// Checks to see if mouse is within range. To be used in update of mouse and mouse_onclick
-	bool is_within_range();
-	*/
 
 	ClickCallbackSTD onClick;
 	float m_color[3];
