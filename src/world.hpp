@@ -99,7 +99,11 @@ private:
 	GLFWwindow* m_window;
 
 	Startscreen start;
-    Text screen_text;
+    Text map_text;
+    Text skill_text;
+    Text hp_text;
+    Text mp_text;
+    Text exp_text;
 	Skilltree stree;
 	Shop_screen shop_screen;
 	Bar_description hme;

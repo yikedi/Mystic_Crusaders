@@ -180,7 +180,11 @@ bool World::init(vec2 screen)
 	skill_element = "ice";
 	m_window_width = screen.x;
 	m_window_height = screen.y;
-    screen_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
+    map_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
+    skill_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
+    hp_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
+    mp_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
+    exp_text.loadCharacters(font_path("ARCADECLASSIC.TTF"));
 	stree.init(screen, 1);
 	m_hero.init(screen);
 	m_portal.init(screen);
@@ -1609,17 +1613,25 @@ void World::draw()
 		m_portal.draw(projection_2D);
 		for (auto& phoenix : phoenix_list)
 			phoenix->draw(projection_2D);
-        screen_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), 800.f, 60.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
+        map_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), screen_left / zoom_factor + (screen_right - screen_left) / (2.f * zoom_factor) - 50 / zoom_factor,
+            (screen_top + 30.f) / zoom_factor, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
 		m_skill_switch.draw(projection_2D);
+        hp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_hp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
+            (screen_bottom - 100.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
+        mp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_mp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
+            (screen_bottom - 70.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
+        int exp_points = m_points - previous_point;
+        exp_text.RenderText(projection_2D, std::to_string(exp_points), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
+            (screen_bottom - 40.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
 	}
 
 	if (game_is_paused){
         int remaining_skills = m_level - used_skillpoints;
 		stree.draw(projection_2D);
-        screen_text.RenderText(projection_2D, "Remaining skill points  " + std::to_string(remaining_skills), 90.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
+        skill_text.RenderText(projection_2D, "Skill points left " + std::to_string(remaining_skills), 90.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 	}
 	/////////////////////
 	// Truely render to the screen

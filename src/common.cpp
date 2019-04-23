@@ -327,11 +327,11 @@ bool Text::loadCharacters(const char* ft_path)
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
-            GL_ALPHA,
+            GL_RED,
             face->glyph->bitmap.width,
             face->glyph->bitmap.rows,
             0,
-            GL_ALPHA,
+            GL_RED,
             GL_UNSIGNED_BYTE,
             face->glyph->bitmap.buffer
         );
@@ -376,9 +376,9 @@ bool Text::loadCharacters(const char* ft_path)
 void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors)
 {   
     // Setting uniform values to the currently bound program
-    glEnable(GL_CULL_FACE);
     glUseProgram(textEffect.program);
     glUniformMatrix3fv(glGetUniformLocation(textEffect.program, "projection"), 1, GL_FALSE, (float*)&projection);
+    glUniform1i(glGetUniformLocation(textEffect.program, "text"), 0);
     glUniform3f(glGetUniformLocation(textEffect.program, "textColor"), colors.x, colors.y, colors.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
@@ -420,9 +420,7 @@ void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLflo
         // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
     }
-    glDisable(GL_CULL_FACE);
-    // glBindVertexArray(0);
-    // glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Renderable::transform_begin()
