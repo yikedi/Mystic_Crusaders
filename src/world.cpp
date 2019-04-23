@@ -1613,11 +1613,11 @@ void World::draw()
 		m_portal.draw(projection_2D);
 		for (auto& phoenix : phoenix_list)
 			phoenix->draw(projection_2D);
-        map_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), screen_left / zoom_factor + (screen_right - screen_left) / (2.f * zoom_factor) - 50 / zoom_factor,
-            (screen_top + 30.f) / zoom_factor, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
+        map_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), screen_left / zoom_factor + (screen_right - screen_left) / (2.f * zoom_factor) + 60 / zoom_factor,
+            (screen_bottom - 70.f) / zoom_factor, 0.5f, vec3{ 0.1f, 0.1f, 0.1f });
         hp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_hp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
             (screen_bottom - 100.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
         mp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_mp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
