@@ -29,9 +29,12 @@
 #include "vine.h"
 #include "phoenix.h"
 #include "skill_switch_UI.hpp"
+#include "scrollable.hpp"
+#include "story.hpp"
 #include "Shop.h"
 #include "shop_screen.hpp"
 #include "box.hpp"
+
 // stlib
 #include <vector>
 #include <random>
@@ -161,7 +164,7 @@ private:
 	std::vector<Thunder*> thunders;
 	std::vector<phoenix*> phoenix_list;
 	UserInterface m_interface;
-	
+
 	//Treetrunk m_treetrunk;
 	//Tree m_tree;
 
@@ -172,6 +175,10 @@ private:
 	float m_next_fish_spawn;
 
 	Mix_Music* m_background_music;
+	Mix_Music* m_background_music2;
+	Mix_Music* m_background_music3;
+	Mix_Music* m_homescreen_music;
+	Mix_Music* m_intro_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
 	Mix_Chunk* m_levelup_sound;
@@ -181,6 +188,9 @@ private:
 	Mix_Chunk* m_laser_sound;
 	Mix_Chunk* m_transition_sound;
 	Mix_Chunk* m_amplify_sound;
+	Mix_Chunk* m_phoenix_sound;
+	Mix_Chunk* m_shop_sound;
+	Mix_Chunk* m_tutorial_sound;
 
 
 
@@ -205,15 +215,22 @@ private:
 	Button button_back_to_menu;
 	Button button_back_to_menu2;
 	Button button_back_from_skillscreen;
+	Button button_skip_intro;
+
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
 	SkillSwitch m_skill_switch;
 
 	bool passed_level;
 
+	bool drawIntro;
+	Scrollable intro_text;
+	Story m_story;
+
 	int current_stock;
 	//int total_stock;
 	int current_price;
 	float interest;
 	int balance;
+
 };

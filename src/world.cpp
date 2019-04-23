@@ -124,6 +124,10 @@ bool World::init(vec2 screen)
 	}
 
 	m_background_music = Mix_LoadMUS(audio_path("music.wav"));
+	m_background_music2 = Mix_LoadMUS(audio_path("music2.wav"));
+	m_background_music3 = Mix_LoadMUS(audio_path("music3.wav"));
+	m_homescreen_music = Mix_LoadMUS(audio_path("home_screen_music.wav"));
+	m_intro_music = Mix_LoadMUS(audio_path("intromusic.wav"));
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 	m_levelup_sound = Mix_LoadWAV(audio_path("level_up.wav"));
@@ -133,16 +137,25 @@ bool World::init(vec2 screen)
 	m_laser_sound = Mix_LoadWAV(audio_path("laser.wav"));
 	m_transition_sound = Mix_LoadWAV(audio_path("transition.wav"));
 	m_amplify_sound = Mix_LoadWAV(audio_path("amplify.wav"));
+	m_phoenix_sound = Mix_LoadWAV(audio_path("phoenix.wav"));
+	m_shop_sound = Mix_LoadWAV(audio_path("shop.wav"));
+	m_tutorial_sound = Mix_LoadWAV(audio_path("tutorial.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr
+
+	if (m_background_music == nullptr || m_background_music2 == nullptr
+		|| m_background_music3 == nullptr || m_salmon_dead_sound == nullptr
 		|| m_salmon_eat_sound == nullptr || m_levelup_sound == nullptr
 		|| m_lightning_sound == nullptr || m_ice_sound == nullptr
 		|| m_fireball_sound == nullptr || m_laser_sound == nullptr
 		|| m_transition_sound == nullptr || m_amplify_sound == nullptr
+		|| m_phoenix_sound == nullptr || m_intro_music == nullptr
+		|| m_homescreen_music == nullptr
 		)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav"),
+			audio_path("music2.wav"),
+			audio_path("music3.wav"),
 			audio_path("salmon_dead.wav"),
 			audio_path("salmon_eat.wav"),
 			audio_path("level_up.wav"),
@@ -151,13 +164,16 @@ bool World::init(vec2 screen)
 			audio_path("fireball.wav"),
 			audio_path("laser.wav"),
 			audio_path("transition.wav"),
-			audio_path("amplify.wav")
+			audio_path("amplify.wav"),
+			audio_path("phoenix.wav"),
+			audio_path("intromusic.wav")
+			audio_path("home_screen_music.wav")
 		);
 		return false;
 	}
 
 	// Playing background music undefinitely
-	Mix_PlayMusic(m_background_music, -1);
+	Mix_PlayMusic(m_homescreen_music, -1);
 
 	fprintf(stderr, "Loaded music\n");
 
@@ -189,18 +205,41 @@ bool World::init(vec2 screen)
 	m_hero.init(screen);
 	m_portal.init(screen);
 	m_skill_switch.init({ 500.f, 500.f });
+	intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
+	m_story.init(screen);
 	passed_level = false;
 	shootingFireBall = false;
 	cur_points_needed = pass_points - m_points;
 	kill_num = number_to_vec(cur_points_needed, true);
+	drawIntro = false;
+
 	shop.init();
 	shop.update_hero(m_hero);
-	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
+	button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+		drawIntro = true;
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_intro_music, 1);
+
+	});
 	button_play.set_hoverable(true);
-	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
-	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1;});
-	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+	button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+		display_tutorial = true;
+		Mix_PlayChannel(-1, m_tutorial_sound, -1);
+	});
+	button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+		shopping = true;
+		Mix_PlayChannel(-1, m_shop_sound, -1);
+	});
+	button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() {
+		display_tutorial = false; page_num = 1;
+		Mix_FadeOutChannel(-1, 500); });
+	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() {
+		shopping = false;
+		Mix_FadeOutChannel(-1, 500);
+	});
 	button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num =std::min(4, page_num+1); });
 	button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 	button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() { 
@@ -216,6 +255,7 @@ bool World::init(vec2 screen)
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
 	// testButton4.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [this]() { this->m_hero.change_mp(80.f); });
+	button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 
 	//initialize treetrunk & tree;
 	m_treetrunk_position.push_back({ 4* screen.x / 5 - 120.f, screen.y / 3  });
@@ -233,7 +273,7 @@ bool World::init(vec2 screen)
 	initTrees();
 
 	mouse_position = { 0.f,0.f };
-	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
+	return start.init(screen) && m_water.init() && m_interface.init({ 300.f, 42.f }, m_hero.max_hp) && m_tutorial.init(screen) && shop_screen.init(screen) && hme.init(screen) && ingame.init(screen);
 }
 
 bool World::initTrees() {
@@ -256,7 +296,7 @@ bool World::initTrees() {
 			new_tree.set_position({ position.x + 10.f ,position.y });
 		}
 	}
-	else if (m_game_level % 3 == 1) 
+	else if (m_game_level % 3 == 1)
 	{
 		for (auto & position : m_treetrunk_position)
 		{
@@ -287,6 +327,14 @@ void World::destroy()
 
 	if (m_background_music != nullptr)
 		Mix_FreeMusic(m_background_music);
+	if (m_background_music2 != nullptr)
+		Mix_FreeMusic(m_background_music2);
+	if (m_background_music3 != nullptr)
+		Mix_FreeMusic(m_background_music3);
+	if (m_intro_music != nullptr)
+		Mix_FreeMusic(m_intro_music);
+	if (m_homescreen_music != nullptr)
+		Mix_FreeMusic(m_homescreen_music);
 	if (m_salmon_dead_sound != nullptr)
 		Mix_FreeChunk(m_salmon_dead_sound);
 	if (m_salmon_eat_sound != nullptr)
@@ -303,6 +351,12 @@ void World::destroy()
 		Mix_FreeChunk(m_transition_sound);
 	if (m_amplify_sound != nullptr)
 		Mix_FreeChunk(m_amplify_sound);
+	if (m_phoenix_sound != nullptr)
+		Mix_FreeChunk(m_phoenix_sound);
+	if (m_shop_sound != nullptr)
+		Mix_FreeChunk(m_shop_sound);
+	if (m_tutorial_sound != nullptr)
+		Mix_FreeChunk(m_tutorial_sound);
 
 	Mix_CloseAudio();
 
@@ -340,12 +394,15 @@ void World::destroy()
 	start.destroy();
 	stree.destroy();
 	hme.destroy();
+	intro_text.destroy();
+	m_story.destroy();
 	button_play.destroy();
 	button_tutorial.destroy();
 	button_tutorial_next_page.destroy();
 	button_tutorial_prevous_page.destroy();
 	button_shop.destroy();
 	button_back_to_menu.destroy();
+	button_skip_intro.destroy();
 	button_back_to_menu2.destroy();
 	button_back_from_skillscreen.destroy();
 	glfwDestroyWindow(m_window);
@@ -365,6 +422,18 @@ bool World::update(float elapsed_ms)
 	current_price = shop.get_price(find_item(item_num));
 	balance = shop.get_balance();
 	shop_screen.update_shop(shopping, current_stock, balance, current_price, item_num, screen);
+
+	if (!start_is_over) {
+		if (drawIntro) {
+			intro_text.update();
+			if (intro_text.check_position_for_ending()) {
+				// Text has scrolled past the edge of the screen
+				// fprintf(stderr, "Game started because we scrolled past the edge!");
+				startGame();
+			}
+		}
+	}
+
 
 	if (passed_level && m_hero.justFinishedTransition) {
 		map.destroy();
@@ -387,6 +456,21 @@ bool World::update(float elapsed_ms)
 		m_vine.clear();
 		m_box.clear();
 		initTrees();
+		if(m_game_level % 3 == 0 ) {
+			if (Mix_FadeInMusic(m_background_music, -1, 1000) == -1) {
+				printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+			}
+		}
+		else if (m_game_level % 3 == 1) {
+			if (Mix_FadeInMusic(m_background_music2, -1, 1000) == -1) {
+				printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+			}
+		}
+		else {
+			if (Mix_FadeInMusic(m_background_music3, -1, 1000) == -1) {
+				printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+			}
+		}
 		map.init(screen, m_game_level);
 		pass_points = m_points + (m_game_level + 1) * 5;
 		cur_points_needed = pass_points - m_points;
@@ -394,8 +478,8 @@ bool World::update(float elapsed_ms)
 	}
 
 	if (start_is_over && !game_is_paused && !shopping && !m_hero.isInTransition) {
-		if (m_hero.is_alive()) {
 
+		if (m_hero.is_alive()) {
 			if (shootingFireBall && clock() - lastFireProjectileTime > 300) {
 				m_hero.shoot_projectiles(hero_projectiles);
 				Mix_PlayChannel(-1, m_fireball_sound, 0);
@@ -586,12 +670,11 @@ bool World::update(float elapsed_ms)
 		for (auto& box : m_box)
 			box.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, {(float) (m_points - previous_point), (float) (20 + (m_hero.level * 5))}, zoom_factor);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float) (m_points - previous_point), (float) (20 + (m_hero.level * 5)) }, zoom_factor, m_hero.max_hp);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		for (auto& phoenix : phoenix_list)
 			phoenix->update(elapsed_ms,m_hero.get_position(),m_enemys_01, m_enemys_02, m_enemys_03,hero_projectiles);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float)(m_points - previous_point), (float)(20 + (m_hero.level * 5)) }, zoom_factor);
 		hme.update_hme(m_hero.get_position(), zoom_factor, screen);
 		level_num = number_to_vec(m_game_level, false);
 		kill_num = number_to_vec(pass_points - m_points, true);
@@ -677,6 +760,10 @@ bool World::update(float elapsed_ms)
 			vec2 new_position = { cur_position.x + cur_direction.x * stepback , cur_position.y + cur_direction.y * stepback };
 			m_hero.set_position(new_position);
 			if(passed_level && !m_hero.isInTransition) {
+				while (!Mix_FadeOutMusic(1500) && Mix_PlayingMusic()) {
+					// wait for any fades to complete
+					SDL_Delay(100);
+				}
 				m_hero.next_level();
 			}
 		}
@@ -815,7 +902,7 @@ bool World::update(float elapsed_ms)
 
 
 		}
-		
+
 
 
 		//check treetrunk collision
@@ -830,7 +917,7 @@ bool World::update(float elapsed_ms)
 
 				//find the difference vector, but only push back hero in the opposite direction that the hero walks
 				vec2 difference = { (cur_position.x - tree_location.x)* abs(current_direction.x), (cur_position.y - tree_location.y) * abs(current_direction.y) };
-				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back. 
+				//if hero is not moving in any direction, to avoid hero stuck in the tree, we still need to push hero back.
 				if (abs(current_direction.x) < 1.0f && abs(current_direction.y) < 1.0f)
 					difference = { cur_position.x - tree_location.x , cur_position.y - tree_location.y };
 				difference = { difference.x + 0.001f, difference.y + 0.001f }; //add 0.0001f to avoid divide by 0
@@ -1409,8 +1496,11 @@ bool World::update(float elapsed_ms)
 		button_back_to_menu.destroy();
 		button_back_to_menu2.destroy();
 		button_back_from_skillscreen.destroy();
-		m_tutorial.destroy();
 		shop_screen.destroy();
+		button_skip_intro.destroy();
+		m_tutorial.destroy();
+		intro_text.destroy();
+		m_story.destroy();
 		m_hero.destroy(true);
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
@@ -1436,11 +1526,30 @@ bool World::update(float elapsed_ms)
 			box.destroy();
 		m_hero.init(screen);
 		shop.update_hero(m_hero);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
-		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
-		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+			drawIntro = true;
+			while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+				// wait for any fades to complete
+				SDL_Delay(100);
+			}
+			Mix_PlayMusic(m_intro_music, 1);
+
+		});
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = true;
+			Mix_PlayChannel(-1, m_tutorial_sound, -1);
+		});
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = true;
+			Mix_PlayChannel(-1, m_shop_sound, -1);
+		});
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = false; page_num = 1;
+			Mix_FadeOutChannel(-1, 500); });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = false;
+			Mix_FadeOutChannel(-1, 500);
+		});
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() {
@@ -1452,6 +1561,7 @@ bool World::update(float elapsed_ms)
 			}
 			game_is_paused = !game_is_paused;
 		});
+		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		start.init(screen);
@@ -1463,8 +1573,6 @@ bool World::update(float elapsed_ms)
 		thunders.clear();
 		phoenix_list.clear();
 		m_skill_switch.destroy(true);
-		m_interface.destroy();
-		m_interface.init({ 300.f, 50.f });
 		m_treetrunk.clear();
 		m_tree.clear();
 		m_vine.clear();
@@ -1496,13 +1604,21 @@ bool World::update(float elapsed_ms)
 		map.set_is_over(true);
 		start_is_over = false;
 		display_tutorial = false;
+		drawIntro = false;
 		start.init(screen);
 		stree.init(screen, 1);
-		m_interface.init({ 300.f, 42.f });
+		m_interface.init({ 300.f, 42.f }, m_hero.max_hp);
 		ingame.init(screen);
 		hme.init(screen);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
+		m_story.init(screen);
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			//SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_homescreen_music, -1);
 	}
 
 
@@ -1522,7 +1638,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << m_points << " HP:" << m_hero.get_hp() << "MP:" <<m_hero.get_mp() << "Level: " << m_game_level ;
+	title_ss << "Points: " << m_points << "  HP: " << (int) m_hero.get_hp() << "  MP: " << (int) m_hero.get_mp() << "  Level: " << m_game_level ;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -1580,10 +1696,20 @@ void World::draw()
 	mat3 projection_2D = mul(translate_2D, scaling_2D);
 
 	start.draw(projection_2D);
+
 	if (!display_tutorial && !shopping) {
-		button_play.draw(projection_2D);
-		button_tutorial.draw(projection_2D);
-		button_shop.draw(projection_2D);
+		if (!drawIntro) {
+			button_play.draw(projection_2D);
+			button_tutorial.draw(projection_2D);
+			button_shop.draw(projection_2D);
+		}
+		else {
+			if (!start_is_over) {
+				m_story.draw(projection_2D);	// TODO in the other implementation hero.draw comes right after start.draw
+				intro_text.draw(projection_2D);
+				button_skip_intro.draw(projection_2D);
+			}
+		}
 	}
 
 	if (display_tutorial) {
@@ -1608,7 +1734,7 @@ void World::draw()
 	// Drawing entities
 	if (start_is_over && !shopping) {
 		map.draw(projection_2D);
-		m_hero.draw(projection_2D);
+		m_hero.draw(projection_2D);	// TODO if problems, refer to this line
 		for (auto& enemy : m_enemys_01)
 			enemy.draw(projection_2D);
 		for (auto& enemy : m_enemys_02)
@@ -1797,6 +1923,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_back_to_menu.destroy();
 		button_back_to_menu2.destroy();
 		button_back_from_skillscreen.destroy();
+		button_skip_intro.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
 		hme.destroy();
@@ -1807,6 +1934,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_interface.destroy();
 		ingame.destroy();
 		m_skill_switch.destroy(true);
+		intro_text.destroy();
+		m_story.destroy();
 		for (auto& enemy : m_enemys_01)
 			enemy.destroy(true);
 		for (auto& enemy : m_enemys_02)
@@ -1834,11 +1963,30 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_vine.clear();
 		m_box.clear();
 		start.init(screen);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { this->startGame(); });
-		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
-		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+			drawIntro = true;
+			while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+				// wait for any fades to complete
+				SDL_Delay(100);
+			}
+			Mix_PlayMusic(m_intro_music, 1);
+
+		});
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = true;
+			Mix_PlayChannel(-1, m_tutorial_sound, -1);
+		});
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = true;
+			Mix_PlayChannel(-1, m_shop_sound, -1);
+		});
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = false; page_num = 1;
+			Mix_FadeOutChannel(-1, 500); });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = false;
+			Mix_FadeOutChannel(-1, 500);
+		});
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() {
@@ -1850,19 +1998,23 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			}
 			game_is_paused = !game_is_paused;
 		});
+		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		m_hero.init(screen);
+		shop.update_hero(m_hero);
 		m_enemys_01.clear();
 		m_enemys_02.clear();
 		m_enemys_03.clear();
 		hero_projectiles.clear();
 		enemy_projectiles.clear();
 		thunders.clear();
-		m_interface.init({ 300.f, 42.f });
+		m_interface.init({ 300.f, 42.f }, m_hero.max_hp);
 		stree.init(screen, 1);
 		ingame.init(screen);
 		hme.init(screen);
+		intro_text.init({ screen.x / 2.f, screen.y }, screen, 0.8f);
+		m_story.init(screen);
 		phoenix_list.clear();
 		m_skill_switch.init({ 500.f, 500.f });
 		m_water.reset_salmon_dead_time();
@@ -1872,6 +2024,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		screen_right = (float)w;// *0.5;
 		screen_bottom = (float)h;// *0.5;
 		zoom_factor = 1.f;
+		shop.set_balance(shop.get_balance() + m_points * (1.f + shop.get_purchased("coin_increase") * shop.get_interest_value("coin_increase")));
 		m_points = 0;
 		m_portal.setIsPortal(false);
 		passed_level = false;
@@ -1893,8 +2046,14 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		game_is_paused = false;
 		shopping = false;
 		display_tutorial = false;
+		drawIntro = false;
 		cur_points_needed = pass_points - m_points;
 		kill_num = number_to_vec(cur_points_needed, true);
+		while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+			// wait for any fades to complete
+			//SDL_Delay(100);
+		}
+		Mix_PlayMusic(m_homescreen_music, -1);
 	}
 
 	// Control the current speed with `<` `>`
@@ -1962,11 +2121,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			zoom_factor = 1.1f;
 		}
 	}
-	else if (key == GLFW_KEY_G && start_is_over == false && !shopping) {
-		map.init(screen,m_game_level);
-		start_is_over = true;
-		zoom_factor = 1.1f;
-	}
+	// else if (key == GLFW_KEY_G && start_is_over == false && !shopping) {
+	// 	map.init(screen,m_game_level);
+	// 	start_is_over = true;
+	// 	zoom_factor = 1.1f;
+	// }
 	else if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE && !start_is_over) {
         if (!display_tutorial && !shopping) {
             // escape in start screen
@@ -2033,9 +2192,15 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 	vec2 screen = { (float)w, (float)h };
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !start_is_over ) {
 		if (!display_tutorial && !shopping) {
-			button_play.check_click(mouse_pos);
-			button_tutorial.check_click(mouse_pos);
-			button_shop.check_click(mouse_pos);
+			if (!drawIntro) {
+				button_play.check_click(mouse_pos);
+				button_tutorial.check_click(mouse_pos);
+				button_shop.check_click(mouse_pos);
+			}
+			else {
+				// We are drawing intro, only one button active
+				button_skip_intro.check_click(mouse_pos);
+			}
 		}
 		else if (!display_tutorial && shopping){
 			button_back_to_menu2.check_click(mouse_pos);
@@ -2058,6 +2223,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				current_stock = shop.get_stock(item_name);
 				current_price = shop.get_price(item_name);
 				balance = shop.get_balance();
+				shop.update_hero(m_hero);
 				item_num = 0;
 			}
 			else {
@@ -2076,7 +2242,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position, m_phoenix_sound);
 			if (m_hero.get_active_skill() == THUNDER_SKILL)
 				Mix_PlayChannel(-1, m_lightning_sound, 0);
 			else if(m_hero.get_active_skill() == ICE_SKILL)
@@ -2191,7 +2357,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && start_is_over && !shopping) {
-			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position);
+			m_hero.use_skill(hero_projectiles, thunders,phoenix_list,mouse_position, m_phoenix_sound);
 		}
 	}
 }
@@ -2214,6 +2380,15 @@ void World::on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
 
 void World::startGame()
 {
+	//Fade out intro music
+	while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+		// wait for any fades to complete
+		SDL_Delay(100);
+	}
+	//Fade in battle music
+	if (Mix_FadeInMusic(m_background_music, -1, 1000) == -1) {
+		printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+	}
 	// grab screen size first
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);

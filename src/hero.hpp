@@ -116,8 +116,8 @@ public:
 	bool use_ice_arrow_skill(std::vector<Projectile*> & hero_projectiles);
     void levelup();
 	bool use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position);
-	bool use_phoenix_skill(std::vector<phoenix*> & phoenix);
-	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position);
+	bool use_phoenix_skill(std::vector<phoenix*> & phoenix, Mix_Chunk* m_phoenix_sound);
+	bool use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position, Mix_Chunk* m_phoenix_sound);
     void level_up(int select_skill, int select_upgrade);
 	void set_active_skill(int active);
 	int get_active_skill();

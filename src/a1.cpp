@@ -16,16 +16,7 @@ using Clock = std::chrono::high_resolution_clock;
 World world;
 const int width = 1280;
 const int height = 720;
-const char* title = "Your Title Here";
-
-World* getWorldInstance() {
-	return &world;
-	/*
-		in files that grab instance:
-		World *m_world;
-		// m_world = &actual_world
-	*/
-}
+const char* title = "Mystic Crusaders";
 
 // Entry point
 int main(int argc, char* argv[])
