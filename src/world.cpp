@@ -1483,14 +1483,30 @@ bool World::update(float elapsed_ms)
 			box.destroy();
 		m_hero.init(screen);
 		shop.update_hero(m_hero);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
-		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { 
-			shopping = true; 
-			
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+			drawIntro = true;
+			while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+				// wait for any fades to complete
+				SDL_Delay(100);
+			}
+			Mix_PlayMusic(m_intro_music, 1);
+
 		});
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
-		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = true;
+			Mix_PlayChannel(-1, m_tutorial_sound, -1);
+		});
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = true;
+			Mix_PlayChannel(-1, m_shop_sound, -1);
+		});
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = false; page_num = 1;
+			Mix_FadeOutChannel(-1, 500); });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = false;
+			Mix_FadeOutChannel(-1, 500);
+		});
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
@@ -1550,7 +1566,7 @@ bool World::update(float elapsed_ms)
 			// wait for any fades to complete
 			//SDL_Delay(100);
 		}
-		Mix_PlayMusic(m_homescreen_music, 1);
+		Mix_PlayMusic(m_homescreen_music, -1);
 	}
 
 
@@ -1882,11 +1898,30 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		m_vine.clear();
 		m_box.clear();
 		start.init(screen);
-		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() { drawIntro = true; });
-		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = true; });
-		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() { shopping = true; });
-		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() { display_tutorial = false; page_num = 1; });
-		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
+		button_play.makeButton(438, 410, 420, 60, 0.1f, "button_purple.png", "Start", [this]() {
+			drawIntro = true;
+			while (!Mix_FadeOutMusic(500) && Mix_PlayingMusic()) {
+				// wait for any fades to complete
+				SDL_Delay(100);
+			}
+			Mix_PlayMusic(m_intro_music, 1);
+
+		});
+		button_tutorial.makeButton(438, 510, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = true;
+			Mix_PlayChannel(-1, m_tutorial_sound, -1);
+		});
+		button_shop.makeButton(438, 610, 420, 60, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = true;
+			Mix_PlayChannel(-1, m_shop_sound, -1);
+		});
+		button_back_to_menu.makeButton(801, 30, 429, 90, 0.1f, "button_purple.png", "Start", [&]() {
+			display_tutorial = false; page_num = 1;
+			Mix_FadeOutChannel(-1, 500); });
+		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() {
+			shopping = false;
+			Mix_FadeOutChannel(-1, 500);
+		});		
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
 		button_skip_intro.makeButton(1045, 600, 200, 70, 0.1f, "button_purple.png", "Start", [&]() { drawIntro = false; World::startGame(); });
@@ -1944,7 +1979,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			// wait for any fades to complete
 			//SDL_Delay(100);
 		}
-		Mix_PlayMusic(m_homescreen_music, 1);
+		Mix_PlayMusic(m_homescreen_music, -1);
 	}
 
 	// Control the current speed with `<` `>`
