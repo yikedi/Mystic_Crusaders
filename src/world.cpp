@@ -1618,7 +1618,6 @@ void World::draw()
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
-		m_skill_switch.draw(projection_2D);
         hp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_hp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
             (screen_bottom - 100.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
         mp_text.RenderText(projection_2D, std::to_string((int) m_hero.get_mp()), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
@@ -1626,6 +1625,7 @@ void World::draw()
         int exp_points = m_points - previous_point;
         exp_text.RenderText(projection_2D, std::to_string(exp_points), screen_left / zoom_factor + (screen_right - screen_left) / (3.f * zoom_factor) - 50 / zoom_factor,
             (screen_bottom - 40.f) / zoom_factor, 0.3f, vec3{ 0.2f, 0.2f, 0.2f });
+		m_skill_switch.draw(projection_2D);
 	}
 
 	if (game_is_paused){
