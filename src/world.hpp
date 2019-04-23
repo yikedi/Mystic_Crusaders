@@ -204,6 +204,7 @@ private:
 	Button button_shop;
 	Button button_back_to_menu;
 	Button button_back_to_menu2;
+	Button button_back_from_skillscreen;
 	bool display_tutorial = false;
 	TutorialScreen m_tutorial;
 	SkillSwitch m_skill_switch;

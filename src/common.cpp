@@ -420,6 +420,7 @@ void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLflo
         // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
     }
+	glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
