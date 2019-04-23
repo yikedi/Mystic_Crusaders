@@ -203,6 +203,15 @@ bool World::init(vec2 screen)
 	button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 	button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num =std::min(4, page_num+1); });
 	button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
+	button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() { 
+		if (game_is_paused) {
+			zoom_factor = 1.1f;
+		}
+		else {
+			zoom_factor = 1.f;
+		}
+		game_is_paused = !game_is_paused;
+	});
 	// For future reference: examples of how to use buttons
 	// testButton2.makeButton(500, 600, 200, 50, 0.8f, "button.png", "Start", [&]() { World::startGame(); });
 	// testButton2.makeButton(500, 600, 300, 50, 0.8f, "BAR.png", "Tutorial", [this]() { this->doNothing(); });
@@ -338,6 +347,7 @@ void World::destroy()
 	button_shop.destroy();
 	button_back_to_menu.destroy();
 	button_back_to_menu2.destroy();
+	button_back_from_skillscreen.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -1398,6 +1408,7 @@ bool World::update(float elapsed_ms)
 		button_shop.destroy();
 		button_back_to_menu.destroy();
 		button_back_to_menu2.destroy();
+		button_back_from_skillscreen.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
 		m_hero.destroy(true);
@@ -1432,6 +1443,15 @@ bool World::update(float elapsed_ms)
 		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
+		button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() {
+			if (game_is_paused) {
+				zoom_factor = 1.1f;
+			}
+			else {
+				zoom_factor = 1.f;
+			}
+			game_is_paused = !game_is_paused;
+		});
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		start.init(screen);
@@ -1631,7 +1651,8 @@ void World::draw()
 	if (game_is_paused){
         int remaining_skills = m_level - used_skillpoints;
 		stree.draw(projection_2D);
-        skill_text.RenderText(projection_2D, "Skill points left " + std::to_string(remaining_skills), 90.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
+		skill_text.RenderText(projection_2D, "Skill points left " + std::to_string(remaining_skills), 90.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
+		button_back_from_skillscreen.draw(projection_2D);
 	}
 	/////////////////////
 	// Truely render to the screen
@@ -1775,6 +1796,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_shop.destroy();
 		button_back_to_menu.destroy();
 		button_back_to_menu2.destroy();
+		button_back_from_skillscreen.destroy();
 		m_tutorial.destroy();
 		shop_screen.destroy();
 		hme.destroy();
@@ -1819,6 +1841,15 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		button_back_to_menu2.makeButton(985, 25, 260, 50, 0.1f, "button_purple.png", "Start", [&]() { shopping = false; });
 		button_tutorial_next_page.makeButton(1045, 600, 180, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::min(4, page_num + 1); });
 		button_tutorial_prevous_page.makeButton(25, 600, 300, 105, 0.1f, "button_purple.png", "Start", [&]() { page_num = std::max(1, page_num - 1); });
+		button_back_from_skillscreen.makeButton(1150, 30, 90, 90, "button_close.png", "Start", [&]() {
+			if (game_is_paused) {
+				zoom_factor = 1.1f;
+			}
+			else {
+				zoom_factor = 1.f;
+			}
+			game_is_paused = !game_is_paused;
+		});
 		m_tutorial.init(screen);
 		shop_screen.init(screen);
 		m_hero.init(screen);
@@ -2056,7 +2087,9 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 
 	}
 	else if (game_is_paused && start_is_over && !shopping) {
-
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+			button_back_from_skillscreen.check_click(mouse_pos);
+		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && skill_num == 0 && skill_element != stree.element_position(mouse_pos)) {
 			skill_element = stree.element_position(mouse_pos);
 			if (skill_element == "ice") {
