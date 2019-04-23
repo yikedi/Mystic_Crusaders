@@ -97,9 +97,10 @@ void UserInterface::destroy()
 }
 
 // Called on each frame by World::update()
-void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom)
+void UserInterface::update(vec2 hp_mp, vec2 exp, float zoom, float _max_hp)
 {
 	hp = hp_mp.x;
+	max_hp = _max_hp;
 	mp = hp_mp.y;
 	cur_exp = exp.x;
 	max_exp = exp.y;

@@ -591,7 +591,7 @@ bool World::update(float elapsed_ms)
 		for (auto& box : m_box)
 			box.update(elapsed_ms * m_current_speed);
 		m_portal.update(elapsed_ms * m_current_speed, cur_points_needed - (pass_points - m_points), cur_points_needed);
-		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float) (m_points - previous_point), (float) (20 + (m_hero.level * 5)) }, zoom_factor);
+		m_interface.update({ m_hero.get_hp(), m_hero.get_mp() }, { (float) (m_points - previous_point), (float) (20 + (m_hero.level * 5)) }, zoom_factor, m_hero.max_hp);
 		for (auto& thunder : thunders)
 			thunder->update(elapsed_ms);
 		for (auto& phoenix : phoenix_list)
@@ -2060,6 +2060,7 @@ void World::on_mouse_click(GLFWwindow* window, int button, int action, int mods)
 				current_stock = shop.get_stock(item_name);
 				current_price = shop.get_price(item_name);
 				balance = shop.get_balance();
+				shop.update_hero(m_hero);
 				item_num = 0;
 			}
 			else {
