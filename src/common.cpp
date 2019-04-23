@@ -275,20 +275,38 @@ void Effect::release()
 	glDeleteProgram(program);
 }
 
+Text::Text()
+{
+
+}
+
+Text::~Text()
+{
+    // glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    textEffect.release();
+}
+
 bool Text::loadCharacters(const char* ft_path)
 {
-    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND); 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
     // Loading shaders
     if (!textEffect.load_from_file(shader_path("text.vs.glsl"), shader_path("text.fs.glsl")))
         return false;
 
-    if (FT_Init_FreeType(&ft))
+    if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return false;
+    }
 
-    if (FT_New_Face(ft, ft_path, 0, &face))
+    if (FT_New_Face(ft, ft_path, 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        return false;
+    }
 
     FT_Set_Pixel_Sizes(face, 0, 48);
 
@@ -309,17 +327,17 @@ bool Text::loadCharacters(const char* ft_path)
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
-            GL_RED,
+            GL_ALPHA,
             face->glyph->bitmap.width,
             face->glyph->bitmap.rows,
             0,
-            GL_RED,
+            GL_ALPHA,
             GL_UNSIGNED_BYTE,
             face->glyph->bitmap.buffer
         );
         // Set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // Now store character for later use
@@ -351,12 +369,14 @@ bool Text::loadCharacters(const char* ft_path)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    glDisable(GL_CULL_FACE);
     return true;
 }
 
 void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors)
-{
+{   
     // Setting uniform values to the currently bound program
+    glEnable(GL_CULL_FACE);
     glUseProgram(textEffect.program);
     glUniformMatrix3fv(glGetUniformLocation(textEffect.program, "projection"), 1, GL_FALSE, (float*)&projection);
     glUniform3f(glGetUniformLocation(textEffect.program, "textColor"), colors.x, colors.y, colors.z);
@@ -400,8 +420,9 @@ void Text::RenderText(const mat3& projection, std::string text, GLfloat x, GLflo
         // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
     }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_CULL_FACE);
+    // glBindVertexArray(0);
+    // glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Renderable::transform_begin()

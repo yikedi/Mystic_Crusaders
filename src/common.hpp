@@ -134,6 +134,9 @@ struct Text
     FT_Library ft;
     FT_Face face;
 
+    Text();
+    ~Text();
+
     bool loadCharacters(const char* ft_path);
     void RenderText(const mat3& projection, std::string text, GLfloat x, GLfloat y, GLfloat scale, vec3 colors);
 };

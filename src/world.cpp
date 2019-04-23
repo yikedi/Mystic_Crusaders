@@ -1610,8 +1610,6 @@ void World::draw()
 		for (auto& phoenix : phoenix_list)
 			phoenix->draw(projection_2D);
         screen_text.RenderText(projection_2D, "Hero Level " + std::to_string(m_level), 800.f, 60.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
-        int remaining_skills = m_level - used_skillpoints;
-        screen_text.RenderText(projection_2D, "Remaining skill points  " + std::to_string(remaining_skills), 800.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 		m_interface.draw(projection_2D);
 		hme.draw(projection_2D);
 		ingame.draw(projection_2D);
@@ -1619,7 +1617,9 @@ void World::draw()
 	}
 
 	if (game_is_paused){
+        int remaining_skills = m_level - used_skillpoints;
 		stree.draw(projection_2D);
+        screen_text.RenderText(projection_2D, "Remaining skill points  " + std::to_string(remaining_skills), 90.f, 90.f, 0.5f, vec3{ 0.8f, 0.7f, 0.2f });
 	}
 	/////////////////////
 	// Truely render to the screen
