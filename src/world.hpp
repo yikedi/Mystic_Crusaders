@@ -171,6 +171,8 @@ private:
 	float m_next_fish_spawn;
 
 	Mix_Music* m_background_music;
+	Mix_Music* m_homescreen_music;
+	Mix_Music* m_intro_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
 	Mix_Chunk* m_levelup_sound;
@@ -180,6 +182,9 @@ private:
 	Mix_Chunk* m_laser_sound;
 	Mix_Chunk* m_transition_sound;
 	Mix_Chunk* m_amplify_sound;
+	Mix_Chunk* m_phoenix_sound;
+	Mix_Chunk* m_shop_sound;
+	Mix_Chunk* m_tutorial_sound;
 
 
 

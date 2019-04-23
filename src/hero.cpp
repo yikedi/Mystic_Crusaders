@@ -13,6 +13,10 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
+#include <SDL_mixer.h>
+
 SpriteSheet Hero::hero_texture;
 
 bool Hero::init(vec2 screen)
@@ -671,11 +675,11 @@ bool Hero::use_thunder_skill(std::vector<Thunder*> & thunders, vec2 position)
 	return false;
 }
 
-bool Hero::use_phoenix_skill(std::vector<phoenix*> & phoenix_list)
+bool Hero::use_phoenix_skill(std::vector<phoenix*> & phoenix_list, Mix_Chunk* m_phoenix_sound)
 {
 	if (mp > phoenix_skill.get_mpcost())
 	{
-		float mp_cost = phoenix_skill.create_phoenix(phoenix_list,m_position);
+		float mp_cost = phoenix_skill.create_phoenix(phoenix_list,m_position, m_phoenix_sound);
 		change_mp(-1 * mp_cost);
 		return true;
 	}
@@ -704,7 +708,7 @@ void Hero::apply_momentum(vec2 f)
 	momentum.y += f.y;
 }
 
-bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position)
+bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Thunder*> & thunders, std::vector<phoenix*> &phoenix_list, vec2 position, Mix_Chunk* m_phoenix_sound)
 {
 	bool success;
 	switch (activeSkill)
@@ -716,7 +720,7 @@ bool Hero::use_skill(std::vector<Projectile*> & hero_projectiles, std::vector<Th
 		success = use_thunder_skill(thunders, position);
 		break;
 	case PHOENIX_SKILL:
-		success = use_phoenix_skill(phoenix_list);
+		success = use_phoenix_skill(phoenix_list, m_phoenix_sound);
 	default:
 		success = false;
 		break;
